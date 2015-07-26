@@ -7,13 +7,33 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B248B60D1B6488A700ABD4A5 /* libboost_system.dylib in Resources */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
+		B248B6101B648BB300ABD4A5 /* libboost_system.dylib in Resources */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
+		B26B48131B64583E009262A4 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
+		B2AA92F21B64AB5600855ACA /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
 		B2AADA8E1B64455C00688FC5 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2AADA8D1B64455C00688FC5 /* main.cpp */; };
+		B2AADA9B1B64460400688FC5 /* IoServices.h in Headers */ = {isa = PBXBuildFile; fileRef = B2AADA9A1B64460400688FC5 /* IoServices.h */; };
+		B2AADA9D1B64460400688FC5 /* IoServicesPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = B2AADA9C1B64460400688FC5 /* IoServicesPriv.h */; };
+		B2AADA9F1B64460400688FC5 /* IoServices.cp in Sources */ = {isa = PBXBuildFile; fileRef = B2AADA9E1B64460400688FC5 /* IoServices.cp */; };
+		B2AADAA41B64468B00688FC5 /* IoServicesImpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B2AADAA31B64468B00688FC5 /* IoServicesImpl.h */; };
+		B2AADAA61B6448B100688FC5 /* IoServicesImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2AADAA51B6448B100688FC5 /* IoServicesImpl.cpp */; };
+		B2AADAA71B644A8E00688FC5 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		B2AADAA81B644AB600688FC5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2AADA821B64455C00688FC5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2AADA971B64460400688FC5;
+			remoteInfo = IoServices;
+		};
+/* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		B2AADA881B64455C00688FC5 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 8;
 			dstPath = /usr/share/man/man1/;
 			dstSubfolderSpec = 0;
 			files = (
@@ -23,8 +43,16 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		B26B48121B64583E009262A4 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = ../../../../../../opt/local/lib/libboost_system.dylib; sourceTree = "<group>"; };
+		B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_thread.dylib; path = ../../../../../../opt/local/lib/libboost_thread.dylib; sourceTree = "<group>"; };
 		B2AADA8A1B64455C00688FC5 /* HelloAsio */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HelloAsio; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2AADA8D1B64455C00688FC5 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		B2AADA981B64460400688FC5 /* libIoServices.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libIoServices.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2AADA9A1B64460400688FC5 /* IoServices.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IoServices.h; sourceTree = "<group>"; };
+		B2AADA9C1B64460400688FC5 /* IoServicesPriv.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = IoServicesPriv.h; sourceTree = "<group>"; };
+		B2AADA9E1B64460400688FC5 /* IoServices.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IoServices.cp; sourceTree = "<group>"; };
+		B2AADAA31B64468B00688FC5 /* IoServicesImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IoServicesImpl.h; sourceTree = "<group>"; };
+		B2AADAA51B6448B100688FC5 /* IoServicesImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoServicesImpl.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -32,6 +60,16 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2AADAA71B644A8E00688FC5 /* libIoServices.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2AADA951B64460400688FC5 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2AA92F21B64AB5600855ACA /* libboost_thread.dylib in Frameworks */,
+				B26B48131B64583E009262A4 /* libboost_system.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -41,7 +79,10 @@
 		B2AADA811B64455C00688FC5 = {
 			isa = PBXGroup;
 			children = (
+				B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */,
+				B26B48121B64583E009262A4 /* libboost_system.dylib */,
 				B2AADA8C1B64455C00688FC5 /* HelloAsio */,
+				B2AADA991B64460400688FC5 /* IoServices */,
 				B2AADA8B1B64455C00688FC5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -50,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				B2AADA8A1B64455C00688FC5 /* HelloAsio */,
+				B2AADA981B64460400688FC5 /* libIoServices.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -62,7 +104,32 @@
 			path = HelloAsio;
 			sourceTree = "<group>";
 		};
+		B2AADA991B64460400688FC5 /* IoServices */ = {
+			isa = PBXGroup;
+			children = (
+				B2AADA9A1B64460400688FC5 /* IoServices.h */,
+				B2AADAA31B64468B00688FC5 /* IoServicesImpl.h */,
+				B2AADAA51B6448B100688FC5 /* IoServicesImpl.cpp */,
+				B2AADA9C1B64460400688FC5 /* IoServicesPriv.h */,
+				B2AADA9E1B64460400688FC5 /* IoServices.cp */,
+			);
+			path = IoServices;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		B2AADA961B64460400688FC5 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2AADA9B1B64460400688FC5 /* IoServices.h in Headers */,
+				B2AADA9D1B64460400688FC5 /* IoServicesPriv.h in Headers */,
+				B2AADAA41B64468B00688FC5 /* IoServicesImpl.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
 		B2AADA891B64455C00688FC5 /* HelloAsio */ = {
@@ -72,15 +139,35 @@
 				B2AADA861B64455C00688FC5 /* Sources */,
 				B2AADA871B64455C00688FC5 /* Frameworks */,
 				B2AADA881B64455C00688FC5 /* CopyFiles */,
+				B248B60F1B648BA600ABD4A5 /* Resources */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				B2AADAA91B644AB600688FC5 /* PBXTargetDependency */,
 			);
 			name = HelloAsio;
 			productName = HelloAsio;
 			productReference = B2AADA8A1B64455C00688FC5 /* HelloAsio */;
 			productType = "com.apple.product-type.tool";
+		};
+		B2AADA971B64460400688FC5 /* IoServices */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B2AADAA01B64460400688FC5 /* Build configuration list for PBXNativeTarget "IoServices" */;
+			buildPhases = (
+				B2AADA941B64460400688FC5 /* Sources */,
+				B2AADA951B64460400688FC5 /* Frameworks */,
+				B2AADA961B64460400688FC5 /* Headers */,
+				B248B60C1B64889500ABD4A5 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = IoServices;
+			productName = IoServices;
+			productReference = B2AADA981B64460400688FC5 /* libIoServices.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
 		};
 /* End PBXNativeTarget section */
 
@@ -92,6 +179,9 @@
 				ORGANIZATIONNAME = "Michael Jones";
 				TargetAttributes = {
 					B2AADA891B64455C00688FC5 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+					B2AADA971B64460400688FC5 = {
 						CreatedOnToolsVersion = 6.4;
 					};
 				};
@@ -109,9 +199,29 @@
 			projectRoot = "";
 			targets = (
 				B2AADA891B64455C00688FC5 /* HelloAsio */,
+				B2AADA971B64460400688FC5 /* IoServices */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		B248B60C1B64889500ABD4A5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B248B60D1B6488A700ABD4A5 /* libboost_system.dylib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B248B60F1B648BA600ABD4A5 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B248B6101B648BB300ABD4A5 /* libboost_system.dylib in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		B2AADA861B64455C00688FC5 /* Sources */ = {
@@ -122,14 +232,31 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B2AADA941B64460400688FC5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2AADA9F1B64460400688FC5 /* IoServices.cp in Sources */,
+				B2AADAA61B6448B100688FC5 /* IoServicesImpl.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		B2AADAA91B644AB600688FC5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2AADA971B64460400688FC5 /* IoServices */;
+			targetProxy = B2AADAA81B644AB600688FC5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		B2AADA8F1B64455C00688FC5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -160,6 +287,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/opt/local/include,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -171,7 +303,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -196,6 +328,11 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"$(inherited)",
+					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
+					/opt/local/include,
+				);
 				MACOSX_DEPLOYMENT_TARGET = 10.10;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
@@ -205,6 +342,8 @@
 		B2AADA921B64455C00688FC5 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -212,6 +351,42 @@
 		B2AADA931B64455C00688FC5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		B2AADAA11B64460400688FC5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B2AADAA21B64460400688FC5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				EXECUTABLE_PREFIX = lib;
+				GCC_ENABLE_CPP_EXCEPTIONS = YES;
+				GCC_ENABLE_CPP_RTTI = YES;
+				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -235,6 +410,16 @@
 				B2AADA931B64455C00688FC5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B2AADAA01B64460400688FC5 /* Build configuration list for PBXNativeTarget "IoServices" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2AADAA11B64460400688FC5 /* Debug */,
+				B2AADAA21B64460400688FC5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
