@@ -10,6 +10,7 @@
 #ifndef IoServices_
 #define IoServices_
 
+#include "PeriodicTimer.h"
 #include <memory>
 #include <functional>
 
@@ -17,7 +18,6 @@
 #pragma GCC visibility push(default)
 
 namespace HelloAsio {
-
     class IoServicesImpl;
     
     class IoServices final {
@@ -27,6 +27,8 @@ namespace HelloAsio {
         ~IoServices();
         
         void RunWork(std::function<void(void)>const& work);
+        void SetPeriodicTimer(PeriodicTimer id, const std::function<void(void)>& handler);
+
     };
     
 }

@@ -10,6 +10,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <mutex>
 
 using namespace HelloAsio;
 using namespace std;
@@ -22,16 +23,33 @@ int main(int argc, const char * argv[]) {
     
     IoServices servicesInstance{};
     
+    // MJ Unless I make another wrapped instance of io_service, then the thread group
+    // blocks the timers. Running timers from a second instance overcomes this.
+    IoServices secondInstance{};
+    mutex workMutex{};
+    
     std::cout << "Hello, World!\n";
     
-    auto work = []()->void {
-        cout << "Hello Work World" << endl;
-        sleep_for(seconds(2));
-        cout << "Goodbye Working Life" << endl;
+    auto timeout = [&]() {
+        lock_guard<mutex> ioGuard(workMutex);
+        cout << "Hello Timeout: " << "fix id" << endl;
     };
     
-    for (int w = 0; w < 10; w++) {
-        servicesInstance.RunWork(work);
+    secondInstance.SetPeriodicTimer(PeriodicTimer::General, timeout);
+    
+    {
+        // Test scope of work outliving this block.
+        auto work = [&](int id)->void {
+            lock_guard<mutex> ioGuard(workMutex);
+            cout << "Hello Work World: " << id << endl;
+            sleep_for(seconds(2));
+            cout << "Goodbye Working Life: " << id << endl;
+        };
+        
+        for (int w = 0; w < 10; w++) {
+            auto workFn = bind(work, w);
+            servicesInstance.RunWork(workFn);
+        }
     }
     
     for (int x = 0; x < 10; x++) {

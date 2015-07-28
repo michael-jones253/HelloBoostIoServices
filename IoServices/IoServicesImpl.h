@@ -9,9 +9,16 @@
 #ifndef HelloAsio_IoServicesImpl_h
 #define HelloAsio_IoServicesImpl_h
 
-#include <future>
+#include "Timer.h"
+#include "PeriodicTimer.h"
+
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
+#include <boost/asio/deadline_timer.hpp>
+#include <future>
+#include <vector>
+#include <unordered_map>
+#include <atomic>
 #include <iostream>
 
 #pragma GCC visibility push(hidden)
@@ -21,9 +28,13 @@ namespace HelloAsio {
         boost::asio::io_service _ioService;
         std::future<bool> _serviceRunHandle;
         boost::thread_group _threadPool;
+        std::vector<boost::thread*> _workerHandles;
+        std::atomic<int> _freeWorkerCount;
+        std::unordered_map<Timer, boost::asio::deadline_timer> _oneShotTimers;
+        std::unordered_map<PeriodicTimer, boost::asio::deadline_timer> _periodicTimers;
         
     public:
-        IoServicesImpl() {};
+        IoServicesImpl();
         
         ~IoServicesImpl();
         
@@ -31,11 +42,14 @@ namespace HelloAsio {
         
         void Stop();
         
-        void RunWork(std::function<void(void)> work);
+        void RunWork(const std::function<void(void)>& work);
+        
+        void SetPeriodicTimer(PeriodicTimer id, const std::function<void(void)>& handler);
         
     private:
         bool Run();
-        
+        void AddWorker();
+        void RemoveWorker();
         void WorkerThread(boost::asio::io_service& ioService);
     };
 }
