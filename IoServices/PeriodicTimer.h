@@ -15,6 +15,7 @@ namespace HelloAsio {
     
     enum class PeriodicTimer : int {
         General,
+        Secondary,
         End
     };
 
@@ -27,6 +28,9 @@ namespace HelloAsio {
         switch (rhs) {
             case PeriodicTimer::General:
                 os << "PeriodicTimer::General";
+                break;
+            case PeriodicTimer::Secondary:
+                os << "PeriodicTimer::Secondary";
                 break;
             case PeriodicTimer::End:
                 os << "PeriodicTimer::End";

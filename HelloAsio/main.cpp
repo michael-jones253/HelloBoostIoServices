@@ -30,12 +30,13 @@ int main(int argc, const char * argv[]) {
     
     std::cout << "Hello, World!\n";
     
-    auto timeout = [&]() {
+    auto timeout = [&](PeriodicTimer id) {
         lock_guard<mutex> ioGuard(workMutex);
-        cout << "Hello Timeout: " << "fix id" << endl;
+        cout << "Hello Timeout id: " << id << endl;
     };
     
     secondInstance.SetPeriodicTimer(PeriodicTimer::General, timeout);
+    secondInstance.SetPeriodicTimer(PeriodicTimer::Secondary, timeout);
     
     {
         // Test scope of work outliving this block.

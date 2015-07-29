@@ -78,15 +78,18 @@ namespace HelloAsio {
         _ioService.post(std::move(workWrapper));
     }
     
-    void IoServicesImpl::SetPeriodicTimer(PeriodicTimer id, const std::function<void(void)>& handler) {
-        auto resetHandler = [this, id, &handler](boost::system::error_code ec) {
-            handler();
-            this->SetPeriodicTimer(id, handler);
+    void IoServicesImpl::SetPeriodicTimer(
+                                          PeriodicTimer id,
+                                          boost::posix_time::time_duration durationFromNow,
+                                          const std::function<void(PeriodicTimer id)>& handler) {
+        auto resetHandler = [this, id, durationFromNow, &handler](boost::system::error_code ec) {
+            handler(id);
+            this->SetPeriodicTimer(id, durationFromNow, handler);
         };
         
         auto timer = _periodicTimers.find(id);
         if (timer != _periodicTimers.end()) {
-            timer->second.expires_from_now(boost::posix_time::seconds(1));
+            timer->second.expires_from_now(durationFromNow);
             timer->second.async_wait(std::move(resetHandler));
         }
     }

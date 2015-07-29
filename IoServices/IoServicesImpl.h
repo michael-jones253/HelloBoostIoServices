@@ -15,6 +15,7 @@
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
 #include <boost/asio/deadline_timer.hpp>
+#include <boost/date_time/posix_time/posix_time_types.hpp>
 #include <future>
 #include <vector>
 #include <unordered_map>
@@ -44,7 +45,10 @@ namespace HelloAsio {
         
         void RunWork(const std::function<void(void)>& work);
         
-        void SetPeriodicTimer(PeriodicTimer id, const std::function<void(void)>& handler);
+        void SetPeriodicTimer(
+                              PeriodicTimer id,
+                              boost::posix_time::time_duration durationFromNow,
+                              const std::function<void(PeriodicTimer id)>& handler);
         
     private:
         bool Run();

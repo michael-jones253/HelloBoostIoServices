@@ -17,8 +17,9 @@ namespace HelloAsio {
         _impl->RunWork(work);
     }
 
-    void IoServices::SetPeriodicTimer(PeriodicTimer id, const std::function<void(void)>& handler) {
-        _impl->SetPeriodicTimer(id, handler);
+    void IoServices::SetPeriodicTimer(PeriodicTimer id, const std::function<void(PeriodicTimer id)>& handler) {
+        auto ptimeFromNow = boost::posix_time::seconds(1);
+        _impl->SetPeriodicTimer(id, ptimeFromNow, handler);
     }
 
 }

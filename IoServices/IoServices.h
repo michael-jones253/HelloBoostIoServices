@@ -27,7 +27,7 @@ namespace HelloAsio {
         ~IoServices();
         
         void RunWork(std::function<void(void)>const& work);
-        void SetPeriodicTimer(PeriodicTimer id, const std::function<void(void)>& handler);
+        void SetPeriodicTimer(PeriodicTimer id, const std::function<void(PeriodicTimer id)>& handler);
 
     };
     
