@@ -23,11 +23,12 @@ int main(int argc, const char * argv[]) {
     
     IoServices servicesInstance{};
     
-    servicesInstance.RunTcpServer(23);
+    // servicesInstance.RunTcpServer(23);
     
     // MJ Unless I make another wrapped instance of io_service, then the thread group
     // blocks the timers. Running timers from a second instance overcomes this.
     IoServices secondInstance{};
+    secondInstance.RunTcpServer(23);
     mutex workMutex{};
     
     std::cout << "Hello, World!\n";

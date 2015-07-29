@@ -12,8 +12,8 @@ namespace HelloAsio
     TcpPeerConnection::TcpPeerConnection(
                   boost::asio::ip::tcp::socket&& peerSocket,
                   boost::asio::ip::tcp::endpoint&& peerEndPoint) :
-    _peerSocket(std::move(peerSocket)),
-    _peerEndPoint(std::move(peerEndPoint)) {
+    PeerSocket(std::move(peerSocket)),
+    PeerEndPoint(std::move(peerEndPoint)) {
         
     }
 }

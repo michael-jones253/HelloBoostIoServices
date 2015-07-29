@@ -25,8 +25,12 @@ namespace HelloAsio {
         std::vector<TcpPeerConnection> _peerConnections;
     public:
         TcpServer(boost::asio::io_service* ioService, int port);
+        TcpServer(TcpServer&& rhs);
+        ~TcpServer();
         void Start();
+        void Stop();
     private:
+        void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& error);
         void AsyncAccept();
     };
 }

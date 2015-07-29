@@ -12,12 +12,10 @@
 #include <boost/asio.hpp>
 
 namespace HelloAsio {
-    class TcpPeerConnection {
-    private:
-        boost::asio::ip::tcp::socket _peerSocket;
-        boost::asio::ip::tcp::endpoint _peerEndPoint;
+    struct TcpPeerConnection {
+        boost::asio::ip::tcp::socket PeerSocket;
+        boost::asio::ip::tcp::endpoint PeerEndPoint;
 
-    public:
         TcpPeerConnection(
                           boost::asio::ip::tcp::socket&& peerSocket,
                           boost::asio::ip::tcp::endpoint&& peerEndPoint
