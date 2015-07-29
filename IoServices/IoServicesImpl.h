@@ -11,6 +11,7 @@
 
 #include "Timer.h"
 #include "PeriodicTimer.h"
+#include "TcpServer.h"
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -27,6 +28,7 @@
 namespace HelloAsio {
     class IoServicesImpl final {
         boost::asio::io_service _ioService;
+        std::vector<TcpServer> _tcpServers;
         std::future<bool> _serviceRunHandle;
         boost::thread_group _threadPool;
         std::vector<boost::thread*> _workerHandles;
@@ -40,6 +42,8 @@ namespace HelloAsio {
         ~IoServicesImpl();
         
         void Start();
+        
+        void RunTcpServer(int port);
         
         void Stop();
         

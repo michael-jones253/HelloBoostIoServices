@@ -16,7 +16,8 @@ using namespace boost::asio;
 
 namespace HelloAsio {
     
-    IoServicesImpl::IoServicesImpl() {
+    IoServicesImpl::IoServicesImpl() :
+    _tcpServers{} {
         for (Timer t{}; t < Timer::End; ++t) {
             _oneShotTimers.emplace(
                                    std::piecewise_construct,
@@ -40,6 +41,11 @@ namespace HelloAsio {
         
         _serviceRunHandle = std::async(std::launch::async, [this]() ->bool { return Run(); });
     
+    }
+    
+    void IoServicesImpl::RunTcpServer(int port) {
+        _tcpServers.emplace_back(&_ioService, port);
+        _tcpServers.back().Start();
     }
     
     void IoServicesImpl::Stop() {

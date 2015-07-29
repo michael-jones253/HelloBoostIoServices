@@ -11,6 +11,10 @@ namespace HelloAsio {
         
     }
     
+    void IoServices::RunTcpServer(int port) {
+        _impl->RunTcpServer(port);
+    }
+    
     void IoServices::RunWork(std::function<void(void)>const& work) {
         _impl->RunWork(work);
     }

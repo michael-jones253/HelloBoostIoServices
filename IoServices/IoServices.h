@@ -27,6 +27,8 @@ namespace HelloAsio {
         IoServices();
         ~IoServices();
         
+        void RunTcpServer(int port);
+        
         void RunWork(std::function<void(void)>const& work);
         void SetPeriodicTimer(
                               PeriodicTimer id,
