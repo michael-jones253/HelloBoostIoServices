@@ -30,20 +30,40 @@ int main(int argc, const char * argv[]) {
     
     std::cout << "Hello, World!\n";
     
+    int generalCount{};
+    int secondaryCount{};
+    
     auto timeout = [&](PeriodicTimer id) {
+        switch (id) {
+            case PeriodicTimer::General:
+                generalCount++;
+                break;
+                
+            case PeriodicTimer::Secondary:
+                secondaryCount++;
+                break;
+                
+            default:
+                break;
+        }
         lock_guard<mutex> ioGuard(workMutex);
         cout << "Hello Timeout id: " << id << endl;
     };
     
-    secondInstance.SetPeriodicTimer(PeriodicTimer::General, timeout);
-    secondInstance.SetPeriodicTimer(PeriodicTimer::Secondary, timeout);
+    secondInstance.SetPeriodicTimer(PeriodicTimer::General, seconds(1), timeout);
+    secondInstance.SetPeriodicTimer(PeriodicTimer::Secondary, seconds(2), timeout);
     
     {
         // Test scope of work outliving this block.
         auto work = [&](int id)->void {
-            lock_guard<mutex> ioGuard(workMutex);
-            cout << "Hello Work World: " << id << endl;
+            {
+                lock_guard<mutex> ioGuard(workMutex);
+                cout << "Hello Work World: " << id << endl;
+            }
+            
             sleep_for(seconds(2));
+
+            lock_guard<mutex> ioGuard(workMutex);
             cout << "Goodbye Working Life: " << id << endl;
         };
         
@@ -57,6 +77,9 @@ int main(int argc, const char * argv[]) {
         sleep_for(seconds(3));
         cout << "Hello" << endl;
     }
+    
+    cout << "General count: " << generalCount << endl;
+    cout << "Secondary count " << secondaryCount << endl;
     
     return 0;
 }

@@ -1,11 +1,9 @@
 #include "IoServices.h"
 
 #include "IoServicesImpl.h"
-using namespace std;
-
 
 namespace HelloAsio {
-    IoServices::IoServices() : _impl(make_unique<IoServicesImpl>()) {
+    IoServices::IoServices() : _impl(std::make_unique<IoServicesImpl>()) {
         _impl->Start();
     }
     
@@ -17,8 +15,12 @@ namespace HelloAsio {
         _impl->RunWork(work);
     }
 
-    void IoServices::SetPeriodicTimer(PeriodicTimer id, const std::function<void(PeriodicTimer id)>& handler) {
-        auto ptimeFromNow = boost::posix_time::seconds(1);
+    void IoServices::SetPeriodicTimer(
+                                      PeriodicTimer id,
+                                      std::chrono::duration<long long>  du,
+                                      const std::function<void(PeriodicTimer id)>& handler) {
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(du);
+        auto ptimeFromNow = boost::posix_time::milliseconds(ms.count());
         _impl->SetPeriodicTimer(id, ptimeFromNow, handler);
     }
 

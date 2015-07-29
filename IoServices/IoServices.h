@@ -13,6 +13,7 @@
 #include "PeriodicTimer.h"
 #include <memory>
 #include <functional>
+#include <chrono>
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
@@ -27,7 +28,10 @@ namespace HelloAsio {
         ~IoServices();
         
         void RunWork(std::function<void(void)>const& work);
-        void SetPeriodicTimer(PeriodicTimer id, const std::function<void(PeriodicTimer id)>& handler);
+        void SetPeriodicTimer(
+                              PeriodicTimer id,
+                              std::chrono::duration<long long>  du,
+                              const std::function<void(PeriodicTimer id)>& handler);
 
     };
     
