@@ -9,11 +9,15 @@
 #include "TcpPeerConnection.h"
 namespace HelloAsio
 {
-    TcpPeerConnection::TcpPeerConnection(
-                  boost::asio::ip::tcp::socket&& peerSocket,
-                  boost::asio::ip::tcp::endpoint&& peerEndPoint) :
-    PeerSocket(std::move(peerSocket)),
-    PeerEndPoint(std::move(peerEndPoint)) {
+    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService) :
+        PeerSocket{*ioService},
+        PeerEndPoint{} {
         
     }
+    
+    TcpPeerConnection::TcpPeerConnection(TcpPeerConnection&& rhs) :
+        PeerSocket(std::move(rhs.PeerSocket)),
+        PeerEndPoint(std::move(rhs.PeerEndPoint)) {
+    }
+
 }

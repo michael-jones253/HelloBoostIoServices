@@ -45,9 +45,9 @@ namespace HelloAsio {
     
     void TcpServer::AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& error) {
         // FIX ME temp.
-        std::this_thread::sleep_for(std::chrono::seconds(4));
+        // std::this_thread::sleep_for(std::chrono::seconds(4));
         
-        _peerConnections.emplace_back(std::move(acceptedConn->PeerSocket), std::move(acceptedConn->PeerEndPoint));
+        _peerConnections.push_back(std::move(*acceptedConn));
         std::cout << "GOT A CONNECTION: " << _peerConnections.size() << std::endl;
         
         // Kick off another async accept to handle another connection.
@@ -55,16 +55,14 @@ namespace HelloAsio {
     }
     
     void TcpServer::AsyncAccept() {
-        // FIX ME - constructor which takes io service.
-        boost::asio::ip::tcp::endpoint peerEndPoint{};
-        boost::asio::ip::tcp::socket peerSocket(*_ioService);
-        auto conn = std::make_shared<TcpPeerConnection>(std::move(peerSocket), std::move(peerEndPoint));
+        auto conn = std::make_shared<TcpPeerConnection>(_ioService);
 
         auto acceptor = std::bind(&TcpServer::AcceptHandler, this, conn, std::placeholders::_1);
 
         std::cout << "ACCEPTING" << std::endl;
-        // Async accept takes references to the socket and end point, which are kept alive by the smart
-        // pointer bound to the acceptor callback.
+        
+        // Async accept does not block and takes references to the socket and end point of the connection.
+        // The connection smart pointer is kept alive by being bound to the acceptor callback.
         _acceptor->async_accept(conn->PeerSocket, conn->PeerEndPoint, std::move(acceptor));
     }
 }
