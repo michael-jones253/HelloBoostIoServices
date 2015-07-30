@@ -17,8 +17,6 @@ namespace HelloAsio {
         boost::asio::ip::tcp::endpoint PeerEndPoint;
 
         TcpPeerConnection(boost::asio::io_service* ioService);
-        
-        TcpPeerConnection(TcpPeerConnection&& rhs);
     };
 }
 

@@ -14,10 +14,4 @@ namespace HelloAsio
         PeerEndPoint{} {
         
     }
-    
-    TcpPeerConnection::TcpPeerConnection(TcpPeerConnection&& rhs) :
-        PeerSocket(std::move(rhs.PeerSocket)),
-        PeerEndPoint(std::move(rhs.PeerEndPoint)) {
-    }
-
 }
