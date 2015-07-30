@@ -79,6 +79,7 @@ int main(int argc, const char * argv[]) {
     for (int x = 0; x < 10; x++) {
         sleep_for(seconds(3));
         cout << "Hello" << endl;
+        secondInstance.HelloAllPeers();
     }
     
     cout << "General count: " << generalCount << endl;

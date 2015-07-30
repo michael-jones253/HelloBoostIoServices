@@ -38,14 +38,16 @@ namespace HelloAsio {
     }
     
     void IoServicesImpl::Start() {
-        
-        _serviceRunHandle = std::async(std::launch::async, [this]() ->bool { return Run(); });
-    
+        _serviceRunHandle = std::async(std::launch::async, [this]() ->bool { return Run(); });    
     }
     
     void IoServicesImpl::RunTcpServer(int port) {
         _tcpServers.emplace_back(&_ioService, port);
         _tcpServers.back().Start();
+    }
+    
+    void IoServicesImpl::HelloAllPeers() {
+        _tcpServers.front().SendMessageToAllPeers("Hello World!");
     }
     
     void IoServicesImpl::Stop() {

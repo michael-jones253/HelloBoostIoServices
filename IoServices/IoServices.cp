@@ -15,6 +15,10 @@ namespace HelloAsio {
         _impl->RunTcpServer(port);
     }
     
+    void IoServices::HelloAllPeers() {
+        _impl->HelloAllPeers();
+    }
+    
     void IoServices::RunWork(std::function<void(void)>const& work) {
         _impl->RunWork(work);
     }

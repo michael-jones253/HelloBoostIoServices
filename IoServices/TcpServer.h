@@ -16,8 +16,7 @@
 #include <vector>
 
 namespace HelloAsio {
-    class TcpServer
-    {
+    class TcpServer final {
     private:
         boost::asio::io_service* _ioService;
         int _port;
@@ -29,6 +28,7 @@ namespace HelloAsio {
         ~TcpServer();
         void Start();
         void Stop();
+        void SendMessageToAllPeers(const std::string& msg);
     private:
         void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec);
         void AsyncAccept();

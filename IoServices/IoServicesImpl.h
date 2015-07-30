@@ -45,6 +45,8 @@ namespace HelloAsio {
         
         void RunTcpServer(int port);
         
+        void HelloAllPeers();
+        
         void Stop();
         
         void RunWork(const std::function<void(void)>& work);

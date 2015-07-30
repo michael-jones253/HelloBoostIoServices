@@ -76,4 +76,17 @@ namespace HelloAsio {
             conn.PeerSocket.close();
         }
     }
+
+    void TcpServer::SendMessageToAllPeers(const std::string& msg) {
+        auto sentHandler = [](boost::system::error_code ec, std::size_t written) {
+            if (ec != 0) {
+                std::cerr << "Write error" << std::endl;
+            }
+        };
+        
+        for (auto& conn : _peerConnections) {
+            boost::asio::async_write(conn.PeerSocket, boost::asio::buffer(msg), std::move(sentHandler));
+        }
+    }
+    
 }
