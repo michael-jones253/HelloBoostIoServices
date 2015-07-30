@@ -34,7 +34,7 @@ namespace HelloAsio {
     }
     
     IoServicesImpl::~IoServicesImpl() {
-        
+        Stop();
     }
     
     void IoServicesImpl::Start() {
@@ -50,6 +50,11 @@ namespace HelloAsio {
     
     void IoServicesImpl::Stop() {
         _ioService.stop();
+        _threadPool.join_all();
+        auto ok = _serviceRunHandle.get();
+        if (ok) {
+            std::cout << "Io Service ran OK" << std::endl;
+        }
     }
     
     bool IoServicesImpl::Run() {
@@ -58,7 +63,6 @@ namespace HelloAsio {
         system::error_code ec;
         _ioService.run(ec);
         
-        std::cout << "Io Service ran OK" << std::endl;
         return true;
     }
     

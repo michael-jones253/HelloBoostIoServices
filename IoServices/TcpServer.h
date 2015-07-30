@@ -30,8 +30,9 @@ namespace HelloAsio {
         void Start();
         void Stop();
     private:
-        void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& error);
+        void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec);
         void AsyncAccept();
+        void CloseAllPeerConnections();
     };
 }
 #endif /* defined(__HelloAsio__TcpServer__) */

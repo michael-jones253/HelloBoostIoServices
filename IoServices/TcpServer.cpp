@@ -41,11 +41,16 @@ namespace HelloAsio {
     
     void TcpServer::Stop() {
         _acceptor->close();
+        CloseAllPeerConnections();
     }
     
-    void TcpServer::AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& error) {
+    void TcpServer::AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec) {
         // FIX ME temp.
         // std::this_thread::sleep_for(std::chrono::seconds(4));
+        
+        if (ec != 0) {
+            std::cerr << "Accept error: " << ec << std::endl;
+        }
         
         _peerConnections.push_back(std::move(*acceptedConn));
         std::cout << "GOT A CONNECTION: " << _peerConnections.size() << std::endl;
@@ -64,5 +69,11 @@ namespace HelloAsio {
         // Async accept does not block and takes references to the socket and end point of the connection.
         // The connection smart pointer is kept alive by being bound to the acceptor callback.
         _acceptor->async_accept(conn->PeerSocket, conn->PeerEndPoint, std::move(acceptor));
+    }
+    
+    void TcpServer::CloseAllPeerConnections() {
+        for (auto& conn : _peerConnections) {
+            conn.PeerSocket.close();
+        }
     }
 }
