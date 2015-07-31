@@ -9,14 +9,31 @@
 #ifndef __HelloAsio__TcpPeerConnection__
 #define __HelloAsio__TcpPeerConnection__
 
+#include "IoBufferWrapper.h"
+
+#include <memory>
 #include <boost/asio.hpp>
 
+
 namespace HelloAsio {
-    struct TcpPeerConnection {
+    struct TcpPeerConnection;
+    
+    using WriteCompletionCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, boost::system::error_code)>;
+    struct TcpPeerConnection : public std::enable_shared_from_this<TcpPeerConnection> {
         boost::asio::ip::tcp::socket PeerSocket;
         boost::asio::ip::tcp::endpoint PeerEndPoint;
 
         TcpPeerConnection(boost::asio::io_service* ioService);
+        
+        void WriteHandler(
+                          const WriteCompletionCallback& serverCallback,
+                          std::shared_ptr<TcpPeerConnection> conn,
+                          std::shared_ptr<IoBufferWrapper> bufWrapper,
+                          boost::system::error_code ec,
+                          std::size_t written);
+        
+        void AsyncWrite(std::string&& msg, WriteCompletionCallback&& serverCallback);
+
     };
 }
 

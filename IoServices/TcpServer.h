@@ -30,11 +30,13 @@ namespace HelloAsio {
         ~TcpServer();
         void Start();
         void Stop();
+        void SendMessageToAllPeersDeprecated(const std::string& msg);
         void SendMessageToAllPeers(const std::string& msg);
     private:
         void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec);
         void AsyncAccept();
-        void WriteHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec, std::size_t written);
+        void WriteHandlerDeprecated(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec, std::size_t written);
+        void WriteHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
         void CloseAllPeerConnections();
     };
 }

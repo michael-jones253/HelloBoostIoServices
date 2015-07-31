@@ -78,7 +78,7 @@ namespace HelloAsio {
         }
     }
 
-    void TcpServer::WriteHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec, std::size_t written) {
+    void TcpServer::WriteHandlerDeprecated(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec, std::size_t written) {
         if (ec != 0) {
             std::cerr << "Write error" << std::endl;
             
@@ -96,11 +96,40 @@ namespace HelloAsio {
         }
     }
     
+    void TcpServer::WriteHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec) {
+        if (ec != 0) {
+            std::cerr << "Write error" << std::endl;
+            
+            std::lock_guard<std::mutex> guard(_mutex);
+            conn->PeerSocket.close();
+            for (auto pos = _peerConnections.begin(); pos != _peerConnections.end(); pos++) {
+                if (pos->get()->PeerSocket.is_open()) {
+                    continue;
+                }
+                
+                std::cerr << "ERASING PEER: " << pos->get()->PeerEndPoint.address() << std::endl;
+                _peerConnections.erase(pos);
+                break;
+            }
+        }
+    }
+    
+    void TcpServer::SendMessageToAllPeersDeprecated(const std::string& msg) {
+        std::lock_guard<std::mutex> guard(_mutex);
+        for (auto& conn : _peerConnections) {
+            auto handler = std::bind(&TcpServer::WriteHandlerDeprecated, this, conn, std::placeholders::_1, std::placeholders::_2);
+            boost::asio::async_write(conn->PeerSocket, boost::asio::buffer(msg), std::move(handler));
+        }
+    }
+
     void TcpServer::SendMessageToAllPeers(const std::string& msg) {
         std::lock_guard<std::mutex> guard(_mutex);
         for (auto& conn : _peerConnections) {
-            auto handler = std::bind(&TcpServer::WriteHandler, this, conn, std::placeholders::_1, std::placeholders::_2);
-            boost::asio::async_write(conn->PeerSocket, boost::asio::buffer(msg), std::move(handler));
+            auto handler = std::bind(&TcpServer::WriteHandler, this, std::placeholders::_1, std::placeholders::_2);
+            
+            // Allocate message for move.
+            auto msgBuf = msg;
+            conn->AsyncWrite(std::move(msgBuf), std::move(handler));
         }
     }
     

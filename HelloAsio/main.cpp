@@ -80,6 +80,8 @@ int main(int argc, const char * argv[]) {
         sleep_for(seconds(3));
         cout << "Hello" << endl;
         secondInstance.HelloAllPeers();
+        secondInstance.HelloAllPeers();
+        secondInstance.HelloAllPeers();
     }
     
     cout << "General count: " << generalCount << endl;
