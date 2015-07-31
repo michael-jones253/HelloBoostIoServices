@@ -12,6 +12,8 @@
 #include "IoBufferWrapper.h"
 
 #include <memory>
+#include <mutex>
+#include <deque>
 #include <boost/asio.hpp>
 
 
@@ -19,9 +21,12 @@ namespace HelloAsio {
     struct TcpPeerConnection;
     
     using WriteCompletionCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, boost::system::error_code)>;
+    
     struct TcpPeerConnection : public std::enable_shared_from_this<TcpPeerConnection> {
         boost::asio::ip::tcp::socket PeerSocket;
         boost::asio::ip::tcp::endpoint PeerEndPoint;
+        std::mutex Mutex;
+        std::deque<std::shared_ptr<IoBufferWrapper>> OutQueue;
 
         TcpPeerConnection(boost::asio::io_service* ioService);
         
