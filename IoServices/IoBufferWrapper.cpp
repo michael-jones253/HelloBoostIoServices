@@ -7,10 +7,24 @@
 //
 
 #include "IoBufferWrapper.h"
+using namespace std;
 
 namespace HelloAsio {
-    IoBufferWrapper::IoBufferWrapper(std::string&& msg) {
-        Buffer = std::move(msg);
+    IoBufferWrapper::IoBufferWrapper(const std::string& msg) {
+        Buffer.insert(Buffer.begin(), msg.cbegin(), msg.cend());
+    }
+    
+    IoBufferWrapper::IoBufferWrapper(vector<uint8_t>&& rhs) {
+        Buffer = move(rhs);
+    }
+    
+    IoBufferWrapper::IoBufferWrapper(IoBufferWrapper&& rhs) {
+        Buffer = move(rhs.Buffer);
+    }
+    
+    IoBufferWrapper& IoBufferWrapper::operator=(IoBufferWrapper&& rhs) {
+        Buffer = move(rhs.Buffer);
+        return *this;
     }
 
 }

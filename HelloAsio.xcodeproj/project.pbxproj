@@ -22,6 +22,8 @@
 		B2AADAA41B64468B00688FC5 /* IoServicesImpl.h in Headers */ = {isa = PBXBuildFile; fileRef = B2AADAA31B64468B00688FC5 /* IoServicesImpl.h */; };
 		B2AADAA61B6448B100688FC5 /* IoServicesImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2AADAA51B6448B100688FC5 /* IoServicesImpl.cpp */; };
 		B2AADAA71B644A8E00688FC5 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
+		B2DFE9AB1B6B3B3600CED951 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DFE9AA1B6B3B3600CED951 /* main.cpp */; };
+		B2DFE9AF1B6B3B4C00CED951 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
 		B2F65EA11B677B5200035D30 /* Timer.h in Headers */ = {isa = PBXBuildFile; fileRef = B2036AFC1B6759880037C5B2 /* Timer.h */; };
 		B2F65EA21B677B5F00035D30 /* PeriodicTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = B2036AFD1B67599E0037C5B2 /* PeriodicTimer.h */; };
 		B2F813C31B6AF66A00018DE7 /* IoBufferWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F813C11B6AF66A00018DE7 /* IoBufferWrapper.cpp */; };
@@ -48,6 +50,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 1;
 		};
+		B2DFE9A61B6B3B3600CED951 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -67,6 +78,8 @@
 		B2AADA9E1B64460400688FC5 /* IoServices.cp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = IoServices.cp; sourceTree = "<group>"; };
 		B2AADAA31B64468B00688FC5 /* IoServicesImpl.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IoServicesImpl.h; sourceTree = "<group>"; };
 		B2AADAA51B6448B100688FC5 /* IoServicesImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoServicesImpl.cpp; sourceTree = "<group>"; };
+		B2DFE9A81B6B3B3600CED951 /* TestServices */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestServices; sourceTree = BUILT_PRODUCTS_DIR; };
+		B2DFE9AA1B6B3B3600CED951 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B2F813C11B6AF66A00018DE7 /* IoBufferWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoBufferWrapper.cpp; sourceTree = "<group>"; };
 		B2F813C21B6AF66A00018DE7 /* IoBufferWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IoBufferWrapper.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -89,6 +102,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B2DFE9A51B6B3B3600CED951 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2DFE9AF1B6B3B4C00CED951 /* libIoServices.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -99,6 +120,7 @@
 				B26B48121B64583E009262A4 /* libboost_system.dylib */,
 				B2AADA8C1B64455C00688FC5 /* HelloAsio */,
 				B2AADA991B64460400688FC5 /* IoServices */,
+				B2DFE9A91B6B3B3600CED951 /* TestServices */,
 				B2AADA8B1B64455C00688FC5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -108,6 +130,7 @@
 			children = (
 				B2AADA8A1B64455C00688FC5 /* HelloAsio */,
 				B2AADA981B64460400688FC5 /* libIoServices.dylib */,
+				B2DFE9A81B6B3B3600CED951 /* TestServices */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -138,6 +161,14 @@
 				B21F0B3E1B68914700D1FE09 /* TcpPeerConnection.h */,
 			);
 			path = IoServices;
+			sourceTree = "<group>";
+		};
+		B2DFE9A91B6B3B3600CED951 /* TestServices */ = {
+			isa = PBXGroup;
+			children = (
+				B2DFE9AA1B6B3B3600CED951 /* main.cpp */,
+			);
+			path = TestServices;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -198,6 +229,23 @@
 			productReference = B2AADA981B64460400688FC5 /* libIoServices.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
+		B2DFE9A71B6B3B3600CED951 /* TestServices */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B2DFE9AE1B6B3B3600CED951 /* Build configuration list for PBXNativeTarget "TestServices" */;
+			buildPhases = (
+				B2DFE9A41B6B3B3600CED951 /* Sources */,
+				B2DFE9A51B6B3B3600CED951 /* Frameworks */,
+				B2DFE9A61B6B3B3600CED951 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TestServices;
+			productName = TestServices;
+			productReference = B2DFE9A81B6B3B3600CED951 /* TestServices */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -211,6 +259,9 @@
 						CreatedOnToolsVersion = 6.4;
 					};
 					B2AADA971B64460400688FC5 = {
+						CreatedOnToolsVersion = 6.4;
+					};
+					B2DFE9A71B6B3B3600CED951 = {
 						CreatedOnToolsVersion = 6.4;
 					};
 				};
@@ -229,6 +280,7 @@
 			targets = (
 				B2AADA891B64455C00688FC5 /* HelloAsio */,
 				B2AADA971B64460400688FC5 /* IoServices */,
+				B2DFE9A71B6B3B3600CED951 /* TestServices */,
 			);
 		};
 /* End PBXProject section */
@@ -270,6 +322,14 @@
 				B2AADAA61B6448B100688FC5 /* IoServicesImpl.cpp in Sources */,
 				B21F0B3B1B68875E00D1FE09 /* TcpServer.cpp in Sources */,
 				B2F813C31B6AF66A00018DE7 /* IoBufferWrapper.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B2DFE9A41B6B3B3600CED951 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2DFE9AB1B6B3B3600CED951 /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -423,6 +483,26 @@
 			};
 			name = Release;
 		};
+		B2DFE9AC1B6B3B3600CED951 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B2DFE9AD1B6B3B3600CED951 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -452,6 +532,14 @@
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
+		};
+		B2DFE9AE1B6B3B3600CED951 /* Build configuration list for PBXNativeTarget "TestServices" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B2DFE9AC1B6B3B3600CED951 /* Debug */,
+				B2DFE9AD1B6B3B3600CED951 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
 		};
 /* End XCConfigurationList section */
 	};

@@ -32,7 +32,8 @@ namespace HelloAsio
     }
 
     void TcpPeerConnection::AsyncWrite(std::string&& msg, WriteCompletionCallback&& serverCallback) {
-        auto bufWrapper = std::make_shared<IoBufferWrapper>(std::move(msg));
+        auto hack = std::move(msg);
+        auto bufWrapper = std::make_shared<IoBufferWrapper>(hack);
 
         // Boost buffer does not hang on to data, so we bind a shared pointer to buffer wrapper to the callback,
         // to ensure that the buffer lasts the lifetime of the async completion.
