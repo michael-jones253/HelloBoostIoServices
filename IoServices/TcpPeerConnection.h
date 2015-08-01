@@ -18,6 +18,8 @@
 
 
 namespace HelloAsio {
+    // FIX ME - this deserves to be a class.
+    
     struct TcpPeerConnection;
     
     using WriteCompletionCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, boost::system::error_code)>;
@@ -27,17 +29,21 @@ namespace HelloAsio {
         boost::asio::ip::tcp::endpoint PeerEndPoint;
         std::mutex Mutex;
         std::deque<std::shared_ptr<IoBufferWrapper>> OutQueue;
+        const WriteCompletionCallback ErrorCallback;
 
-        TcpPeerConnection(boost::asio::io_service* ioService);
+        TcpPeerConnection(boost::asio::io_service* ioService, WriteCompletionCallback&& errorCallback);
+        
+        void AsyncWrite(std::string&& msg);
+        
+    private:
+        
+        void LaunchWrite();
         
         void WriteHandler(
-                          const WriteCompletionCallback& serverCallback,
                           std::shared_ptr<TcpPeerConnection> conn,
                           std::shared_ptr<IoBufferWrapper> bufWrapper,
                           boost::system::error_code ec,
                           std::size_t written);
-        
-        void AsyncWrite(std::string&& msg, WriteCompletionCallback&& serverCallback);
 
     };
 }

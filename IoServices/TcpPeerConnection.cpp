@@ -11,79 +11,74 @@
 
 namespace HelloAsio
 {
-    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService) :
+    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService, WriteCompletionCallback&& errorCallback) :
         PeerSocket{*ioService},
-        PeerEndPoint{} {
+        PeerEndPoint{},
+        Mutex{},
+        OutQueue{},
+        ErrorCallback(std::move(errorCallback)) {
         
+    }
+
+    void TcpPeerConnection::AsyncWrite(std::string&& msg) {
+        auto hack = std::move(msg);
+        auto bufWrapper = std::make_shared<IoBufferWrapper>(hack);
+        
+        // Boost documentation says that for each stream only one async write can be outstanding at a time.
+        // So we queue rather than launch straight away.
+        std::lock_guard<std::mutex> guard(Mutex);
+        OutQueue.push_back(bufWrapper);
+        
+        if (OutQueue.size() > 1) {
+            // We have the lock, so if the queue has more than one, then a chained launch is guaranteed.
+            return;
+        }
+        
+        LaunchWrite();
+    }
+    
+    void TcpPeerConnection::LaunchWrite() {
+        
+        // Boost buffer does not hang on to data, so we bind a shared pointer to buffer wrapper to the callback,
+        // to ensure that the buffer lasts the lifetime of the async completion.
+        // MJ update - this isn't really needed now, except under a shutdown situation where the queue gets cleared
+        // and there is an async operation outstanding.
+        auto handler = std::bind(
+                                 &TcpPeerConnection::WriteHandler,
+                                 this,
+                                 shared_from_this(),
+                                 OutQueue.front(),
+                                 std::placeholders::_1,
+                                 std::placeholders::_2);
+        
+        boost::asio::async_write(PeerSocket, boost::asio::buffer(OutQueue.front()->Buffer), std::move(handler));
     }
     
     void TcpPeerConnection::WriteHandler(
-                                         const WriteCompletionCallback& serverCallback,
                                          std::shared_ptr<TcpPeerConnection> conn,
                                          std::shared_ptr<IoBufferWrapper> bufWrapper,
                                          boost::system::error_code ec,
                                          std::size_t written) {
+        
         if (written != bufWrapper->Buffer.size()) {
             std::cerr << "Incomplete write, buffer: " << bufWrapper->Buffer.size() << " written: " << written << std::endl;
             conn->PeerSocket.close();
-            serverCallback(conn, ec);
+            ErrorCallback(conn, ec);
             return;
         }
         
-        {
-            std::lock_guard<std::mutex> guard(Mutex);
-            OutQueue.pop_front();
-            
-            // If there are no more queued messages then nothing more to do, otherwise chain another async write onto
-            // the next message in the queue.
-            if (OutQueue.size() == 0) {
-                return;
-            }
-
-            // Boost buffer does not hang on to data, so we bind a shared pointer to buffer wrapper to the callback,
-            // to ensure that the buffer lasts the lifetime of the async completion.
-            auto handler = std::bind(
-                                     &TcpPeerConnection::WriteHandler,
-                                     this,
-                                     serverCallback,
-                                     shared_from_this(),
-                                     OutQueue.front(),
-                                     std::placeholders::_1,
-                                     std::placeholders::_2);
-            
-            boost::asio::async_write(PeerSocket, boost::asio::buffer(OutQueue.front()->Buffer), std::move(handler));
-        }        
-    }
-
-    // FIX ME - probably don't want to move serverCallback - const ref it.
-    void TcpPeerConnection::AsyncWrite(std::string&& msg, WriteCompletionCallback&& serverCallback) {
-        auto hack = std::move(msg);
-        auto bufWrapper = std::make_shared<IoBufferWrapper>(hack);
+        // Discard processed message.
+        std::lock_guard<std::mutex> guard(Mutex);
+        OutQueue.pop_front();
         
-        {
-            std::lock_guard<std::mutex> guard(Mutex);
-            OutQueue.push_back(bufWrapper);
-        }
-        
-        // Boost documentation says that for each stream only one async write can be outstanding at a time.
-        if (OutQueue.size() > 1) {
+        // If there are no more queued messages then nothing more to do, otherwise chain another async write onto
+        // the next message in the queue.
+        if (OutQueue.size() == 0) {
             return;
         }
-
-        // Boost buffer does not hang on to data, so we bind a shared pointer to buffer wrapper to the callback,
-        // to ensure that the buffer lasts the lifetime of the async completion.
-        auto handler = std::bind(
-                                 &TcpPeerConnection::WriteHandler,
-                                 this,
-                                 std::move(serverCallback),
-                                 shared_from_this(),
-                                 bufWrapper,
-                                 std::placeholders::_1,
-                                 std::placeholders::_2);
         
-        
-        boost::asio::async_write(PeerSocket, boost::asio::buffer(bufWrapper->Buffer), std::move(handler));
-        
+        // Chain another async write onto for the next message in the queue.
+        LaunchWrite();
     }
 
 }

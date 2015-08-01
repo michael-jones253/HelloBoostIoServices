@@ -52,7 +52,7 @@ namespace HelloAsio {
             std::cerr << "Accept error: " << ec << std::endl;
         }
         
-        _peerConnections.emplace_back(acceptedConn);
+        _peerConnections.push_back(acceptedConn);
         std::cout << "GOT A CONNECTION: " << _peerConnections.size() << std::endl;
         
         // Kick off another async accept to handle another connection.
@@ -60,7 +60,9 @@ namespace HelloAsio {
     }
     
     void TcpServer::AsyncAccept() {
-        auto conn = std::make_shared<TcpPeerConnection>(_ioService);
+        auto errorHandler = std::bind(&TcpServer::WriteHandler, this, std::placeholders::_1, std::placeholders::_2);
+        
+        auto conn = std::make_shared<TcpPeerConnection>(_ioService, std::move(errorHandler));
 
         auto acceptor = std::bind(&TcpServer::AcceptHandler, this, conn, std::placeholders::_1);
 
@@ -125,11 +127,10 @@ namespace HelloAsio {
     void TcpServer::SendMessageToAllPeers(const std::string& msg) {
         std::lock_guard<std::mutex> guard(_mutex);
         for (auto& conn : _peerConnections) {
-            auto handler = std::bind(&TcpServer::WriteHandler, this, std::placeholders::_1, std::placeholders::_2);
-            
+
             // Allocate message for move.
             auto msgBuf = msg;
-            conn->AsyncWrite(std::move(msgBuf), std::move(handler));
+            conn->AsyncWrite(std::move(msgBuf));
         }
     }
     
