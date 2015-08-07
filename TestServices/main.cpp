@@ -8,11 +8,17 @@
 
 #include <iostream>
 #include <assert.h>
+#include <future>
+#include <thread>
+#include <chrono>
 
 #include "IoBufferWrapper.h"
+#include "IoCircularBuffer.h"
 
 using namespace HelloAsio;
 using namespace std;
+using namespace std::chrono;
+using namespace std::this_thread;
 
 int main(int argc, const char * argv[]) {
     // insert code here...
@@ -40,6 +46,27 @@ int main(int argc, const char * argv[]) {
     cout << "Buffer contents from move: " << fromMovePtr << endl;
     assert(strcmp(fromMovePtr, msg.data()) == 0);
     assert(anotherWrapper.Buffer.size() == 0);
+    
+    auto asyncReadSomeInCallback = [](uint8_t* bufPtr, ssize_t len, std::function<void(ssize_t)>&&handler) {
+        memset(bufPtr, 0xFF, len);
+        
+        auto readSomeHandler = move(handler);
+        auto deferredHandle = [&readSomeHandler, len]() {
+            sleep_for(milliseconds(100));
+            readSomeHandler(len);
+        };
+        
+        auto handle = async(launch::async, move(deferredHandle));
+        
+    };
+    
+    auto notifyAvailableCallback = [](ssize_t available) {
+        cout << "Available: " << available << endl;
+    };
+
+    IoCircularBuffer circularBuffer{asyncReadSomeInCallback, notifyAvailableCallback};
+    circularBuffer.ReadSome();
+    
     
     return 0;
 }

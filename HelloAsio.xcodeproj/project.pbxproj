@@ -28,6 +28,8 @@
 		B2F65EA21B677B5F00035D30 /* PeriodicTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = B2036AFD1B67599E0037C5B2 /* PeriodicTimer.h */; };
 		B2F813C31B6AF66A00018DE7 /* IoBufferWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F813C11B6AF66A00018DE7 /* IoBufferWrapper.cpp */; };
 		B2F813C41B6AF66A00018DE7 /* IoBufferWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = B2F813C21B6AF66A00018DE7 /* IoBufferWrapper.h */; };
+		B2F9DED71B6D858C00FC02B2 /* IoCircularBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F9DED51B6D858C00FC02B2 /* IoCircularBuffer.cpp */; };
+		B2F9DED81B6D858C00FC02B2 /* IoCircularBuffer.h in Headers */ = {isa = PBXBuildFile; fileRef = B2F9DED61B6D858C00FC02B2 /* IoCircularBuffer.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -82,6 +84,8 @@
 		B2DFE9AA1B6B3B3600CED951 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B2F813C11B6AF66A00018DE7 /* IoBufferWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoBufferWrapper.cpp; sourceTree = "<group>"; };
 		B2F813C21B6AF66A00018DE7 /* IoBufferWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IoBufferWrapper.h; sourceTree = "<group>"; };
+		B2F9DED51B6D858C00FC02B2 /* IoCircularBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoCircularBuffer.cpp; sourceTree = "<group>"; };
+		B2F9DED61B6D858C00FC02B2 /* IoCircularBuffer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IoCircularBuffer.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +151,8 @@
 			isa = PBXGroup;
 			children = (
 				B2AADA9A1B64460400688FC5 /* IoServices.h */,
+				B2F9DED51B6D858C00FC02B2 /* IoCircularBuffer.cpp */,
+				B2F9DED61B6D858C00FC02B2 /* IoCircularBuffer.h */,
 				B2036AFC1B6759880037C5B2 /* Timer.h */,
 				B2036AFD1B67599E0037C5B2 /* PeriodicTimer.h */,
 				B2AADAA31B64468B00688FC5 /* IoServicesImpl.h */,
@@ -184,6 +190,7 @@
 				B2AADA9D1B64460400688FC5 /* IoServicesPriv.h in Headers */,
 				B2F65EA21B677B5F00035D30 /* PeriodicTimer.h in Headers */,
 				B21F0B3C1B68875E00D1FE09 /* TcpServer.h in Headers */,
+				B2F9DED81B6D858C00FC02B2 /* IoCircularBuffer.h in Headers */,
 				B2F65EA11B677B5200035D30 /* Timer.h in Headers */,
 				B2AADAA41B64468B00688FC5 /* IoServicesImpl.h in Headers */,
 			);
@@ -321,6 +328,7 @@
 				B248C74C1B69E63F00B1A1DF /* TcpPeerConnection.cpp in Sources */,
 				B2AADAA61B6448B100688FC5 /* IoServicesImpl.cpp in Sources */,
 				B21F0B3B1B68875E00D1FE09 /* TcpServer.cpp in Sources */,
+				B2F9DED71B6D858C00FC02B2 /* IoCircularBuffer.cpp in Sources */,
 				B2F813C31B6AF66A00018DE7 /* IoBufferWrapper.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -540,6 +548,7 @@
 				B2DFE9AD1B6B3B3600CED951 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

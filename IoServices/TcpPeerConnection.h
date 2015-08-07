@@ -10,7 +10,6 @@
 #define __HelloAsio__TcpPeerConnection__
 
 #include "IoBufferWrapper.h"
-
 #include <memory>
 #include <mutex>
 #include <deque>
@@ -23,6 +22,10 @@ namespace HelloAsio {
     struct TcpPeerConnection;
     
     using WriteCompletionCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, boost::system::error_code)>;
+
+    using ReadErrorCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, boost::system::error_code)>;
+
+    using ReadSomeCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, std::size_t bytesRead)>;
     
     struct TcpPeerConnection : public std::enable_shared_from_this<TcpPeerConnection> {
         boost::asio::ip::tcp::socket PeerSocket;
