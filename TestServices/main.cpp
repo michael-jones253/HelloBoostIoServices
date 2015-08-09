@@ -6,14 +6,18 @@
 //  Copyright (c) 2015 Michael Jones. All rights reserved.
 //
 
+#include "IoBufferWrapper.h"
+#include "IoCircularBuffer.h"
+
 #include <iostream>
 #include <assert.h>
 #include <future>
 #include <thread>
 #include <chrono>
+#include <list>
+#include <array>
+#include <string.h>
 
-#include "IoBufferWrapper.h"
-#include "IoCircularBuffer.h"
 
 using namespace HelloAsio;
 using namespace std;
@@ -47,26 +51,45 @@ int main(int argc, const char * argv[]) {
     assert(strcmp(fromMovePtr, msg.data()) == 0);
     assert(anotherWrapper.Buffer.size() == 0);
     
-    auto asyncReadSomeInCallback = [](uint8_t* bufPtr, ssize_t len, std::function<void(ssize_t)>&&handler) {
-        memset(bufPtr, 0xFF, len);
+    list<future<bool>> handles{};
+    
+    auto asyncReadSomeInCallback = [&handles](uint8_t* bufPtr, ssize_t len, std::function<void(ssize_t)>&&handler) {
         
-        auto readSomeHandler = move(handler);
-        auto deferredHandle = [&readSomeHandler, len]() {
+        auto readSomeHanderl = move(handler);
+        auto deferredHandle = [=]() -> bool {
             sleep_for(milliseconds(100));
-            readSomeHandler(len);
+            memset(bufPtr, 0xFF, len);
+            cout << "Buf Ptr: " << reinterpret_cast<long long>(bufPtr) << endl;
+
+            readSomeHanderl(len);
+            return true;
         };
         
         auto handle = async(launch::async, move(deferredHandle));
-        
+        handles.push_back(move(handle));
     };
     
-    auto notifyAvailableCallback = [](ssize_t available) {
+    const int AmountForConsume{24};
+    array<uint8_t, AmountForConsume> patternForCompare{};
+    memset(patternForCompare.data(), 0xFF, AmountForConsume);
+    
+    IoCircularBuffer circularBuffer{asyncReadSomeInCallback};
+    
+    auto notifyAvailableCallback = [&](ssize_t available) {
         cout << "Available: " << available << endl;
+        if (available >= AmountForConsume) {
+            assert(memcmp(circularBuffer.Get(), patternForCompare.data(), available) == 0);
+            circularBuffer.Consume(AmountForConsume);
+        }
     };
-
-    IoCircularBuffer circularBuffer{asyncReadSomeInCallback, notifyAvailableCallback};
-    circularBuffer.ReadSome();
     
+    const int chunkSize = 12;
+    circularBuffer.BeginReadSome(move(notifyAvailableCallback), chunkSize);
+    
+    while (true) {
+        sleep_for(seconds(3));
+        cout << "Main looping" << endl;
+    }
     
     return 0;
 }
