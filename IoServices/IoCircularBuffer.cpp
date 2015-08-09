@@ -46,11 +46,6 @@ namespace HelloAsio {
         if (requiredCapacity > _buffer.capacity()) {
             cout << "Before reserve of " << requiredCapacity << endl;
             _buffer.reserve(requiredCapacity);
-            auto rs = _buffer.size();
-            /*
-            _buffer.resize(requiredCapacity);
-            _buffer.resize(rs);
-             */
         }
 
         auto nextSlotPtr = _buffer.data() + _buffer.size();
@@ -63,12 +58,8 @@ namespace HelloAsio {
     
     void IoCircularBuffer::ReadSomeHandler(ssize_t bytesRead) {
         assert(_buffer.size() + bytesRead <= _buffer.capacity());
-        array<uint8_t, 1024> x{}; // FIX ME TEMP
-        memset(x.data(), 0xFF, 1024);
-        assert(memcmp(_buffer.data(), x.data(), bytesRead) == 0);
         cout << "Before resize of " << (_buffer.size() + bytesRead) << endl;
         _buffer.resize(_buffer.size() + bytesRead);
-        assert(memcmp(_buffer.data(), x.data(), bytesRead) == 0);
         cout << "Buf start: " << reinterpret_cast<long long>(_buffer.data()) << " size: " << _buffer.size() << endl;
         
         if (bytesRead <= 0) {

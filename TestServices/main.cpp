@@ -69,26 +69,35 @@ int main(int argc, const char * argv[]) {
         handles.push_back(move(handle));
     };
     
-    const int AmountForConsume{24};
-    array<uint8_t, AmountForConsume> patternForCompare{};
-    memset(patternForCompare.data(), 0xFF, AmountForConsume);
+    int amountForConsume{24};
+    const int AmountForCompare{1024};
+    array<uint8_t, AmountForCompare> patternForCompare{};
+    memset(patternForCompare.data(), 0xFF, AmountForCompare);
     
     IoCircularBuffer circularBuffer{asyncReadSomeInCallback};
     
     auto notifyAvailableCallback = [&](ssize_t available) {
         cout << "Available: " << available << endl;
-        if (available >= AmountForConsume) {
+        if (available >= amountForConsume) {
             assert(memcmp(circularBuffer.Get(), patternForCompare.data(), available) == 0);
-            circularBuffer.Consume(AmountForConsume);
+            
+            // We can do what we want with the memory to consume - test replenish of pattern from read some.
+            memset(const_cast<uint8_t*>(circularBuffer.Get()), 0x00, amountForConsume);
+            circularBuffer.Consume(amountForConsume);
         }
     };
     
     const int chunkSize = 12;
     circularBuffer.BeginReadSome(move(notifyAvailableCallback), chunkSize);
     
+    int count{};
     while (true) {
         sleep_for(seconds(3));
         cout << "Main looping" << endl;
+        if (++count == 10) {
+            // Test partial consume.
+            amountForConsume -= 2;
+        }
     }
     
     return 0;
