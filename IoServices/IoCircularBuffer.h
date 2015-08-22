@@ -17,24 +17,27 @@
 #pragma GCC visibility push(default)
 
 template <class T>
-class no_init_alloc
+class ResizeReserveAllocator
 : public std::allocator<T>
 {
 public:
     using std::allocator<T>::allocator;
     
+    // At least on OS X this does not get called by any vector re-allocation methods.
     template <class U> void construct(U* me, const T&rhs) {
         std::cout << "copy construct" << std::endl;
         *me = rhs;
     }
 
-    
+    // This is needed for a reserve which shuffles data from one part of the container to another and requires
+    // copying of this data.
     template<class U>
-   void construct(U* me, T&& rhs) {
+    void construct(U* me, T&& rhs) {
         std::cout << "move construct" << std::endl;
         *me = std::move(rhs);
     };
     
+    // This is needed for a resize without default initialisation wiping out data in the reserved/spare capacity area.
     template <class U, class... Args> void construct(U*, Args&&...) {
         std::cout << "variadic construct" << std::endl;
     }
@@ -48,12 +51,15 @@ namespace HelloAsio {
 
     class IoCircularBuffer {
     private:
-        std::vector<uint8_t, no_init_alloc<uint8_t>> _buffer;
+        std::vector<uint8_t, ResizeReserveAllocator<uint8_t>> _buffer;
         int _chunkSize;
         IoAsyncReadSomeInCallback _readSomeIn;
         IoNotifyAvailableCallback _notifyAvailable;
     public:
         IoCircularBuffer(IoAsyncReadSomeInCallback readSome);
+        IoCircularBuffer();
+        
+        IoCircularBuffer& operator=(IoCircularBuffer&& rhs);
         
         void BeginReadSome(IoNotifyAvailableCallback&& notifySome, int chunkSize);
         
@@ -62,6 +68,9 @@ namespace HelloAsio {
         uint8_t const* Get() const;
         
         ssize_t Size() const;
+        
+        // This is only needed for memory consumption diagnostics.
+        ssize_t Capacity() const;
         
     private:
         void ReadSome();

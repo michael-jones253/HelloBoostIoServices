@@ -10,6 +10,7 @@
 #define __HelloAsio__TcpPeerConnection__
 
 #include "IoBufferWrapper.h"
+#include "IoCircularBuffer.h"
 #include <memory>
 #include <mutex>
 #include <deque>
@@ -17,9 +18,8 @@
 
 
 namespace HelloAsio {
-    // FIX ME - this deserves to be a class.
     
-    struct TcpPeerConnection;
+    class TcpPeerConnection;
     
     using WriteCompletionCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, boost::system::error_code)>;
 
@@ -27,16 +27,23 @@ namespace HelloAsio {
 
     using ReadSomeCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, std::size_t bytesRead)>;
     
-    struct TcpPeerConnection : public std::enable_shared_from_this<TcpPeerConnection> {
-        boost::asio::ip::tcp::socket PeerSocket;
-        boost::asio::ip::tcp::endpoint PeerEndPoint;
+    class TcpPeerConnection : public std::enable_shared_from_this<TcpPeerConnection> {
         std::mutex Mutex;
         std::deque<std::shared_ptr<IoBufferWrapper>> OutQueue;
         const WriteCompletionCallback ErrorCallback;
+        IoCircularBuffer _readBuffer;
+        
+    public:
+        boost::asio::ip::tcp::socket PeerSocket;
+        boost::asio::ip::tcp::endpoint PeerEndPoint;
 
         TcpPeerConnection(boost::asio::io_service* ioService, WriteCompletionCallback&& errorCallback);
         
         void AsyncWrite(std::string&& msg);
+        
+        void BeginChainedRead(IoNotifyAvailableCallback&& available, int chunkSize);
+        
+        boost::asio::ip::tcp::socket& GetPeerSocket() { return PeerSocket; }
         
     private:
         

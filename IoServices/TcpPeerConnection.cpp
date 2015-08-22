@@ -16,8 +16,26 @@ namespace HelloAsio
         PeerEndPoint{},
         Mutex{},
         OutQueue{},
-        ErrorCallback(std::move(errorCallback)) {
-        
+        ErrorCallback(std::move(errorCallback)),
+        _readBuffer{} {
+            auto cb = [this](uint8_t* bufPtr, ssize_t len, std::function<void(ssize_t)>&&handler) {
+                auto myHandler = move(handler);
+                
+                auto boostHandler = [myHandler](const boost::system::error_code& ec,
+                              std::size_t bytes_transferred) {
+                    
+                    myHandler(bytes_transferred);
+                    
+                };
+                
+                // Unless buffer is created with a mutable pointer the boost buffer will not be mutable.
+                auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(_readBuffer.Get()), _readBuffer.Size());
+                boost::asio::async_read(PeerSocket,boostBuf, std::move(boostHandler));
+
+            };
+            
+            IoCircularBuffer bufWithCb{ cb };
+            _readBuffer = std::move(bufWithCb);
     }
 
     void TcpPeerConnection::AsyncWrite(std::string&& msg) {
@@ -37,6 +55,12 @@ namespace HelloAsio
         LaunchWrite();
     }
     
+    // FIX ME - get this to callback a notify available that passes in the peer connection id/address
+    // or something that identifies it. Maybe the end point.
+    void TcpPeerConnection::BeginChainedRead(IoNotifyAvailableCallback&& available, int chunkSize) {
+        _readBuffer.BeginReadSome(std::move(available), chunkSize);
+    }
+
     void TcpPeerConnection::LaunchWrite() {
         
         // Boost buffer does not hang on to data, so we bind a shared pointer to buffer wrapper to the callback,

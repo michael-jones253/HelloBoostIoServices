@@ -26,6 +26,24 @@ namespace HelloAsio {
         _notifyAvailable{} {
         
     }
+    
+    IoCircularBuffer::IoCircularBuffer() :
+    _buffer{},
+    _chunkSize{},
+    _readSomeIn{},
+    _notifyAvailable{} {
+        
+    }
+    
+    IoCircularBuffer& IoCircularBuffer::operator=(IoCircularBuffer&& rhs) {
+        _buffer = move(rhs._buffer);
+        _chunkSize = rhs._chunkSize;
+        _readSomeIn = move(rhs._readSomeIn);
+        _notifyAvailable = move(rhs._notifyAvailable);
+        
+        return *this;
+    }
+
 
     void IoCircularBuffer::BeginReadSome(IoNotifyAvailableCallback&& notifySome, int chunkSize) {
         // Only one chained readsome allowed in progress.
@@ -103,6 +121,10 @@ namespace HelloAsio {
 
     ssize_t IoCircularBuffer::Size() const {
         return _buffer.size();
+    }
+    
+    ssize_t IoCircularBuffer::Capacity() const {
+        return _buffer.capacity();
     }
 
 

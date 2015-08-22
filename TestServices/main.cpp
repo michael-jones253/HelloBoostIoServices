@@ -55,13 +55,15 @@ int main(int argc, const char * argv[]) {
     
     auto asyncReadSomeInCallback = [&handles](uint8_t* bufPtr, ssize_t len, std::function<void(ssize_t)>&&handler) {
         
-        auto readSomeHanderl = move(handler);
+        auto completionHandler = move(handler);
         auto deferredHandle = [=]() -> bool {
-            sleep_for(milliseconds(100));
+            sleep_for(milliseconds(1));
+            
+            // Pretend to read data consisting of 0xFF into the buffer. Normally this would be a socket read.
             memset(bufPtr, 0xFF, len);
             cout << "Buf Ptr: " << reinterpret_cast<long long>(bufPtr) << endl;
 
-            readSomeHanderl(len);
+            completionHandler(len);
             return true;
         };
         
@@ -76,29 +78,62 @@ int main(int argc, const char * argv[]) {
     
     IoCircularBuffer circularBuffer{asyncReadSomeInCallback};
     
+    ssize_t maxAllocated{};
+    bool testFinished{};
+    
     auto notifyAvailableCallback = [&](ssize_t available) {
         cout << "Available: " << available << endl;
+        if (available > patternForCompare.size()) {
+            testFinished = true;
+            return;
+        }
+        
         if (available >= amountForConsume) {
             assert(memcmp(circularBuffer.Get(), patternForCompare.data(), available) == 0);
+            maxAllocated = max(maxAllocated, circularBuffer.Capacity());
             
             // We can do what we want with the memory to consume - test replenish of pattern from read some.
             memset(const_cast<uint8_t*>(circularBuffer.Get()), 0x00, amountForConsume);
             circularBuffer.Consume(amountForConsume);
         }
+        
     };
     
-    const int chunkSize = 12;
+    const int chunkSize = amountForConsume / 2;
     circularBuffer.BeginReadSome(move(notifyAvailableCallback), chunkSize);
     
-    int count{};
-    while (true) {
+    auto const startChunkSize = chunkSize;
+    auto const startAmountForConsume = amountForConsume;
+    
+    
+    auto checkResult = [&]()->bool {
+        for (auto& handle : handles) {
+            assert(handle.get());
+        }
+        
+        return true;
+    };
+    
+    auto checkTask = async(launch::async, checkResult);
+
+    for  (int count = 0; count < 1000; count++) {
+        if (testFinished) {
+            break;
+        }
+        
         sleep_for(seconds(3));
-        cout << "Main looping" << endl;
-        if (++count == 10) {
+        cout << "Main looping, max consumed: " << maxAllocated << endl;
+        if (count % 10 == 0 && amountForConsume > 1) {
             // Test partial consume.
-            amountForConsume -= 2;
+            amountForConsume--;
+        }
+        
+        if (amountForConsume >= chunkSize) {
+            assert(maxAllocated <= startAmountForConsume + startChunkSize);
         }
     }
+    
+    auto res = checkTask.get();
     
     return 0;
 }
