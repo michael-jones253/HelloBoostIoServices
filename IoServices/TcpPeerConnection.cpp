@@ -29,7 +29,7 @@ namespace HelloAsio
                 };
                 
                 // Unless buffer is created with a mutable pointer the boost buffer will not be mutable.
-                auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(_readBuffer.Get()), _readBuffer.Size());
+                auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(_readBuffer.Get()), len);
                 boost::asio::async_read(PeerSocket,boostBuf, std::move(boostHandler));
 
             };

@@ -52,6 +52,14 @@ namespace HelloAsio {
             std::cerr << "Accept error: " << ec << std::endl;
         }
         
+        auto connPtr = acceptedConn.get();
+        auto available = [connPtr](ssize_t available) {
+            std::cout << "GOT STUFF!!!!!: " << connPtr->PeerEndPoint << available << std::endl;
+            // Need to make buffer available here.
+        };
+        
+        acceptedConn->BeginChainedRead(std::move(available), 12);
+        
         _peerConnections.push_back(acceptedConn);
         std::cout << "GOT A CONNECTION: " << _peerConnections.size() << std::endl;
         

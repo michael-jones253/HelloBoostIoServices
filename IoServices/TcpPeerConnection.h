@@ -28,6 +28,7 @@ namespace HelloAsio {
     using ReadSomeCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, std::size_t bytesRead)>;
     
     class TcpPeerConnection : public std::enable_shared_from_this<TcpPeerConnection> {
+    private:
         std::mutex Mutex;
         std::deque<std::shared_ptr<IoBufferWrapper>> OutQueue;
         const WriteCompletionCallback ErrorCallback;
