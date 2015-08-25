@@ -22,7 +22,11 @@ int main(int argc, const char * argv[]) {
     
     IoServices servicesInstance{};
     
-    servicesInstance.RunTcpServer(23);
+    auto readCb = [](std::shared_ptr<TcpPeerConnection>, std::size_t bytesRead) {
+        
+    };
+    
+    servicesInstance.RunTcpServer(23, move(readCb));
     
     
 

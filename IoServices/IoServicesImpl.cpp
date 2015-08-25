@@ -42,7 +42,12 @@ namespace HelloAsio {
     }
     
     void IoServicesImpl::RunTcpServer(int port) {
-        _tcpServers.emplace_back(&_ioService, port);
+        auto readSome = [](std::shared_ptr<TcpPeerConnection> conn, std::size_t bytesRead) {
+            // FIX ME
+            std::cout << "READ SOME SERVER CALLBACK: " << conn->PeerEndPoint << std::endl;
+        };
+        
+        _tcpServers.emplace_back(&_ioService, port, std::move(readSome));
         _tcpServers.back().Start();
     }
     

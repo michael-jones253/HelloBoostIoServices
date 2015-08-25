@@ -11,18 +11,23 @@
 
 namespace HelloAsio
 {
-    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService, WriteCompletionCallback&& errorCallback) :
+    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService,
+                                         HelloAsio::ErrorCallback&& errorCallback) :
         PeerSocket{*ioService},
         PeerEndPoint{},
         Mutex{},
         OutQueue{},
-        ErrorCallback(std::move(errorCallback)),
+        ErrorCallback{std::move(errorCallback)},
         _readBuffer{} {
             auto cb = [this](uint8_t* bufPtr, ssize_t len, std::function<void(ssize_t)>&&handler) {
                 auto myHandler = move(handler);
                 
-                auto boostHandler = [myHandler](const boost::system::error_code& ec,
+                auto boostHandler = [this, myHandler](const boost::system::error_code& ec,
                               std::size_t bytes_transferred) {
+                    if (bytes_transferred == 0 || ec != 0) {
+                        ErrorCallback(shared_from_this(), ec);
+                        return;
+                    }
                     
                     myHandler(bytes_transferred);
                     

@@ -21,9 +21,7 @@ namespace HelloAsio {
     
     class TcpPeerConnection;
     
-    using WriteCompletionCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, boost::system::error_code)>;
-
-    using ReadErrorCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, boost::system::error_code)>;
+    using ErrorCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, boost::system::error_code)>;
 
     using ReadSomeCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, std::size_t bytesRead)>;
     
@@ -31,14 +29,15 @@ namespace HelloAsio {
     private:
         std::mutex Mutex;
         std::deque<std::shared_ptr<IoBufferWrapper>> OutQueue;
-        const WriteCompletionCallback ErrorCallback;
+        const ErrorCallback ErrorCallback;
         IoCircularBuffer _readBuffer;
         
     public:
         boost::asio::ip::tcp::socket PeerSocket;
         boost::asio::ip::tcp::endpoint PeerEndPoint;
 
-        TcpPeerConnection(boost::asio::io_service* ioService, WriteCompletionCallback&& errorCallback);
+        TcpPeerConnection(boost::asio::io_service* ioService,
+                          HelloAsio::ErrorCallback&& errorCallback);
         
         void AsyncWrite(std::string&& msg);
         

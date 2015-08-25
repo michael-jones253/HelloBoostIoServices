@@ -12,11 +12,12 @@
 #include <thread>
 
 namespace HelloAsio {
-    TcpServer::TcpServer(boost::asio::io_service* ioService, int port) :
+    TcpServer::TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb) :
     _ioService{ioService},
     _port{port},
     _acceptor{},
-    _peerConnections{}
+    _peerConnections{},
+    _readSomeCb{ std::move(readSomeCb) }
     {
     }
     
@@ -25,6 +26,7 @@ namespace HelloAsio {
         _port = rhs._port;
         _acceptor = std::move(rhs._acceptor);
         _peerConnections = std::move(rhs._peerConnections);
+        _readSomeCb = std::move(rhs._readSomeCb);
     }
 
     TcpServer::~TcpServer() {
@@ -45,17 +47,13 @@ namespace HelloAsio {
     }
     
     void TcpServer::AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec) {
-        // FIX ME temp.
-        // std::this_thread::sleep_for(std::chrono::seconds(4));
-        
         if (ec != 0) {
             std::cerr << "Accept error: " << ec << std::endl;
         }
         
-        auto connPtr = acceptedConn.get();
-        auto available = [connPtr](ssize_t available) {
-            std::cout << "GOT STUFF!!!!!: " << connPtr->PeerEndPoint << available << std::endl;
-            // Need to make buffer available here.
+        auto available = [this, acceptedConn](ssize_t available) {
+            std::cout << "GOT STUFF!!!!!: " << acceptedConn->PeerEndPoint << available << std::endl;
+            _readSomeCb(acceptedConn, available);
         };
         
         acceptedConn->BeginChainedRead(std::move(available), 12);

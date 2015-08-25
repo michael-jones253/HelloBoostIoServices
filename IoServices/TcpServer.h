@@ -24,8 +24,9 @@ namespace HelloAsio {
         int _port;
         std::unique_ptr<boost::asio::ip::tcp::acceptor> _acceptor;
         std::vector<std::shared_ptr<TcpPeerConnection>> _peerConnections;
+        ReadSomeCallback _readSomeCb;
     public:
-        TcpServer(boost::asio::io_service* ioService, int port);
+        TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb);
         TcpServer(TcpServer&& rhs);
         ~TcpServer();
         void Start();
