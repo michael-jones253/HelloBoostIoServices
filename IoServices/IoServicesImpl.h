@@ -43,7 +43,7 @@ namespace HelloAsio {
         
         void Start();
         
-        void RunTcpServer(int port);
+        void RunTcpServer(int port, ReadSomeCallback&& readSome);
         
         void HelloAllPeers();
         

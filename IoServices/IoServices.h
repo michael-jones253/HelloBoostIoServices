@@ -11,6 +11,7 @@
 #define IoServices_
 
 #include "PeriodicTimer.h"
+#include "StreamConnection.h"
 #include <memory>
 #include <functional>
 #include <chrono>
@@ -23,11 +24,14 @@ namespace HelloAsio {
     
     class IoServices final {
         std::unique_ptr<IoServicesImpl> _impl;
+        ReadStreamCallback _readStream;
+        StreamErrorCallback _error;
+        
     public:
         IoServices();
         ~IoServices();
         
-        void RunTcpServer(int port);
+        void RunTcpServer(int port, ReadStreamCallback&& readStream);
         
         void HelloAllPeers();
         

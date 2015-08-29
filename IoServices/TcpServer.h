@@ -33,6 +33,7 @@ namespace HelloAsio {
         void Stop();
         void SendMessageToAllPeersDeprecated(const std::string& msg);
         void SendMessageToAllPeers(const std::string& msg);
+        int GetPort() const { return _port; }
     private:
         void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec);
         void AsyncAccept();

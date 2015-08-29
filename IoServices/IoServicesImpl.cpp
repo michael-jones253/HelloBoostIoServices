@@ -10,6 +10,7 @@
 
 #include <stdio.h>
 #include <chrono>
+#include <stdexcept>
 
 using namespace boost;
 using namespace boost::asio;
@@ -41,13 +42,18 @@ namespace HelloAsio {
         _serviceRunHandle = std::async(std::launch::async, [this]() ->bool { return Run(); });    
     }
     
-    void IoServicesImpl::RunTcpServer(int port) {
-        auto readSome = [](std::shared_ptr<TcpPeerConnection> conn, std::size_t bytesRead) {
-            // FIX ME
-            std::cout << "READ SOME SERVER CALLBACK: " << conn->PeerEndPoint << std::endl;
+    void IoServicesImpl::RunTcpServer(int port, ReadSomeCallback&& readSome) {
+        auto predicate = [this,port](const TcpServer& it) {
+            return it.GetPort() == port;
         };
         
+        if (std::find_if(_tcpServers.begin(), _tcpServers.end(), predicate) != _tcpServers.end()) {
+            
+            throw std::runtime_error("Server already on port");
+        }
+        
         _tcpServers.emplace_back(&_ioService, port, std::move(readSome));
+        
         _tcpServers.back().Start();
     }
     

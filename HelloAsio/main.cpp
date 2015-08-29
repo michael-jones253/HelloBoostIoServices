@@ -11,6 +11,8 @@
 #include <thread>
 #include <chrono>
 #include <mutex>
+#include <array>
+#include <assert.h>
 
 using namespace HelloAsio;
 using namespace std;
@@ -28,8 +30,27 @@ int main(int argc, const char * argv[]) {
     // MJ Unless I make another wrapped instance of io_service, then the thread group
     // blocks the timers. Running timers from a second instance overcomes this.
     IoServices secondInstance{};
+    
+    auto readStream = [](shared_ptr<StreamConnection> conn, int bytesAvailable) {
+        const int amountForConsume = 25;
+        array<uint8_t, amountForConsume> buf{};
+        cout << "AVAILABLE IN SERVER: " << bytesAvailable << endl;
+        if (bytesAvailable >= amountForConsume) {
+            assert(static_cast<int>(conn->Size()) == bytesAvailable);
+            string msgFromData(reinterpret_cast<const char*>(conn->Data()), amountForConsume);
+            
+            cout << "MSG FROMDATA: " << msgFromData << endl;
+            
+            conn->ConsumeInto(buf.data(), amountForConsume);
+            string msgFromBuf(reinterpret_cast<char*>(buf.data()), amountForConsume);
+            
+            assert(msgFromData.compare(msgFromBuf) == 0);
+            
+            cout << "MSG: " << msgFromBuf << endl;
+        }
+    };
 
-    secondInstance.RunTcpServer(23);
+    secondInstance.RunTcpServer(23, move(readStream));
     mutex workMutex{};
     
     std::cout << "Hello, World!\n";

@@ -15,6 +15,8 @@
 		B248B6101B648BB300ABD4A5 /* libboost_system.dylib in Resources */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B248C74C1B69E63F00B1A1DF /* TcpPeerConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21F0B3D1B68914700D1FE09 /* TcpPeerConnection.cpp */; };
 		B26B48131B64583E009262A4 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
+		B2A9E43D1B917DA0003B6FB3 /* StreamConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */; };
+		B2A9E43E1B917DA0003B6FB3 /* StreamConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */; };
 		B2AA92F21B64AB5600855ACA /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
 		B2AADA8E1B64455C00688FC5 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2AADA8D1B64455C00688FC5 /* main.cpp */; };
 		B2AADA9B1B64460400688FC5 /* IoServices.h in Headers */ = {isa = PBXBuildFile; fileRef = B2AADA9A1B64460400688FC5 /* IoServices.h */; };
@@ -84,6 +86,8 @@
 		B21F0B3D1B68914700D1FE09 /* TcpPeerConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TcpPeerConnection.cpp; sourceTree = "<group>"; };
 		B21F0B3E1B68914700D1FE09 /* TcpPeerConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TcpPeerConnection.h; sourceTree = "<group>"; };
 		B26B48121B64583E009262A4 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = ../../../../../../opt/local/lib/libboost_system.dylib; sourceTree = "<group>"; };
+		B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamConnection.cpp; sourceTree = "<group>"; };
+		B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamConnection.h; sourceTree = "<group>"; };
 		B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_thread.dylib; path = ../../../../../../opt/local/lib/libboost_thread.dylib; sourceTree = "<group>"; };
 		B2AADA8A1B64455C00688FC5 /* HelloAsio */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = HelloAsio; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2AADA8D1B64455C00688FC5 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -182,6 +186,9 @@
 			isa = PBXGroup;
 			children = (
 				B2AADA9A1B64460400688FC5 /* IoServices.h */,
+				B2AADA9E1B64460400688FC5 /* IoServices.cp */,
+				B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */,
+				B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */,
 				B2F9DED51B6D858C00FC02B2 /* IoCircularBuffer.cpp */,
 				B2F9DED61B6D858C00FC02B2 /* IoCircularBuffer.h */,
 				B2036AFC1B6759880037C5B2 /* Timer.h */,
@@ -189,7 +196,6 @@
 				B2AADAA31B64468B00688FC5 /* IoServicesImpl.h */,
 				B2AADAA51B6448B100688FC5 /* IoServicesImpl.cpp */,
 				B2AADA9C1B64460400688FC5 /* IoServicesPriv.h */,
-				B2AADA9E1B64460400688FC5 /* IoServices.cp */,
 				B21F0B391B68875E00D1FE09 /* TcpServer.cpp */,
 				B21F0B3A1B68875E00D1FE09 /* TcpServer.h */,
 				B21F0B3D1B68914700D1FE09 /* TcpPeerConnection.cpp */,
@@ -215,6 +221,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2A9E43E1B917DA0003B6FB3 /* StreamConnection.h in Headers */,
 				B21F0B401B68914700D1FE09 /* TcpPeerConnection.h in Headers */,
 				B2AADA9B1B64460400688FC5 /* IoServices.h in Headers */,
 				B2F813C41B6AF66A00018DE7 /* IoBufferWrapper.h in Headers */,
@@ -390,6 +397,7 @@
 				B21F0B3B1B68875E00D1FE09 /* TcpServer.cpp in Sources */,
 				B2F9DED71B6D858C00FC02B2 /* IoCircularBuffer.cpp in Sources */,
 				B2F813C31B6AF66A00018DE7 /* IoBufferWrapper.cpp in Sources */,
+				B2A9E43D1B917DA0003B6FB3 /* StreamConnection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
