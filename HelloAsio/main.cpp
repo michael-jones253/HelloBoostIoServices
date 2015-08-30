@@ -33,15 +33,19 @@ int main(int argc, const char * argv[]) {
     
     auto readStream = [](shared_ptr<StreamConnection> conn, int bytesAvailable) {
         const int amountForConsume = 25;
-        array<uint8_t, amountForConsume> buf{};
+        array<uint8_t, amountForConsume + 1> buf{};
         cout << "AVAILABLE IN SERVER: " << bytesAvailable << endl;
         if (bytesAvailable >= amountForConsume) {
             assert(static_cast<int>(conn->Size()) == bytesAvailable);
+            
+            // Does this put a null on the end?
             string msgFromData(reinterpret_cast<const char*>(conn->Data()), amountForConsume);
             
             cout << "MSG FROMDATA: " << msgFromData << endl;
             
             conn->ConsumeInto(buf.data(), amountForConsume);
+            // Probably not needed.
+            buf[amountForConsume] = '\0';
             string msgFromBuf(reinterpret_cast<char*>(buf.data()), amountForConsume);
             
             assert(msgFromData.compare(msgFromBuf) == 0);
