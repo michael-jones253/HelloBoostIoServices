@@ -83,6 +83,10 @@ namespace HelloAsio
         boost::asio::async_write(PeerSocket, boost::asio::buffer(OutQueue.front()->Buffer), std::move(handler));
     }
     
+    void TcpPeerConnection::CopyTo(std::vector<uint8_t>& dest, int len) {
+        _readBuffer.CopyTo(dest, len);
+    }
+    
     void TcpPeerConnection::WriteHandler(
                                          std::shared_ptr<TcpPeerConnection> conn,
                                          std::shared_ptr<IoBufferWrapper> bufWrapper,

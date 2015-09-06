@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <memory>
+#include <vector>
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
@@ -32,6 +33,8 @@ namespace HelloAsio {
         StreamConnection(std::shared_ptr<TcpPeerConnection> peerConnection);
         
         void ConsumeInto(uint8_t* buf, int len);
+        
+        void ExtractTo(std::vector<uint8_t>& dest, int len);
         
         const uint8_t* Data() const;
         

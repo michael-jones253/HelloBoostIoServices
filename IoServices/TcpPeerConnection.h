@@ -15,7 +15,7 @@
 #include <mutex>
 #include <deque>
 #include <boost/asio.hpp>
-
+#include <vector>
 
 namespace HelloAsio {
     
@@ -49,7 +49,9 @@ namespace HelloAsio {
         
         ssize_t Size() const { return _readBuffer.Size(); }
         
-        void Consume(int len) { _readBuffer.Consume(len); }
+        void Consume(ssize_t len) { _readBuffer.Consume(len); }
+        
+        void CopyTo(std::vector<uint8_t>& dest, int len);
         
     private:
         

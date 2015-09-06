@@ -115,6 +115,11 @@ namespace HelloAsio {
         
     }
     
+    void IoCircularBuffer::CopyTo(std::vector<uint8_t>& dest, int len) {
+        std::copy(_buffer.begin(), _buffer.begin() + len, std::back_inserter(dest));
+    }
+
+    
     uint8_t const* IoCircularBuffer::Get() const {
         return _buffer.data();
     }

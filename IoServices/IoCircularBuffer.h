@@ -65,6 +65,8 @@ namespace HelloAsio {
         
         void Consume(ssize_t);
         
+        void CopyTo(std::vector<uint8_t>& dest, int len);
+        
         uint8_t const* Get() const;
         
         ssize_t Size() const;

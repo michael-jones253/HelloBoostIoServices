@@ -22,6 +22,12 @@ namespace HelloAsio {
         _peerConnection->Consume(len);
     }
     
+    void StreamConnection::ExtractTo(std::vector<uint8_t>& dest, int len) {
+        assert(len <= _peerConnection->Size() && "Must extract within limit of available.");
+        _peerConnection->CopyTo(dest, len);
+        _peerConnection->Consume(len);
+    }
+    
     const uint8_t* StreamConnection::Data() const {
         return _peerConnection->Data();
     }
