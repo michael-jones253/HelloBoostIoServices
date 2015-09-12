@@ -9,6 +9,8 @@
 #ifndef HelloAsio_Timer_h
 #define HelloAsio_Timer_h
 
+/* The classes below are exported */
+#pragma GCC visibility push(default)
 namespace HelloAsio {
     
     enum class Timer : int {
@@ -21,5 +23,7 @@ namespace HelloAsio {
         return rhs;
     }
 }
+
+#pragma GCC visibility pop
 
 #endif

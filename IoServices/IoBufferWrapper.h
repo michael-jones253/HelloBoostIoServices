@@ -11,10 +11,10 @@
 
 #include <string>
 #include <vector>
+#include <cstdint>
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
-
 namespace HelloAsio {
     struct IoBufferWrapper {
         std::vector<uint8_t> Buffer;
@@ -27,6 +27,6 @@ namespace HelloAsio {
 
     };
 }
-
 #pragma GCC visibility pop
+
 #endif /* defined(__HelloAsio__IoBufferWrapper__) */

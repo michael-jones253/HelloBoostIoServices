@@ -23,27 +23,32 @@
 #include <atomic>
 #include <iostream>
 
-#pragma GCC visibility push(hidden)
-
+/* The classes below are exported */
+#pragma GCC visibility push(default)
 namespace HelloAsio {
     class IoServicesImpl final {
-        boost::asio::io_service _ioService;
-        std::vector<TcpServer> _tcpServers;
-        std::future<bool> _serviceRunHandle;
-        boost::thread_group _threadPool;
-        std::vector<boost::thread*> _workerHandles;
-        std::atomic<int> _freeWorkerCount;
-        std::unordered_map<Timer, boost::asio::deadline_timer> _oneShotTimers;
-        std::unordered_map<PeriodicTimer, boost::asio::deadline_timer> _periodicTimers;
+		std::atomic<bool> _shouldRun{};
+		std::promise<bool> _started{};
+		boost::asio::io_service _ioService{};
+		std::vector<TcpServer> _tcpServers{};
+		std::future<bool> _serviceRunHandle{};
+		boost::thread_group _threadPool{};
+		std::vector<boost::thread*> _workerHandles{};
+		std::atomic<int> _freeWorkerCount{};
+		std::unordered_map<Timer, boost::asio::deadline_timer> _oneShotTimers{};
+		std::unordered_map<PeriodicTimer, boost::asio::deadline_timer> _periodicTimers{};
+		std::map<int, std::shared_ptr<TcpPeerConnection>> _clientConnections{};
         
     public:
         IoServicesImpl();
         
         ~IoServicesImpl();
         
-        void Start();
+        std::future<bool> Start();
         
         void RunTcpServer(int port, ReadSomeCallback&& readSome);
+
+		void AsyncConnect(ConnectCallback&& connectCb, std::string ipAddress, int port);
         
         void HelloAllPeers();
         
@@ -61,9 +66,9 @@ namespace HelloAsio {
         void AddWorker();
         void RemoveWorker();
         void WorkerThread(boost::asio::io_service& ioService);
+		void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
     };
 }
-
 #pragma GCC visibility pop
 
 #endif

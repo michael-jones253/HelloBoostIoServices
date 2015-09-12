@@ -10,24 +10,34 @@
 #define __HelloAsio__IoCircularBuffer__
 
 #include <vector>
+#include <atomic>
 #include <functional>
 #include <iostream>
+#include <cstddef>
+#include <cstdlib>
+#include <cstdint>
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
 
 template <class T>
-class ResizeReserveAllocator
-: public std::allocator<T>
+class ResizeReserveAllocator: public std::allocator<T>
 {
 public:
-    using std::allocator<T>::allocator;
-    
-    // At least on OS X this does not get called by any vector re-allocation methods.
-    template <class U> void construct(U* me, const T&rhs) {
-        std::cout << "copy construct" << std::endl;
-        *me = rhs;
-    }
+//	using typename std::allocator<T>::allocator;
+
+
+	ResizeReserveAllocator() {}
+	template<class U>
+	ResizeReserveAllocator(const ResizeReserveAllocator<U> &) {}
+	template<class U>
+	ResizeReserveAllocator(ResizeReserveAllocator<U> &&) {}
+
+	template <class U>
+	struct rebind
+	{
+		typedef ResizeReserveAllocator<U> other;
+	};
 
     // This is needed for a reserve which shuffles data from one part of the container to another and requires
     // copying of this data.
@@ -41,16 +51,27 @@ public:
     template <class U, class... Args> void construct(U*, Args&&...) {
         std::cout << "variadic construct" << std::endl;
     }
+
+	// At least on OS X this does not get called by any vector re-allocation methods.
+	// At least on windows this does not result in executable (can break point) code, I think the variadic
+	// construct takes over.
+	/*
+	template <class U> void construct(U* me, const T&rhs) {
+	std::cout << "copy construct" << std::endl;
+	*me = rhs;
+	}
+	*/
 };
 
 namespace HelloAsio {
 
-    using IoAsyncReadSomeInCallback = std::function<void(uint8_t* bufPtr, ssize_t len, std::function<void(ssize_t)>&&handler)>;
+    using IoAsyncReadSomeInCallback = std::function<void(uint8_t* bufPtr, size_t len, std::function<void(size_t)>&&handler)>;
     
-    using IoNotifyAvailableCallback = std::function<void(ssize_t available)>;
+    using IoNotifyAvailableCallback = std::function<void(size_t available)>;
 
     class IoCircularBuffer {
     private:
+		std::atomic<bool> _shouldRead;
         std::vector<uint8_t, ResizeReserveAllocator<uint8_t>> _buffer;
         int _chunkSize;
         IoAsyncReadSomeInCallback _readSomeIn;
@@ -61,24 +82,26 @@ namespace HelloAsio {
         
         IoCircularBuffer& operator=(IoCircularBuffer&& rhs);
         
-        void BeginReadSome(IoNotifyAvailableCallback&& notifySome, int chunkSize);
+        void BeginChainedRead(IoNotifyAvailableCallback&& notifySome, int chunkSize);
+		void EndReadSome() { _shouldRead = false;  }
         
-        void Consume(ssize_t);
+        void Consume(size_t len);
         
         void CopyTo(std::vector<uint8_t>& dest, int len);
         
         uint8_t const* Get() const;
         
-        ssize_t Size() const;
+        size_t Size() const;
         
         // This is only needed for memory consumption diagnostics.
-        ssize_t Capacity() const;
+        size_t Capacity() const;
         
     private:
         void ReadSome();
-        void ReadSomeHandler(ssize_t bytesRead);
+        void ReadSomeHandler(size_t bytesRead);
     };
 }
 
 #pragma GCC visibility pop
+
 #endif /* defined(__HelloAsio__IoCircularBuffer__) */

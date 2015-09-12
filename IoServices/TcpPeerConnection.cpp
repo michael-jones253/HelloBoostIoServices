@@ -5,37 +5,39 @@
 //  Created by Michael Jones on 29/07/2015.
 //  Copyright (c) 2015 Michael Jones. All rights reserved.
 //
+#include "stdafx.h"
 
 #include "TcpPeerConnection.h"
 #include <iostream>
 
 namespace HelloAsio
 {
-    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService,
-                                         HelloAsio::ErrorCallback&& errorCallback) :
+    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService, const HelloAsio::ErrorCallback& errorCallback) :
         PeerSocket{*ioService},
         PeerEndPoint{},
         Mutex{},
         OutQueue{},
-        ErrorCallback{std::move(errorCallback)},
+		_errorCallback{ std::move(errorCallback) },
         _readBuffer{} {
-            auto cb = [this](uint8_t* bufPtr, ssize_t len, std::function<void(ssize_t)>&&handler) {
-                auto myHandler = move(handler);
-                
+            auto cb = [this](uint8_t* bufPtr, size_t len, std::function<void(size_t)>&&handler) {
+				auto myHandler = move(handler);
                 auto boostHandler = [this, myHandler](const boost::system::error_code& ec,
                               std::size_t bytes_transferred) {
                     if (bytes_transferred == 0 || ec != 0) {
-                        ErrorCallback(shared_from_this(), ec);
+						auto me = this->shared_from_this();
+						_readBuffer.EndReadSome();
+						_errorCallback(me, ec);
                         return;
                     }
                     
                     myHandler(bytes_transferred);
                     
                 };
-                
+
                 // Unless buffer is created with a mutable pointer the boost buffer will not be mutable.
-                auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(_readBuffer.Get()), len);
-                boost::asio::async_read(PeerSocket,boostBuf, std::move(boostHandler));
+                // FIX ME auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(_readBuffer.Get()), len);
+				auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(bufPtr), len);
+				boost::asio::async_read(PeerSocket, boostBuf, std::move(boostHandler));
 
             };
             
@@ -59,11 +61,20 @@ namespace HelloAsio
         
         LaunchWrite();
     }
+
+	void TcpPeerConnection::AsyncConnect(ConnectCallback&& connectCb, std::string ipAddress, int port)
+	{
+		boost::asio::ip::tcp::endpoint remoteEp{ boost::asio::ip::address::from_string(ipAddress), static_cast<unsigned short>(port) };
+		_connectCallback = std::move(connectCb);
+
+		auto boostHandler = std::bind(&TcpPeerConnection::ConnectHandler, this, shared_from_this(),std::placeholders::_1);
+		PeerEndPoint = std::move(remoteEp);
+		PeerSocket.async_connect(PeerEndPoint, std::move(boostHandler));
+	}
+
     
-    // FIX ME - get this to callback a notify available that passes in the peer connection id/address
-    // or something that identifies it. Maybe the end point.
-    void TcpPeerConnection::BeginChainedRead(IoNotifyAvailableCallback&& available, int chunkSize) {
-        _readBuffer.BeginReadSome(std::move(available), chunkSize);
+	void TcpPeerConnection::BeginChainedRead(IoNotifyAvailableCallback&& available, int chunkSize) {
+        _readBuffer.BeginChainedRead(std::move(available), chunkSize);
     }
 
     void TcpPeerConnection::LaunchWrite() {
@@ -87,6 +98,17 @@ namespace HelloAsio
         _readBuffer.CopyTo(dest, len);
     }
     
+	void TcpPeerConnection::ConnectHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec)
+	{
+		if (ec)
+		{
+			_errorCallback(conn, ec);
+			return;
+		}
+
+		_connectCallback(conn);
+	}
+
     void TcpPeerConnection::WriteHandler(
                                          std::shared_ptr<TcpPeerConnection> conn,
                                          std::shared_ptr<IoBufferWrapper> bufWrapper,
@@ -96,7 +118,7 @@ namespace HelloAsio
         if (written != bufWrapper->Buffer.size()) {
             std::cerr << "Incomplete write, buffer: " << bufWrapper->Buffer.size() << " written: " << written << std::endl;
             conn->PeerSocket.close();
-            ErrorCallback(conn, ec);
+            _errorCallback(conn, ec);
             return;
         }
         

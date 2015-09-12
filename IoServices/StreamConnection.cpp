@@ -5,9 +5,13 @@
 //  Created by Michael Jones on 29/08/2015.
 //  Copyright (c) 2015 Michael Jones. All rights reserved.
 //
+#include "stdafx.h"
 
 #include "StreamConnection.h"
 #include "TcpPeerConnection.h"
+#include <sstream>
+
+using namespace std;
 
 namespace HelloAsio {
 
@@ -23,7 +27,7 @@ namespace HelloAsio {
     }
     
     void StreamConnection::ExtractTo(std::vector<uint8_t>& dest, int len) {
-        assert(len <= _peerConnection->Size() && "Must extract within limit of available.");
+        assert(len <= static_cast<int>(_peerConnection->Size()) && "Must extract within limit of available.");
         _peerConnection->CopyTo(dest, len);
         _peerConnection->Consume(len);
     }
@@ -32,12 +36,22 @@ namespace HelloAsio {
         return _peerConnection->Data();
     }
     
-    ssize_t StreamConnection::Size() const {
+    size_t StreamConnection::Size() const {
         return _peerConnection->Size();
     }
     
     void StreamConnection::Consume(int len) {
         _peerConnection->Consume(len);
     }
+
+	EndPoint StreamConnection::GetPeerEndPoint() const {
+		stringstream addressStr;
+		addressStr << _peerConnection->PeerEndPoint.address();
+
+		EndPoint ep{addressStr.str(), _peerConnection->PeerEndPoint.port()};
+
+		return ep;
+	}
+
     
 }

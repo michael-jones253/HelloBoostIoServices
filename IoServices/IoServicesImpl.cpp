@@ -5,20 +5,21 @@
 //  Created by Michael Jones on 26/07/2015.
 //  Copyright (c) 2015 Michael Jones. All rights reserved.
 //
-
+#include "stdafx.h"
 #include "IoServicesImpl.h"
 
 #include <stdio.h>
 #include <chrono>
 #include <stdexcept>
+#include <thread>
 
 using namespace boost;
 using namespace boost::asio;
 
 namespace HelloAsio {
     
-    IoServicesImpl::IoServicesImpl() :
-    _tcpServers{} {
+    IoServicesImpl::IoServicesImpl()
+	 {
         for (Timer t{}; t < Timer::End; ++t) {
             _oneShotTimers.emplace(
                                    std::piecewise_construct,
@@ -35,11 +36,39 @@ namespace HelloAsio {
     }
     
     IoServicesImpl::~IoServicesImpl() {
-        Stop();
+		try
+		{
+			Stop();
+		}
+		catch (const std::exception& ex)
+		{
+			std::cout << "Exception stopping IO service: " << ex.what() << std::endl;
+		}
     }
     
-    void IoServicesImpl::Start() {
-        _serviceRunHandle = std::async(std::launch::async, [this]() ->bool { return Run(); });    
+	std::future<bool> IoServicesImpl::Start() {
+		_shouldRun = true;
+
+		auto res = _started.get_future();
+
+		auto runLoop = [this]() ->bool { return Run(); };
+
+        _serviceRunHandle = std::async(std::launch::async, std::move(runLoop));
+
+		auto notifyStarted = [this]()->void {
+			try {
+				--_freeWorkerCount;
+				_started.set_value(true);
+			}
+			catch (const std::exception& ex) {
+				std::cerr << "Exception in start notification: " << ex.what() << std::endl;
+			}
+
+			_freeWorkerCount++;
+		};
+
+		_ioService.post(std::move(notifyStarted));
+		return res;
     }
     
     void IoServicesImpl::RunTcpServer(int port, ReadSomeCallback&& readSome) {
@@ -56,12 +85,33 @@ namespace HelloAsio {
         
         _tcpServers.back().Start();
     }
+
+	void IoServicesImpl::AsyncConnect(ConnectCallback&& connectCb, std::string ipAddress, int port)
+	{
+		auto errorHandler = std::bind(&IoServicesImpl::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
+
+		// FIX ME put this connection in a list or map.
+		auto conn = std::make_shared<TcpPeerConnection>(&_ioService, std::move(errorHandler));
+		static int ConnectionIds{};
+		_clientConnections[ConnectionIds++] = conn;
+
+		conn->AsyncConnect(std::move(connectCb), ipAddress, port);
+	}
     
+	void IoServicesImpl::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec) {
+	}
+
     void IoServicesImpl::HelloAllPeers() {
         _tcpServers.front().SendMessageToAllPeers("Hello World!");
     }
     
     void IoServicesImpl::Stop() {
+		if (!_serviceRunHandle.valid())
+		{
+			return;
+		}
+
+		_shouldRun = false;
         _ioService.stop();
         _threadPool.join_all();
         auto ok = _serviceRunHandle.get();
@@ -74,7 +124,21 @@ namespace HelloAsio {
         io_service::work keepRunning(_ioService);
         
         system::error_code ec;
-        _ioService.run(ec);
+		std::cout << "RUN IOSERVICE" << std::endl;
+
+		while (_shouldRun.load())
+		{
+			try
+			{
+				_ioService.run(ec);
+			}
+			catch (const std::exception& ex)
+			{
+				std::cout << "EXEPTION IO SERVICE: " << ex.what() << std::endl;
+			}
+		}
+
+		std::cout << "STOPPING IOSERVICE" << std::endl;
         
         return true;
     }
@@ -105,7 +169,7 @@ namespace HelloAsio {
                                           PeriodicTimer id,
                                           boost::posix_time::time_duration durationFromNow,
                                           const std::function<void(PeriodicTimer id)>& handler) {
-        auto resetHandler = [this, id, durationFromNow, &handler](boost::system::error_code ec) {
+        auto resetHandler = [this, id, durationFromNow, handler](boost::system::error_code ec) {
             handler(id);
             this->SetPeriodicTimer(id, durationFromNow, handler);
         };

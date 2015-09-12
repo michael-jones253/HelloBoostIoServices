@@ -6,10 +6,17 @@
 //  Copyright (c) 2015 Michael Jones. All rights reserved.
 //
 
+#include "stdafx.h"
 #include "TcpServer.h"
 
 #include <iostream>
 #include <thread>
+#include <boost/bind.hpp>
+
+namespace
+{
+	const int ChunkSize = 12;
+}
 
 namespace HelloAsio {
     TcpServer::TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb) :
@@ -36,8 +43,7 @@ namespace HelloAsio {
     void TcpServer::Start() {
         _acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(
                                                              *_ioService,
-                                                             boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(),
-                                                             _port));
+                                                             boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), _port));
         AsyncAccept();
     }
     
@@ -51,13 +57,14 @@ namespace HelloAsio {
             std::cerr << "Accept error: " << ec << std::endl;
         }
         
-        auto available = [this, acceptedConn](ssize_t available) {
+        auto available = [this, acceptedConn](size_t available) {
             std::cout << "GOT STUFF!!!!!: " << acceptedConn->PeerEndPoint << available << std::endl;
             _readSomeCb(acceptedConn, available);
         };
         
-        acceptedConn->BeginChainedRead(std::move(available), 12);
+        acceptedConn->BeginChainedRead(std::move(available), ChunkSize);
         
+		std::lock_guard<std::mutex> connGuard(_mutex);
         _peerConnections.push_back(acceptedConn);
         std::cout << "GOT A CONNECTION: " << _peerConnections.size() << std::endl;
         
@@ -66,14 +73,14 @@ namespace HelloAsio {
     }
     
     void TcpServer::AsyncAccept() {
-        auto errorHandler = std::bind(&TcpServer::WriteHandler, this, std::placeholders::_1, std::placeholders::_2);
+        auto errorHandler = std::bind(&TcpServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
         
         auto conn = std::make_shared<TcpPeerConnection>(_ioService, std::move(errorHandler));
 
         auto acceptor = std::bind(&TcpServer::AcceptHandler, this, conn, std::placeholders::_1);
 
         std::cout << "ACCEPTING" << std::endl;
-        
+
         // Async accept does not block and takes references to the socket and end point of the connection.
         // The connection smart pointer is kept alive by being bound to the acceptor callback.
         _acceptor->async_accept(conn->PeerSocket, conn->PeerEndPoint, std::move(acceptor));
@@ -104,7 +111,7 @@ namespace HelloAsio {
         }
     }
     
-    void TcpServer::WriteHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec) {
+    void TcpServer::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec) {
         if (ec != 0) {
             std::cerr << "Write error" << std::endl;
             

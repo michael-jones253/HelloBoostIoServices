@@ -15,7 +15,8 @@
 #include <memory>
 #include <vector>
 #include <mutex>
-
+/* The classes below are exported */
+#pragma GCC visibility push(default)
 namespace HelloAsio {
     class TcpServer final {
     private:
@@ -38,8 +39,11 @@ namespace HelloAsio {
         void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec);
         void AsyncAccept();
         void WriteHandlerDeprecated(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec, std::size_t written);
-        void WriteHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
+        void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
         void CloseAllPeerConnections();
     };
 }
+
+#pragma GCC visibility pop
+
 #endif /* defined(__HelloAsio__TcpServer__) */

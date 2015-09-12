@@ -18,20 +18,24 @@
 
 /* The classes below are exported */
 #pragma GCC visibility push(default)
-
 namespace HelloAsio {
     class IoServicesImpl;
-    
+
     class IoServices final {
         std::unique_ptr<IoServicesImpl> _impl;
-        ReadStreamCallback _readStream;
+        ReadStreamCallback _serverReadStream;
+		ReadStreamCallback _clientReadStream;
         StreamErrorCallback _error;
         
     public:
         IoServices();
         ~IoServices();
-        
+
+		void Start();
+
         void RunTcpServer(int port, ReadStreamCallback&& readStream);
+
+		void AsyncConnect(ConnectStreamCallback&& connectCb, ReadStreamCallback&& readCb, std::string ipAddress, int port);
         
         void HelloAllPeers();
         
@@ -46,4 +50,5 @@ namespace HelloAsio {
 }
 
 #pragma GCC visibility pop
+
 #endif

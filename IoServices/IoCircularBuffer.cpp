@@ -5,6 +5,7 @@
 //  Created by Michael Jones on 2/08/2015.
 //  Copyright (c) 2015 Michael Jones. All rights reserved.
 //
+#include "stdafx.h"
 
 #include "IoCircularBuffer.h"
 #include <sstream>
@@ -20,6 +21,7 @@ using namespace std;
 namespace HelloAsio {
     
     IoCircularBuffer::IoCircularBuffer(IoAsyncReadSomeInCallback readSome) :
+		_shouldRead{},
         _buffer{},
         _chunkSize{},
         _readSomeIn(readSome),
@@ -45,7 +47,7 @@ namespace HelloAsio {
     }
 
 
-    void IoCircularBuffer::BeginReadSome(IoNotifyAvailableCallback&& notifySome, int chunkSize) {
+    void IoCircularBuffer::BeginChainedRead(IoNotifyAvailableCallback&& notifySome, int chunkSize) {
         // Only one chained readsome allowed in progress.
         if (_notifyAvailable != nullptr) {
             throw runtime_error("IO circular buffer - read some already in progress");
@@ -53,6 +55,7 @@ namespace HelloAsio {
         
         _notifyAvailable = move(notifySome);
         _chunkSize = chunkSize;
+		_shouldRead = true;
         ReadSome();
     }
     
@@ -60,7 +63,11 @@ namespace HelloAsio {
     
         auto requiredCapacity = _buffer.size() + _chunkSize;
         
-        // FIX ME - set a limit on capacity.
+		if (requiredCapacity >= _buffer.max_size())
+		{
+			throw runtime_error("Exceeded circular buffer capacity");
+		}
+
         if (requiredCapacity > _buffer.capacity()) {
             cout << "Before reserve of " << requiredCapacity << endl;
             _buffer.reserve(requiredCapacity);
@@ -74,24 +81,26 @@ namespace HelloAsio {
         _readSomeIn(nextSlotPtr, _chunkSize, std::move(handler));
     }
     
-    void IoCircularBuffer::ReadSomeHandler(ssize_t bytesRead) {
+    void IoCircularBuffer::ReadSomeHandler(size_t bytesRead) {
         assert(_buffer.size() + bytesRead <= _buffer.capacity());
         cout << "Before resize of " << (_buffer.size() + bytesRead) << endl;
         _buffer.resize(_buffer.size() + bytesRead);
         cout << "Buf start: " << reinterpret_cast<long long>(_buffer.data()) << " size: " << _buffer.size() << endl;
         
-        if (bytesRead <= 0) {
+        if (bytesRead == 0) {
             // FIX ME - what to do, throw? This can be called from boost IO service, so maybe not.
             return;
         }
         
         _notifyAvailable(_buffer.size());
         
-        // Chain the next async read.
-        ReadSome();
-    }
+		if (_shouldRead) {
+			// Chain the next async read.
+			ReadSome();
+		}
+	}
     
-    void IoCircularBuffer::Consume(ssize_t len) {
+    void IoCircularBuffer::Consume(size_t len) {
         if (len > _buffer.size()) {
             stringstream errStr;
             errStr << "IO circular buffer consume of " << len << ", available: " << _buffer.size();
@@ -124,11 +133,11 @@ namespace HelloAsio {
         return _buffer.data();
     }
 
-    ssize_t IoCircularBuffer::Size() const {
+    size_t IoCircularBuffer::Size() const {
         return _buffer.size();
     }
     
-    ssize_t IoCircularBuffer::Capacity() const {
+    size_t IoCircularBuffer::Capacity() const {
         return _buffer.capacity();
     }
 

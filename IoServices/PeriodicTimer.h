@@ -10,7 +10,8 @@
 #define HelloAsio_PeriodicTimer_h
 
 #include <ostream>
-
+/* The classes below are exported */
+#pragma GCC visibility push(default)
 namespace HelloAsio {
     
     enum class PeriodicTimer : int {
@@ -43,5 +44,6 @@ namespace HelloAsio {
     }
 
 }
+#pragma GCC visibility pop
 
 #endif
