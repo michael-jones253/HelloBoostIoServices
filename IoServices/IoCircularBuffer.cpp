@@ -16,11 +16,30 @@
 
 using namespace std;
 
+namespace
+{
+	struct ContextGuard
+	{
+		std::atomic<bool> &HasContext;
 
+		ContextGuard() = delete;
+
+		ContextGuard(std::atomic<bool>& hasContext) : HasContext{hasContext}
+		{
+			HasContext = true;
+		}
+
+		~ContextGuard()
+		{
+			HasContext = false;
+		}
+	};
+}
 
 namespace HelloAsio {
     
     IoCircularBuffer::IoCircularBuffer(IoAsyncReadSomeInCallback readSome) :
+		_hasContext{},
 		_shouldRead{},
         _buffer{},
         _chunkSize{},
@@ -30,7 +49,9 @@ namespace HelloAsio {
     }
     
     IoCircularBuffer::IoCircularBuffer() :
-    _buffer{},
+		_hasContext{},
+	_shouldRead{},
+	_buffer{},
     _chunkSize{},
     _readSomeIn{},
     _notifyAvailable{} {
@@ -60,7 +81,6 @@ namespace HelloAsio {
     }
     
     void IoCircularBuffer::ReadSome() {
-    
         auto requiredCapacity = _buffer.size() + _chunkSize;
         
 		if (requiredCapacity >= _buffer.max_size())
@@ -78,21 +98,32 @@ namespace HelloAsio {
         cout << "Buf next slot: " << reinterpret_cast<long long>(nextSlotPtr) << " size: " << _buffer.size() << endl;
         
         auto handler = std::bind(&IoCircularBuffer::ReadSomeHandler, this, std::placeholders::_1);
+
+		// NB this is async, so the lock won't be held for long.
         _readSomeIn(nextSlotPtr, _chunkSize, std::move(handler));
     }
     
     void IoCircularBuffer::ReadSomeHandler(size_t bytesRead) {
-        assert(_buffer.size() + bytesRead <= _buffer.capacity());
-        cout << "Before resize of " << (_buffer.size() + bytesRead) << endl;
-        _buffer.resize(_buffer.size() + bytesRead);
-        cout << "Buf start: " << reinterpret_cast<long long>(_buffer.data()) << " size: " << _buffer.size() << endl;
+		size_t available{};
+		{
+			// Ensure that the application notify available handler only calls _buffer modification/accessors
+			// from the context of this handler. This is the only safe place it can do so without
+			// thread contention. This handler is called once ReadSome has completed therefore we can guarantee
+			// that no buffer operations are happening during the context of this block.
+			ContextGuard contextGuard(_hasContext);
+			assert(_buffer.size() + bytesRead <= _buffer.capacity());
+			cout << "Before resize of " << (_buffer.size() + bytesRead) << endl;
+			_buffer.resize(_buffer.size() + bytesRead);
+			cout << "Buf start: " << reinterpret_cast<long long>(_buffer.data()) << " size: " << _buffer.size() << endl;
         
-        if (bytesRead == 0) {
-            // FIX ME - what to do, throw? This can be called from boost IO service, so maybe not.
-            return;
-        }
-        
-        _notifyAvailable(_buffer.size());
+			if (bytesRead == 0) {
+				// FIX ME - what to do, throw? This can be called from boost IO service, so maybe not.
+				return;
+			}
+
+			available = _buffer.size();
+			_notifyAvailable(available);
+		}
         
 		if (_shouldRead) {
 			// Chain the next async read.
@@ -101,7 +132,13 @@ namespace HelloAsio {
 	}
     
     void IoCircularBuffer::Consume(size_t len) {
-        if (len > _buffer.size()) {
+		assert(_hasContext.load() && "Circular buffer must have the callback context to consume");
+		if (!_hasContext.load())
+		{
+			throw runtime_error("Circular buffer must have the callback context to consume");
+		}
+
+		if (len > _buffer.size()) {
             stringstream errStr;
             errStr << "IO circular buffer consume of " << len << ", available: " << _buffer.size();
             throw runtime_error(errStr.str());
@@ -125,21 +162,44 @@ namespace HelloAsio {
     }
     
     void IoCircularBuffer::CopyTo(std::vector<uint8_t>& dest, int len) {
-        std::copy(_buffer.begin(), _buffer.begin() + len, std::back_inserter(dest));
+		assert(_hasContext.load() && "Circular buffer must have the callback context to consume");
+		if (!_hasContext.load())
+		{
+			throw runtime_error("Circular buffer must have the callback context to consume");
+		}
+
+		std::copy(_buffer.begin(), _buffer.begin() + len, std::back_inserter(dest));
     }
 
     
     uint8_t const* IoCircularBuffer::Get() const {
+		assert(_hasContext.load() && "Circular buffer must have the callback context to get data pointer");
+		if (!_hasContext.load())
+		{
+			throw runtime_error("Circular buffer must have the callback context to get data pointer");
+		}
+
         return _buffer.data();
     }
 
     size_t IoCircularBuffer::Size() const {
+		assert(_hasContext.load() && "Circular buffer must have the callback context to get size");
+		if (!_hasContext.load())
+		{
+			throw runtime_error("Circular buffer must have the callback context to get size");
+		}
+
         return _buffer.size();
     }
     
     size_t IoCircularBuffer::Capacity() const {
+		assert(_hasContext.load() && "Circular buffer must have the callback context to get capacity");
+		if (!_hasContext.load())
+		{
+			throw runtime_error("Circular buffer must have the callback context to get capacity");
+		}
+
         return _buffer.capacity();
     }
-
 
 }

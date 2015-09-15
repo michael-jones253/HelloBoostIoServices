@@ -15,8 +15,11 @@
 #include <memory>
 #include <vector>
 #include <mutex>
+#if defined(__GNUC__)
 /* The classes below are exported */
 #pragma GCC visibility push(default)
+#endif
+
 namespace HelloAsio {
     class TcpServer final {
     private:
@@ -27,23 +30,27 @@ namespace HelloAsio {
         std::vector<std::shared_ptr<TcpPeerConnection>> _peerConnections;
         ReadSomeCallback _readSomeCb;
     public:
+		TcpServer() = delete;
         TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb);
         TcpServer(TcpServer&& rhs);
-        ~TcpServer();
+		TcpServer& operator=(TcpServer&& rhs);
+		TcpServer(const TcpServer&) = delete;
+		TcpServer& operator=(const TcpServer&) = delete;
+
+		~TcpServer();
         void Start();
         void Stop();
-        void SendMessageToAllPeersDeprecated(const std::string& msg);
-        void SendMessageToAllPeers(const std::string& msg);
+        void SendMessageToAllPeers(const std::string& msg, bool nullTerminate);
         int GetPort() const { return _port; }
     private:
         void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec);
         void AsyncAccept();
-        void WriteHandlerDeprecated(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec, std::size_t written);
         void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
         void CloseAllPeerConnections();
     };
 }
-
+#if defined(__GNUC__)
 #pragma GCC visibility pop
+#endif
 
 #endif /* defined(__HelloAsio__TcpServer__) */

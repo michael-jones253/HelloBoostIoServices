@@ -71,7 +71,7 @@ namespace HelloAsio {
 		return res;
     }
     
-    void IoServicesImpl::RunTcpServer(int port, ReadSomeCallback&& readSome) {
+    void IoServicesImpl::AddTcpServer(int port, ReadSomeCallback&& readSome) {
         auto predicate = [this,port](const TcpServer& it) {
             return it.GetPort() == port;
         };
@@ -81,30 +81,68 @@ namespace HelloAsio {
             throw std::runtime_error("Server already on port");
         }
         
-        _tcpServers.emplace_back(&_ioService, port, std::move(readSome));
-        
-        _tcpServers.back().Start();
+        _tcpServers.emplace_back(&_ioService, port, std::move(readSome));        
     }
 
-	void IoServicesImpl::AsyncConnect(ConnectCallback&& connectCb, std::string ipAddress, int port)
+	void IoServicesImpl::StartTcpServer(int port)
 	{
-		auto errorHandler = std::bind(&IoServicesImpl::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
+		auto predicate = [this, port](const TcpServer& it) {
+			return it.GetPort() == port;
+		};
 
-		// FIX ME put this connection in a list or map.
-		auto conn = std::make_shared<TcpPeerConnection>(&_ioService, std::move(errorHandler));
+		auto server = std::find_if(_tcpServers.begin(), _tcpServers.end(), predicate);
+		if (server == _tcpServers.end()) {
+			std::stringstream errStr;
+			errStr << "No server for port: " << port;
+			throw std::runtime_error(errStr.str());
+		}
+
+		server->Start();
+	}
+
+	void IoServicesImpl::AsyncConnect(ConnectCallback&& connectCb, ErrorCallback&& errCb, std::string ipAddress, int port)
+	{
+		auto errCbCopy = std::move(errCb);
+		auto errHandler = [this, errCbCopy](std::shared_ptr<TcpPeerConnection> conn, const boost::system::error_code& ec) {
+			// Call the application error handler first.
+			errCbCopy(conn, ec);
+
+			// Then call our cleanup handler.
+			ErrorHandler(conn, ec);
+		};
+
+		auto conn = std::make_shared<TcpPeerConnection>(&_ioService, std::move(errHandler));
 		static int ConnectionIds{};
-		_clientConnections[ConnectionIds++] = conn;
+
+		_clientConnections[conn] = conn;
 
 		conn->AsyncConnect(std::move(connectCb), ipAddress, port);
 	}
     
 	void IoServicesImpl::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec) {
+		if (_clientConnections.find(conn) == _clientConnections.end())
+		{
+			std::cout << "Connection not found:" << conn->PeerEndPoint << std::endl;
+			return;
+		}
+
+		_clientConnections.erase(conn);
 	}
 
-    void IoServicesImpl::HelloAllPeers() {
-        _tcpServers.front().SendMessageToAllPeers("Hello World!");
+    void IoServicesImpl::SendToAllServerConnections(const std::string& msg, bool nullTerminate) {
+		for (auto& server : _tcpServers) {
+			server.SendMessageToAllPeers(msg, nullTerminate);
+		}
     }
     
+	std::shared_ptr<UdpListener> IoServicesImpl::BindDgramListener(UdpErrorCallback&& errCb, std::string ipAddress, int port) {
+		// FIX ME bind to ip address too.
+		auto listener = std::make_shared<UdpListener>(&_ioService, std::move(errCb), port);
+		_listeners[listener] = listener;
+
+		return listener;
+	}
+
     void IoServicesImpl::Stop() {
 		if (!_serviceRunHandle.valid())
 		{

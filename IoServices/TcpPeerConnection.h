@@ -20,9 +20,11 @@
 #include <deque>
 #include <boost/asio.hpp>
 #include <vector>
-
+#if defined(__GNUC__)
 /* The classes below are exported */
 #pragma GCC visibility push(default)
+#endif
+
 namespace HelloAsio {
     
     class TcpPeerConnection;
@@ -46,12 +48,12 @@ namespace HelloAsio {
         boost::asio::ip::tcp::socket PeerSocket;
         boost::asio::ip::tcp::endpoint PeerEndPoint;
 
-		TcpPeerConnection(boost::asio::io_service* ioService, const HelloAsio::ErrorCallback& errorCallback);
+		TcpPeerConnection(boost::asio::io_service* ioService, HelloAsio::ErrorCallback&& errorCallback);
 		~TcpPeerConnection() {
 			std::cout << "Closing TCP peer connection: " << PeerEndPoint << std::endl;
 		}
         
-        void AsyncWrite(std::string&& msg);
+        void AsyncWrite(std::string&& msg, bool nullTerminate);
 
 		void AsyncConnect(ConnectCallback&& connectCb, std::string ipAddress, int port);
         
@@ -81,6 +83,8 @@ namespace HelloAsio {
 
     };
 }
+#if defined(__GNUC__)
 #pragma GCC visibility pop
+#endif
 
 #endif /* defined(__HelloAsio__TcpPeerConnection__) */

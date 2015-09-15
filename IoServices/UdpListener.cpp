@@ -7,13 +7,15 @@
 //
 #include "stdafx.h"
 
-#include "TcpPeerConnection.h"
+#include "UdpListener.h"
 #include <iostream>
+
+using namespace boost::asio::ip;
 
 namespace HelloAsio
 {
-    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService, HelloAsio::ErrorCallback&& errorCallback) :
-        PeerSocket{*ioService},
+	UdpListener::UdpListener(boost::asio::io_service* ioService, HelloAsio::UdpErrorCallback&& errorCallback, int port) :
+		PeerSocket{ *ioService, udp::endpoint(udp::v4(), static_cast<unsigned short>(port)) },
         PeerEndPoint{},
         Mutex{},
         OutQueue{},
@@ -35,17 +37,15 @@ namespace HelloAsio
                 };
 
                 // Unless buffer is created with a mutable pointer the boost buffer will not be mutable.
-                // FIX ME auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(_readBuffer.Get()), len);
 				auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(bufPtr), len);
-				boost::asio::async_read(PeerSocket, boostBuf, boost::asio::transfer_at_least(1), std::move(boostHandler));
-
+				PeerSocket.async_receive_from(boostBuf, PeerEndPoint, std::move(boostHandler));
             };
             
             IoCircularBuffer bufWithCb{ cb };
             _readBuffer = std::move(bufWithCb);
     }
 
-	void TcpPeerConnection::AsyncWrite(std::string&& msg, bool nullTerminate) {
+	void UdpListener::AsyncWrite(std::string&& msg, bool nullTerminate) {
         auto hack = std::move(msg);
         auto bufWrapper = std::make_shared<IoBufferWrapper>(hack, nullTerminate);
         
@@ -62,29 +62,21 @@ namespace HelloAsio
         LaunchWrite();
     }
 
-	void TcpPeerConnection::AsyncConnect(ConnectCallback&& connectCb, std::string ipAddress, int port)
-	{
-		boost::asio::ip::tcp::endpoint remoteEp{ boost::asio::ip::address::from_string(ipAddress), static_cast<unsigned short>(port) };
-		_connectCallback = std::move(connectCb);
-
-		auto boostHandler = std::bind(&TcpPeerConnection::ConnectHandler, this, shared_from_this(),std::placeholders::_1);
-		PeerEndPoint = std::move(remoteEp);
-		PeerSocket.async_connect(PeerEndPoint, std::move(boostHandler));
-	}
-
     
-	void TcpPeerConnection::BeginChainedRead(IoNotifyAvailableCallback&& available, int chunkSize) {
-        _readBuffer.BeginChainedRead(std::move(available), chunkSize);
+	void UdpListener::BeginChainedRead(IoNotifyAvailableCallback&& available, int datagramSize) {
+        _readBuffer.BeginChainedRead(std::move(available), datagramSize);
     }
 
-    void TcpPeerConnection::LaunchWrite() {
+    void UdpListener::LaunchWrite() {
         
         // Boost buffer does not hang on to data, so we bind a shared pointer to buffer wrapper to the callback,
         // to ensure that the buffer lasts the lifetime of the async completion.
         // MJ update - this isn't really needed now, except under a shutdown situation where the queue gets cleared
         // and there is an async operation outstanding.
+		/*
+		FIX ME for UDP
         auto handler = std::bind(
-                                 &TcpPeerConnection::WriteHandler,
+                                 &UdpListener::WriteHandler,
                                  this,
                                  shared_from_this(),
                                  OutQueue.front(),
@@ -92,25 +84,15 @@ namespace HelloAsio
                                  std::placeholders::_2);
         
         boost::asio::async_write(PeerSocket, boost::asio::buffer(OutQueue.front()->Buffer), std::move(handler));
-    }
+		*/
+	}
     
-    void TcpPeerConnection::CopyTo(std::vector<uint8_t>& dest, int len) {
+    void UdpListener::CopyTo(std::vector<uint8_t>& dest, int len) {
         _readBuffer.CopyTo(dest, len);
     }
     
-	void TcpPeerConnection::ConnectHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec)
-	{
-		if (ec)
-		{
-			_errorCallback(conn, ec);
-			return;
-		}
-
-		_connectCallback(conn);
-	}
-
-    void TcpPeerConnection::WriteHandler(
-                                         std::shared_ptr<TcpPeerConnection> conn,
+    void UdpListener::WriteHandler(
+                                         std::shared_ptr<UdpListener> conn,
                                          std::shared_ptr<IoBufferWrapper> bufWrapper,
                                          boost::system::error_code ec,
                                          std::size_t written) {

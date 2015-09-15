@@ -21,6 +21,7 @@ namespace
 namespace HelloAsio {
     TcpServer::TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb) :
     _ioService{ioService},
+	_mutex{},
     _port{port},
     _acceptor{},
     _peerConnections{},
@@ -28,7 +29,7 @@ namespace HelloAsio {
     {
     }
     
-    TcpServer::TcpServer(TcpServer&& rhs) {
+	TcpServer::TcpServer(TcpServer&& rhs) : _mutex{} {
         _ioService = rhs._ioService;
         _port = rhs._port;
         _acceptor = std::move(rhs._acceptor);
@@ -36,7 +37,23 @@ namespace HelloAsio {
         _readSomeCb = std::move(rhs._readSomeCb);
     }
 
+	TcpServer& TcpServer::operator=(TcpServer&& rhs) {
+		_ioService = rhs._ioService;
+		_port = rhs._port;
+		_acceptor = std::move(rhs._acceptor);
+		_peerConnections = std::move(rhs._peerConnections);
+		_readSomeCb = std::move(rhs._readSomeCb);
+
+		return *this;
+	}
+
     TcpServer::~TcpServer() {
+		if (!_readSomeCb)
+		{
+			// We have been moved and there is no state to stop.
+			return;
+		}
+
         Stop();
     }
     
@@ -48,6 +65,11 @@ namespace HelloAsio {
     }
     
     void TcpServer::Stop() {
+		if (!_acceptor)
+		{
+			return;
+		}
+
         _acceptor->close();
         CloseAllPeerConnections();
     }
@@ -92,8 +114,14 @@ namespace HelloAsio {
             conn->PeerSocket.close();
         }
     }
-
-    void TcpServer::WriteHandlerDeprecated(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec, std::size_t written) {
+    
+    /// <summary>
+    /// Client connection error handler to close the in error connection and remove it. This is called
+    /// from the context of the boost IO service.
+    /// </summary>
+    /// <param name="conn">The TCP connection in error state.</param>
+    /// <param name="ec">The boost error code.</param>
+	void TcpServer::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec) {
         if (ec != 0) {
             std::cerr << "Write error" << std::endl;
             
@@ -110,40 +138,14 @@ namespace HelloAsio {
             }
         }
     }
-    
-    void TcpServer::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec) {
-        if (ec != 0) {
-            std::cerr << "Write error" << std::endl;
-            
-            std::lock_guard<std::mutex> guard(_mutex);
-            conn->PeerSocket.close();
-            for (auto pos = _peerConnections.begin(); pos != _peerConnections.end(); pos++) {
-                if (pos->get()->PeerSocket.is_open()) {
-                    continue;
-                }
-                
-                std::cerr << "ERASING PEER: " << pos->get()->PeerEndPoint.address() << std::endl;
-                _peerConnections.erase(pos);
-                break;
-            }
-        }
-    }
-    
-    void TcpServer::SendMessageToAllPeersDeprecated(const std::string& msg) {
-        std::lock_guard<std::mutex> guard(_mutex);
-        for (auto& conn : _peerConnections) {
-            auto handler = std::bind(&TcpServer::WriteHandlerDeprecated, this, conn, std::placeholders::_1, std::placeholders::_2);
-            boost::asio::async_write(conn->PeerSocket, boost::asio::buffer(msg), std::move(handler));
-        }
-    }
 
-    void TcpServer::SendMessageToAllPeers(const std::string& msg) {
+    void TcpServer::SendMessageToAllPeers(const std::string& msg, bool nullTerminate) {
         std::lock_guard<std::mutex> guard(_mutex);
         for (auto& conn : _peerConnections) {
 
             // Allocate message for move.
             auto msgBuf = msg;
-            conn->AsyncWrite(std::move(msgBuf));
+            conn->AsyncWrite(std::move(msgBuf), nullTerminate);
         }
     }
     

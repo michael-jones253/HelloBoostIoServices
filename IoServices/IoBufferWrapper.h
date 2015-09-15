@@ -13,13 +13,16 @@
 #include <vector>
 #include <cstdint>
 
+#if defined(__GNUC__)
 /* The classes below are exported */
 #pragma GCC visibility push(default)
+#endif
+
 namespace HelloAsio {
     struct IoBufferWrapper {
         std::vector<uint8_t> Buffer;
         
-        IoBufferWrapper(const std::string& msg);
+        IoBufferWrapper(const std::string& msg, bool nullTerminate);
         IoBufferWrapper(std::vector<uint8_t>&& rhs);
         
         IoBufferWrapper(IoBufferWrapper&& rhs);
@@ -27,6 +30,9 @@ namespace HelloAsio {
 
     };
 }
+
+#if defined(__GNUC__)
 #pragma GCC visibility pop
+#endif
 
 #endif /* defined(__HelloAsio__IoBufferWrapper__) */

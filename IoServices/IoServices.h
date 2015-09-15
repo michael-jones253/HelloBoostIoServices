@@ -12,20 +12,20 @@
 
 #include "PeriodicTimer.h"
 #include "StreamConnection.h"
+#include "DgramListener.h"
 #include <memory>
 #include <functional>
 #include <chrono>
-
+#if defined(__GNUC__)
 /* The classes below are exported */
 #pragma GCC visibility push(default)
+#endif
+
 namespace HelloAsio {
     class IoServicesImpl;
 
     class IoServices final {
         std::unique_ptr<IoServicesImpl> _impl;
-        ReadStreamCallback _serverReadStream;
-		ReadStreamCallback _clientReadStream;
-        StreamErrorCallback _error;
         
     public:
         IoServices();
@@ -33,11 +33,15 @@ namespace HelloAsio {
 
 		void Start();
 
-        void RunTcpServer(int port, ReadStreamCallback&& readStream);
+        void AddTcpServer(int port, ReadStreamCallback&& readStream);
 
-		void AsyncConnect(ConnectStreamCallback&& connectCb, ReadStreamCallback&& readCb, std::string ipAddress, int port);
+		void StartTcpServer(int port);
+
+		void AsyncConnect(ConnectStreamCallback&& connectCb, ReadStreamCallback&& readCb, StreamErrorCallback&& errCb, std::string ipAddress, int port);
         
-        void HelloAllPeers();
+		std::shared_ptr<DgramListener> BindDgramListener(DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, const std::string& ipAddress, int port);
+
+		void SendToAllServerConnections(const std::string& msg, bool nullTerminate);
         
         void RunWork(std::function<void(void)>const& work);
         void SetPeriodicTimer(
@@ -48,7 +52,5 @@ namespace HelloAsio {
     };
     
 }
-
-#pragma GCC visibility pop
 
 #endif

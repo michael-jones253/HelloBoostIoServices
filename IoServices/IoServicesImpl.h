@@ -12,6 +12,7 @@
 #include "Timer.h"
 #include "PeriodicTimer.h"
 #include "TcpServer.h"
+#include "UdpListener.h"
 
 #include <boost/asio.hpp>
 #include <boost/thread.hpp>
@@ -23,8 +24,6 @@
 #include <atomic>
 #include <iostream>
 
-/* The classes below are exported */
-#pragma GCC visibility push(default)
 namespace HelloAsio {
     class IoServicesImpl final {
 		std::atomic<bool> _shouldRun{};
@@ -37,7 +36,8 @@ namespace HelloAsio {
 		std::atomic<int> _freeWorkerCount{};
 		std::unordered_map<Timer, boost::asio::deadline_timer> _oneShotTimers{};
 		std::unordered_map<PeriodicTimer, boost::asio::deadline_timer> _periodicTimers{};
-		std::map<int, std::shared_ptr<TcpPeerConnection>> _clientConnections{};
+		std::map<std::shared_ptr<TcpPeerConnection>, std::shared_ptr<TcpPeerConnection>> _clientConnections{};
+		std::map<std::shared_ptr<UdpListener>, std::shared_ptr<UdpListener>> _listeners{};
         
     public:
         IoServicesImpl();
@@ -46,11 +46,15 @@ namespace HelloAsio {
         
         std::future<bool> Start();
         
-        void RunTcpServer(int port, ReadSomeCallback&& readSome);
+        void AddTcpServer(int port, ReadSomeCallback&& readSome);
 
-		void AsyncConnect(ConnectCallback&& connectCb, std::string ipAddress, int port);
+		void StartTcpServer(int port);
+
+		void AsyncConnect(ConnectCallback&& connectCb, ErrorCallback&& errCb, std::string ipAddress, int port);
         
-        void HelloAllPeers();
+		void SendToAllServerConnections(const std::string& msg, bool nullTerminate);
+
+		std::shared_ptr<UdpListener> BindDgramListener(UdpErrorCallback&& errCb, std::string ipAddress, int port);
         
         void Stop();
         
@@ -69,6 +73,5 @@ namespace HelloAsio {
 		void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
     };
 }
-#pragma GCC visibility pop
 
 #endif

@@ -58,7 +58,8 @@ int main(int argc, const char * argv[]) {
         }
     };
 
-    secondInstance.RunTcpServer(23, move(readStream));
+    secondInstance.AddTcpServer(23, move(readStream));
+    secondInstance.StartTcpServer(23);
     mutex workMutex{};
     
     std::cout << "Hello, World!\n";
@@ -109,9 +110,9 @@ int main(int argc, const char * argv[]) {
     for (int x = 0; x < 100; x++) {
         sleep_for(seconds(3));
         cout << "Hello" << endl;
-        secondInstance.HelloAllPeers();
-        secondInstance.HelloAllPeers();
-        secondInstance.HelloAllPeers();
+        secondInstance.SendToAllServerConnections("Hello World!", true);
+        secondInstance.SendToAllServerConnections("Hello World!", true);
+        secondInstance.SendToAllServerConnections("Hello World!", true);
     }
     
     cout << "General count: " << generalCount << endl;

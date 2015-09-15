@@ -21,34 +21,81 @@ namespace HelloAsio {
         
     }
     
+	void StreamConnection::AsyncWrite(std::string&& msg, bool nullTerminate)
+	{
+		auto conn = _peerConnection.lock();
+		if (!conn)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		conn->AsyncWrite(std::move(msg), nullTerminate);
+	}
+
     void StreamConnection::ConsumeInto(uint8_t* buf, int len) {
-        memcpy(buf, _peerConnection->Data(), len);
-        _peerConnection->Consume(len);
+		auto conn = _peerConnection.lock();
+		if (!conn)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+        memcpy(buf, conn->Data(), len);
+        conn->Consume(len);
     }
     
     void StreamConnection::ExtractTo(std::vector<uint8_t>& dest, int len) {
-        assert(len <= static_cast<int>(_peerConnection->Size()) && "Must extract within limit of available.");
-        _peerConnection->CopyTo(dest, len);
-        _peerConnection->Consume(len);
+		auto conn = _peerConnection.lock();
+		if (!conn)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		assert(len <= static_cast<int>(conn->Size()) && "Must extract within limit of available.");
+		conn->CopyTo(dest, len);
+		conn->Consume(len);
     }
     
     const uint8_t* StreamConnection::Data() const {
-        return _peerConnection->Data();
+		auto conn = _peerConnection.lock();
+		if (!conn)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		return conn->Data();
     }
     
     size_t StreamConnection::Size() const {
-        return _peerConnection->Size();
+		auto conn = _peerConnection.lock();
+		if (!conn)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		return conn->Size();
     }
     
     void StreamConnection::Consume(int len) {
-        _peerConnection->Consume(len);
+		auto conn = _peerConnection.lock();
+		if (!conn)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		conn->Consume(len);
     }
 
 	EndPoint StreamConnection::GetPeerEndPoint() const {
-		stringstream addressStr;
-		addressStr << _peerConnection->PeerEndPoint.address();
+		auto conn = _peerConnection.lock();
+		if (!conn)
+		{
+			throw runtime_error("Connection expired.");
+		}
 
-		EndPoint ep{addressStr.str(), _peerConnection->PeerEndPoint.port()};
+		stringstream addressStr;
+		addressStr << conn->PeerEndPoint.address();
+
+		EndPoint ep{ addressStr.str(), conn->PeerEndPoint.port() };
 
 		return ep;
 	}

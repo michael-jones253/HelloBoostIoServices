@@ -10,12 +10,13 @@
 using namespace std;
 
 namespace HelloAsio {
-    IoBufferWrapper::IoBufferWrapper(const std::string& msg) {
+	IoBufferWrapper::IoBufferWrapper(const std::string& msg, bool nullTerminate) {
         Buffer.insert(Buffer.begin(), msg.cbegin(), msg.cend());
 
-		// Seem to need this on windows.
-		Buffer.push_back('\0');
-    }
+		if (nullTerminate) {
+			Buffer.push_back('\0');
+		}
+	}
     
     IoBufferWrapper::IoBufferWrapper(vector<uint8_t>&& rhs) {
         Buffer = move(rhs);

@@ -1,13 +1,13 @@
 //
-//  StreamConnection.h
+//  DgramListener.h
 //  HelloAsio
 //
 //  Created by Michael Jones on 29/08/2015.
 //  Copyright (c) 2015 Michael Jones. All rights reserved.
 //
 
-#ifndef __HelloAsio__StreamConnection__
-#define __HelloAsio__StreamConnection__
+#ifndef __HelloAsio__DgramListener__
+#define __HelloAsio__DgramListener__
 
 #include <iostream>
 #include <ostream>
@@ -21,17 +21,16 @@
 #endif
 
 namespace HelloAsio {
-    // Hide Tcp peer connection.
-    class TcpPeerConnection;
-    class StreamConnection;
+    // Hide UDP listener.
+    class UdpListener;
+    class DgramListener;
     
-    using StreamErrorCallback = std::function<void(const std::string& msg)>;
+    using DgramErrorCallback = std::function<void(const std::string& msg)>;
     
-    using ReadStreamCallback = std::function<void(std::shared_ptr<StreamConnection>, int bytesAvailable)>;
+    using DgramReceiveCallback = std::function<void(std::shared_ptr<DgramListener>, int bytesAvailable)>;
 
-	using ConnectStreamCallback = std::function<void(std::shared_ptr<StreamConnection>)>;
-
-	struct EndPoint
+	// FIX ME - use this for TCP and put in a separate file.
+	struct IoEndPoint
 	{
 		std::string IpAddress;
 		int Port;
@@ -43,7 +42,7 @@ namespace HelloAsio {
 	/// <param name="os">Output stream.</param>
 	/// <param name="groupType">The end point.</param>
 	/// <returns>End point as readable text stream.</returns>
-	inline std::ostream& operator<<(std::ostream &os, const EndPoint &endPoint)
+	inline std::ostream& operator<<(std::ostream &os, const IoEndPoint &endPoint)
 	{
 		os << endPoint.IpAddress << ":" << endPoint.Port;
 
@@ -51,12 +50,12 @@ namespace HelloAsio {
 	}
 
     
-    class StreamConnection : public std::enable_shared_from_this<StreamConnection> {
+    class DgramListener : public std::enable_shared_from_this<DgramListener> {
     private:
-        std::weak_ptr<TcpPeerConnection> _peerConnection;
+        std::weak_ptr<UdpListener> _udpListener;
         
     public:
-        StreamConnection(std::shared_ptr<TcpPeerConnection> peerConnection);
+		DgramListener(std::shared_ptr<UdpListener> udpListener);
 
 		void AsyncWrite(std::string&& msg, bool nullTerminate);
         
@@ -70,11 +69,11 @@ namespace HelloAsio {
         
         void Consume(int len);
 
-		EndPoint GetPeerEndPoint() const;
+		IoEndPoint GetPeerEndPoint() const;
     };
 }
 #if defined(__GNUC__)
 #pragma GCC visibility pop
 #endif
 
-#endif /* defined(__HelloAsio__StreamConnection__) */
+#endif /* defined(__HelloAsio__DgramListener__) */

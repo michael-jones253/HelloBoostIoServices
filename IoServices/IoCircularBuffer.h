@@ -11,14 +11,17 @@
 
 #include <vector>
 #include <atomic>
+#include <mutex>
 #include <functional>
 #include <iostream>
 #include <cstddef>
 #include <cstdlib>
 #include <cstdint>
 
+#if defined(__GNUC__)
 /* The classes below are exported */
 #pragma GCC visibility push(default)
+#endif
 
 template <class T>
 class ResizeReserveAllocator: public std::allocator<T>
@@ -33,6 +36,7 @@ public:
 	template<class U>
 	ResizeReserveAllocator(ResizeReserveAllocator<U> &&) {}
 
+	// Needed as a minimum allocator on windows.
 	template <class U>
 	struct rebind
 	{
@@ -71,6 +75,7 @@ namespace HelloAsio {
 
     class IoCircularBuffer {
     private:
+		std::atomic<bool> _hasContext;
 		std::atomic<bool> _shouldRead;
         std::vector<uint8_t, ResizeReserveAllocator<uint8_t>> _buffer;
         int _chunkSize;
@@ -101,7 +106,8 @@ namespace HelloAsio {
         void ReadSomeHandler(size_t bytesRead);
     };
 }
-
+#if defined(__GNUC__)
 #pragma GCC visibility pop
+#endif
 
 #endif /* defined(__HelloAsio__IoCircularBuffer__) */
