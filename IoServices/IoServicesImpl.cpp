@@ -1,9 +1,9 @@
 //
 //  IoServicesImpl.cpp
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 26/07/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  https://github.com/michael-jones253/HelloBoostIoServices
 //
 #include "stdafx.h"
 #include "IoServicesImpl.h"
@@ -16,7 +16,7 @@
 using namespace boost;
 using namespace boost::asio;
 
-namespace HelloAsio {
+namespace AsyncIo {
     
     IoServicesImpl::IoServicesImpl()
 	 {
@@ -42,6 +42,7 @@ namespace HelloAsio {
 		}
 		catch (const std::exception& ex)
 		{
+			// FIX ME log this.
 			std::cout << "Exception stopping IO service: " << ex.what() << std::endl;
 		}
     }
@@ -114,20 +115,36 @@ namespace HelloAsio {
 		auto conn = std::make_shared<TcpPeerConnection>(&_ioService, std::move(errHandler));
 		static int ConnectionIds{};
 
+		// All access is from the context of the IO service so should not need mutexing.
 		_clientConnections[conn] = conn;
 
 		conn->AsyncConnect(std::move(connectCb), ipAddress, port);
 	}
     
 	void IoServicesImpl::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec) {
+		// All access is from the context of the IO service so should not need mutexing.
 		if (_clientConnections.find(conn) == _clientConnections.end())
 		{
+			// FIX ME log this.
 			std::cout << "Connection not found:" << conn->PeerEndPoint << std::endl;
 			return;
 		}
 
 		_clientConnections.erase(conn);
 	}
+
+	void IoServicesImpl::ErrorHandler(std::shared_ptr<UdpListener> listener, boost::system::error_code ec) {
+		std::lock_guard<std::mutex> listenerGuard(_mutex);
+		if (_listeners.find(listener) == _listeners.end())
+		{
+			// FIX ME log this.
+			std::cout << "Listener not found: " << listener->PeerEndPoint << std::endl;
+			return;
+		}
+
+		_listeners.erase(listener);
+	}
+
 
     void IoServicesImpl::SendToAllServerConnections(const std::string& msg, bool nullTerminate) {
 		for (auto& server : _tcpServers) {
@@ -136,8 +153,18 @@ namespace HelloAsio {
     }
     
 	std::shared_ptr<UdpListener> IoServicesImpl::BindDgramListener(UdpErrorCallback&& errCb, std::string ipAddress, int port) {
+
+		auto errHandler = [this, errCb](std::shared_ptr<UdpListener> listener, const boost::system::error_code& ec) {
+			// Call the application error handler first.
+			errCb(listener, ec);
+
+			// Then call our cleanup handler.
+			ErrorHandler(listener, ec);
+		};
+
 		// FIX ME bind to ip address too.
-		auto listener = std::make_shared<UdpListener>(&_ioService, std::move(errCb), port);
+		auto listener = std::make_shared<UdpListener>(&_ioService, std::move(errHandler), port);
+		std::lock_guard<std::mutex> listenerGuard(_mutex);
 		_listeners[listener] = listener;
 
 		return listener;
@@ -154,7 +181,7 @@ namespace HelloAsio {
         _threadPool.join_all();
         auto ok = _serviceRunHandle.get();
         if (ok) {
-            std::cout << "Io Service ran OK" << std::endl;
+            // std::cout << "Io Service ran OK" << std::endl;
         }
     }
     
@@ -162,7 +189,6 @@ namespace HelloAsio {
         io_service::work keepRunning(_ioService);
         
         system::error_code ec;
-		std::cout << "RUN IOSERVICE" << std::endl;
 
 		while (_shouldRun.load())
 		{
@@ -172,11 +198,12 @@ namespace HelloAsio {
 			}
 			catch (const std::exception& ex)
 			{
-				std::cout << "EXEPTION IO SERVICE: " << ex.what() << std::endl;
+				// FIX ME log this.
+				std::cout << "Exception in IO service: " << ex.what() << std::endl;
 			}
 		}
 
-		std::cout << "STOPPING IOSERVICE" << std::endl;
+		std::cout << "Stopping IO service." << std::endl;
         
         return true;
     }
@@ -233,9 +260,9 @@ namespace HelloAsio {
     }
     
     void IoServicesImpl::WorkerThread(boost::asio::io_service& ioService) {
-        std::cout << "hello worker" << std::endl;
+        // std::cout << "hello worker" << std::endl;
         ioService.run();
-        std::cout << "Goodbye worker" << std::endl;
+        // std::cout << "Goodbye worker" << std::endl;
     }
 
 }

@@ -1,9 +1,9 @@
 //
 //  IoCircularBuffer.h
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 2/08/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  https://github.com/michael-jones253/HelloBoostIoServices
 //
 
 #ifndef __HelloAsio__IoCircularBuffer__
@@ -23,13 +23,13 @@
 #pragma GCC visibility push(default)
 #endif
 
+/// <summary>
+/// Custom allocator for resizing/reserving a vector for circular buffer use.
+/// </summary>
 template <class T>
 class ResizeReserveAllocator: public std::allocator<T>
 {
 public:
-//	using typename std::allocator<T>::allocator;
-
-
 	ResizeReserveAllocator() {}
 	template<class U>
 	ResizeReserveAllocator(const ResizeReserveAllocator<U> &) {}
@@ -47,13 +47,13 @@ public:
     // copying of this data.
     template<class U>
     void construct(U* me, T&& rhs) {
-        std::cout << "move construct" << std::endl;
+        // std::cout << "move construct" << std::endl;
         *me = std::move(rhs);
     };
     
     // This is needed for a resize without default initialisation wiping out data in the reserved/spare capacity area.
     template <class U, class... Args> void construct(U*, Args&&...) {
-        std::cout << "variadic construct" << std::endl;
+        // std::cout << "variadic construct" << std::endl;
     }
 
 	// At least on OS X this does not get called by any vector re-allocation methods.
@@ -67,13 +67,17 @@ public:
 	*/
 };
 
-namespace HelloAsio {
-
+namespace AsyncIo
+{
     using IoAsyncReadSomeInCallback = std::function<void(uint8_t* bufPtr, size_t len, std::function<void(size_t)>&&handler)>;
     
     using IoNotifyAvailableCallback = std::function<void(size_t available)>;
 
-    class IoCircularBuffer {
+	/// <summary>
+	/// Circular buffer for receiving data from TCP or UDP.
+	/// </summary>
+    class IoCircularBuffer
+	{
     private:
 		std::atomic<bool> _hasContext;
 		std::atomic<bool> _shouldRead;

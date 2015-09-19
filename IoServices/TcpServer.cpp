@@ -1,9 +1,9 @@
 //
 //  TcpServer.cpp
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 29/07/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  https://github.com/michael-jones253/HelloBoostIoServices
 //
 
 #include "stdafx.h"
@@ -18,7 +18,15 @@ namespace
 	const int ChunkSize = 12;
 }
 
-namespace HelloAsio {
+namespace AsyncIo
+{
+	/// <summary>
+	/// For async IO with client connections.
+	/// NB this class is managed internally by the IO services and not to be instantiated by application code.
+	/// </summary>
+	/// <param name="ioService">The boost IO service.</param>
+	/// <param name="port">The port to listen on.</param>
+	/// <param name="readSomeCb">Client read some data callback.</param>
     TcpServer::TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb) :
     _ioService{ioService},
 	_mutex{},
@@ -29,7 +37,8 @@ namespace HelloAsio {
     {
     }
     
-	TcpServer::TcpServer(TcpServer&& rhs) : _mutex{} {
+	TcpServer::TcpServer(TcpServer&& rhs) : _mutex{}
+	{
         _ioService = rhs._ioService;
         _port = rhs._port;
         _acceptor = std::move(rhs._acceptor);
@@ -37,7 +46,8 @@ namespace HelloAsio {
         _readSomeCb = std::move(rhs._readSomeCb);
     }
 
-	TcpServer& TcpServer::operator=(TcpServer&& rhs) {
+	TcpServer& TcpServer::operator=(TcpServer&& rhs)
+	{
 		_ioService = rhs._ioService;
 		_port = rhs._port;
 		_acceptor = std::move(rhs._acceptor);
@@ -47,7 +57,8 @@ namespace HelloAsio {
 		return *this;
 	}
 
-    TcpServer::~TcpServer() {
+    TcpServer::~TcpServer()
+	{
 		if (!_readSomeCb)
 		{
 			// We have been moved and there is no state to stop.
@@ -57,14 +68,16 @@ namespace HelloAsio {
         Stop();
     }
     
-    void TcpServer::Start() {
+    void TcpServer::Start()
+	{
         _acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(
                                                              *_ioService,
                                                              boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), _port));
         AsyncAccept();
     }
     
-    void TcpServer::Stop() {
+    void TcpServer::Stop()
+	{
 		if (!_acceptor)
 		{
 			return;
@@ -74,13 +87,15 @@ namespace HelloAsio {
         CloseAllPeerConnections();
     }
     
-    void TcpServer::AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec) {
-        if (ec != 0) {
+    void TcpServer::AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec)
+	{
+        if (ec != 0)
+		{
             std::cerr << "Accept error: " << ec << std::endl;
         }
         
         auto available = [this, acceptedConn](size_t available) {
-            std::cout << "GOT STUFF!!!!!: " << acceptedConn->PeerEndPoint << available << std::endl;
+            // std::cout << "Got stuff available: " << acceptedConn->PeerEndPoint << available << std::endl;
             _readSomeCb(acceptedConn, available);
         };
         
@@ -88,29 +103,30 @@ namespace HelloAsio {
         
 		std::lock_guard<std::mutex> connGuard(_mutex);
         _peerConnections.push_back(acceptedConn);
-        std::cout << "GOT A CONNECTION: " << _peerConnections.size() << std::endl;
+        std::cout << "Accepted: " << _peerConnections.size() << std::endl;
         
         // Kick off another async accept to handle another connection.
         AsyncAccept();
     }
     
-    void TcpServer::AsyncAccept() {
+    void TcpServer::AsyncAccept()
+	{
         auto errorHandler = std::bind(&TcpServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
         
         auto conn = std::make_shared<TcpPeerConnection>(_ioService, std::move(errorHandler));
 
         auto acceptor = std::bind(&TcpServer::AcceptHandler, this, conn, std::placeholders::_1);
 
-        std::cout << "ACCEPTING" << std::endl;
-
         // Async accept does not block and takes references to the socket and end point of the connection.
         // The connection smart pointer is kept alive by being bound to the acceptor callback.
         _acceptor->async_accept(conn->PeerSocket, conn->PeerEndPoint, std::move(acceptor));
     }
     
-    void TcpServer::CloseAllPeerConnections() {
+    void TcpServer::CloseAllPeerConnections()
+	{
         std::lock_guard<std::mutex> guard(_mutex);
-        for (auto& conn : _peerConnections) {
+        for (auto& conn : _peerConnections)
+		{
             conn->PeerSocket.close();
         }
     }
@@ -121,14 +137,18 @@ namespace HelloAsio {
     /// </summary>
     /// <param name="conn">The TCP connection in error state.</param>
     /// <param name="ec">The boost error code.</param>
-	void TcpServer::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec) {
+	void TcpServer::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec)
+	{
         if (ec != 0) {
+			// FIX ME log this.
             std::cerr << "Write error" << std::endl;
             
             std::lock_guard<std::mutex> guard(_mutex);
             conn->PeerSocket.close();
-            for (auto pos = _peerConnections.begin(); pos != _peerConnections.end(); pos++) {
-                if (pos->get()->PeerSocket.is_open()) {
+            for (auto pos = _peerConnections.begin(); pos != _peerConnections.end(); pos++)
+			{
+                if (pos->get()->PeerSocket.is_open())
+				{
                     continue;
                 }
                 
@@ -139,9 +159,11 @@ namespace HelloAsio {
         }
     }
 
-    void TcpServer::SendMessageToAllPeers(const std::string& msg, bool nullTerminate) {
+    void TcpServer::SendMessageToAllPeers(const std::string& msg, bool nullTerminate)
+	{
         std::lock_guard<std::mutex> guard(_mutex);
-        for (auto& conn : _peerConnections) {
+        for (auto& conn : _peerConnections)
+		{
 
             // Allocate message for move.
             auto msgBuf = msg;

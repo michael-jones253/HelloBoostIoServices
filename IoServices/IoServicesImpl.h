@@ -1,9 +1,9 @@
 //
 //  IoServicesImpl.h
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 26/07/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  https://github.com/michael-jones253/HelloBoostIoServices
 //
 
 #ifndef HelloAsio_IoServicesImpl_h
@@ -24,7 +24,7 @@
 #include <atomic>
 #include <iostream>
 
-namespace HelloAsio {
+namespace AsyncIo {
     class IoServicesImpl final {
 		std::atomic<bool> _shouldRun{};
 		std::promise<bool> _started{};
@@ -38,6 +38,7 @@ namespace HelloAsio {
 		std::unordered_map<PeriodicTimer, boost::asio::deadline_timer> _periodicTimers{};
 		std::map<std::shared_ptr<TcpPeerConnection>, std::shared_ptr<TcpPeerConnection>> _clientConnections{};
 		std::map<std::shared_ptr<UdpListener>, std::shared_ptr<UdpListener>> _listeners{};
+		std::mutex _mutex{};
         
     public:
         IoServicesImpl();
@@ -71,7 +72,8 @@ namespace HelloAsio {
         void RemoveWorker();
         void WorkerThread(boost::asio::io_service& ioService);
 		void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
-    };
+		void ErrorHandler(std::shared_ptr<UdpListener> listener, boost::system::error_code ec);
+	};
 }
 
 #endif

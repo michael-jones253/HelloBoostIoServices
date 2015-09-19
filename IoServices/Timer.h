@@ -1,17 +1,19 @@
 //
 //  Timer.h
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 28/07/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  https://github.com/michael-jones253/HelloBoostIoServices
 //
 
 #ifndef HelloAsio_Timer_h
 #define HelloAsio_Timer_h
-
+#if defined(__GNUC__)
 /* The classes below are exported */
 #pragma GCC visibility push(default)
-namespace HelloAsio {
+#endif
+
+namespace AsyncIo {
     
     enum class Timer : int {
         General,
@@ -23,7 +25,8 @@ namespace HelloAsio {
         return rhs;
     }
 }
-
+#if defined(__GNUC__)
 #pragma GCC visibility pop
+#endif
 
 #endif

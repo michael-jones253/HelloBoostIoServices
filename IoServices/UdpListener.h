@@ -18,18 +18,24 @@
 #pragma GCC visibility push(default)
 #endif
 
-namespace HelloAsio {
-    
+namespace AsyncIo
+{    
     class UdpListener;
     
 	using UdpErrorCallback = std::function<void(std::shared_ptr<UdpListener>, const boost::system::error_code&)>;
 
     using ReceiveFromCallback = std::function<void(std::shared_ptr<UdpListener>, std::size_t bytesAvailable)>;
 
-    class UdpListener final : public std::enable_shared_from_this<UdpListener> {
+
+	/// <summary>
+	/// Internal class for asynchronous receive of UDP datagrams.
+	/// NB not to be instantiated by application code.
+	/// </summary>
+    class UdpListener final : public std::enable_shared_from_this<UdpListener>
+	{
     private:
         std::mutex Mutex;
-        std::deque<std::shared_ptr<IoBufferWrapper>> OutQueue;
+        std::deque<std::shared_ptr<IoBufferWrapper>> mOutQueue;
         const UdpErrorCallback _errorCallback;
         IoCircularBuffer _readBuffer;
         
@@ -37,9 +43,10 @@ namespace HelloAsio {
         boost::asio::ip::udp::socket PeerSocket;
         boost::asio::ip::udp::endpoint PeerEndPoint;
 
-		UdpListener(boost::asio::io_service* ioService, HelloAsio::UdpErrorCallback&& errorCallback, int port);
-		~UdpListener() {
-			std::cout << "Closing UDP peer connection: " << PeerEndPoint << std::endl;
+		UdpListener(boost::asio::io_service* ioService, AsyncIo::UdpErrorCallback&& errorCallback, int port);
+		~UdpListener()
+		{
+			std::cout << "Closing UDP listener: " << PeerEndPoint << std::endl;
 		}
         
         void AsyncWrite(std::string&& msg, bool nullTerminate);
@@ -55,16 +62,18 @@ namespace HelloAsio {
         void Consume(size_t len) { _readBuffer.Consume(len); }
         
         void CopyTo(std::vector<uint8_t>& dest, int len);
+
+		void StopListening();
         
     private:
-        
-        void LaunchWrite();
-        
+
+		void LaunchWrite();
+
 		void WriteHandler(
-                          std::shared_ptr<UdpListener> conn,
-                          std::shared_ptr<IoBufferWrapper> bufWrapper,
-                          boost::system::error_code ec,
-                          std::size_t written);
+			std::shared_ptr<UdpListener> conn,
+			std::shared_ptr<IoBufferWrapper> bufWrapper,
+			boost::system::error_code ec,
+			std::size_t written);
     };
 }
 #if defined(__GNUC__)

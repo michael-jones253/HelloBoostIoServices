@@ -1,9 +1,9 @@
 //
 //  TcpServer.h
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 29/07/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  https://github.com/michael-jones253/HelloBoostIoServices
 //
 
 #ifndef __HelloAsio__TcpServer__
@@ -20,8 +20,14 @@
 #pragma GCC visibility push(default)
 #endif
 
-namespace HelloAsio {
-    class TcpServer final {
+namespace AsyncIo
+{
+	/// <summary>
+	/// For async IO with client connections.
+	/// NB this class is managed internally by the IO services and not to be instantiated by application code.
+	/// </summary>
+    class TcpServer final
+	{
     private:
         boost::asio::io_service* _ioService;
         std::mutex _mutex;
@@ -31,7 +37,16 @@ namespace HelloAsio {
         ReadSomeCallback _readSomeCb;
     public:
 		TcpServer() = delete;
-        TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb);
+
+		/// <summary>
+		/// For async IO with client connections.
+		/// NB this class is managed internally by the IO services and not to be instantiated by application code.
+		/// </summary>
+		/// <param name="ioService">The boost IO service.</param>
+		/// <param name="port">The port to listen on.</param>
+		/// <param name="readSomeCb">Client read some data callback.</param>
+
+		TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb);
         TcpServer(TcpServer&& rhs);
 		TcpServer& operator=(TcpServer&& rhs);
 		TcpServer(const TcpServer&) = delete;

@@ -1,9 +1,9 @@
 //
 //  IoCircularBuffer.cpp
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 2/08/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  Copyright (c)All rights reserved.
 //
 #include "stdafx.h"
 
@@ -36,7 +36,7 @@ namespace
 	};
 }
 
-namespace HelloAsio {
+namespace AsyncIo {
     
     IoCircularBuffer::IoCircularBuffer(IoAsyncReadSomeInCallback readSome) :
 		_hasContext{},
@@ -89,13 +89,13 @@ namespace HelloAsio {
 		}
 
         if (requiredCapacity > _buffer.capacity()) {
-            cout << "Before reserve of " << requiredCapacity << endl;
+            // cout << "Before reserve of " << requiredCapacity << endl;
             _buffer.reserve(requiredCapacity);
         }
 
         auto nextSlotPtr = _buffer.data() + _buffer.size();
         assert(nextSlotPtr != nullptr);
-        cout << "Buf next slot: " << reinterpret_cast<long long>(nextSlotPtr) << " size: " << _buffer.size() << endl;
+        // cout << "Buf next slot: " << reinterpret_cast<long long>(nextSlotPtr) << " size: " << _buffer.size() << endl;
         
         auto handler = std::bind(&IoCircularBuffer::ReadSomeHandler, this, std::placeholders::_1);
 
@@ -112,9 +112,8 @@ namespace HelloAsio {
 			// that no buffer operations are happening during the context of this block.
 			ContextGuard contextGuard(_hasContext);
 			assert(_buffer.size() + bytesRead <= _buffer.capacity());
-			cout << "Before resize of " << (_buffer.size() + bytesRead) << endl;
+			// cout << "Before resize of " << (_buffer.size() + bytesRead) << endl;
 			_buffer.resize(_buffer.size() + bytesRead);
-			cout << "Buf start: " << reinterpret_cast<long long>(_buffer.data()) << " size: " << _buffer.size() << endl;
         
 			if (bytesRead == 0) {
 				// FIX ME - what to do, throw? This can be called from boost IO service, so maybe not.

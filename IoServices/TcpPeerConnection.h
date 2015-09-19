@@ -1,9 +1,9 @@
 //
 //  TcpPeerConnection.h
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 29/07/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  https://github.com/michael-jones253/HelloBoostIoServices
 //
 
 #ifndef __HelloAsio__TcpPeerConnection__
@@ -25,7 +25,7 @@
 #pragma GCC visibility push(default)
 #endif
 
-namespace HelloAsio {
+namespace AsyncIo {
     
     class TcpPeerConnection;
     
@@ -39,7 +39,7 @@ namespace HelloAsio {
     class TcpPeerConnection final : public std::enable_shared_from_this<TcpPeerConnection> {
     private:
         std::mutex Mutex;
-        std::deque<std::shared_ptr<IoBufferWrapper>> OutQueue;
+        std::deque<std::shared_ptr<IoBufferWrapper>> mOutQueue;
         const ErrorCallback _errorCallback;
 		ConnectCallback _connectCallback;
         IoCircularBuffer _readBuffer;
@@ -48,7 +48,7 @@ namespace HelloAsio {
         boost::asio::ip::tcp::socket PeerSocket;
         boost::asio::ip::tcp::endpoint PeerEndPoint;
 
-		TcpPeerConnection(boost::asio::io_service* ioService, HelloAsio::ErrorCallback&& errorCallback);
+		TcpPeerConnection(boost::asio::io_service* ioService, AsyncIo::ErrorCallback&& errorCallback);
 		~TcpPeerConnection() {
 			std::cout << "Closing TCP peer connection: " << PeerEndPoint << std::endl;
 		}

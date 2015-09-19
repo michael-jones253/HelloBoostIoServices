@@ -1,9 +1,9 @@
 //
 //  IoBufferWrapper.h
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 31/07/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  https://github.com/michael-jones253/HelloBoostIoServices
 //
 
 #ifndef __HelloAsio__IoBufferWrapper__
@@ -18,15 +18,20 @@
 #pragma GCC visibility push(default)
 #endif
 
-namespace HelloAsio {
-    struct IoBufferWrapper {
+namespace AsyncIo
+{
+	/// <summary>
+	/// Convenience wrapper for constructing a message to send.
+	/// </summary>
+    struct IoBufferWrapper
+	{
         std::vector<uint8_t> Buffer;
         
         IoBufferWrapper(const std::string& msg, bool nullTerminate);
         IoBufferWrapper(std::vector<uint8_t>&& rhs);
         
         IoBufferWrapper(IoBufferWrapper&& rhs);
-        IoBufferWrapper& operator=(HelloAsio::IoBufferWrapper&& rhs);
+        IoBufferWrapper& operator=(AsyncIo::IoBufferWrapper&& rhs);
 
     };
 }

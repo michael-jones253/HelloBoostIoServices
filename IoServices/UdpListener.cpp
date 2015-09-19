@@ -1,6 +1,6 @@
 //
 //  TcpConnection.cpp
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 29/07/2015.
 //  Copyright (c) 2015 Michael Jones. All rights reserved.
@@ -12,15 +12,16 @@
 
 using namespace boost::asio::ip;
 
-namespace HelloAsio
+namespace AsyncIo
 {
-	UdpListener::UdpListener(boost::asio::io_service* ioService, HelloAsio::UdpErrorCallback&& errorCallback, int port) :
+	UdpListener::UdpListener(boost::asio::io_service* ioService, AsyncIo::UdpErrorCallback&& errorCallback, int port) :
 		PeerSocket{ *ioService, udp::endpoint(udp::v4(), static_cast<unsigned short>(port)) },
         PeerEndPoint{},
         Mutex{},
-        OutQueue{},
+        mOutQueue{},
 		_errorCallback{ std::move(errorCallback) },
-        _readBuffer{} {
+        _readBuffer{}
+	{
             auto cb = [this](uint8_t* bufPtr, size_t len, std::function<void(size_t)>&&handler) {
 				auto myHandler = move(handler);
                 auto boostHandler = [this, myHandler](const boost::system::error_code& ec,
@@ -45,16 +46,17 @@ namespace HelloAsio
             _readBuffer = std::move(bufWithCb);
     }
 
-	void UdpListener::AsyncWrite(std::string&& msg, bool nullTerminate) {
+	void UdpListener::AsyncWrite(std::string&& msg, bool nullTerminate)
+	{
         auto hack = std::move(msg);
         auto bufWrapper = std::make_shared<IoBufferWrapper>(hack, nullTerminate);
         
         // Boost documentation says that for each stream only one async write can be outstanding at a time.
         // So we queue rather than launch straight away.
         std::lock_guard<std::mutex> guard(Mutex);
-        OutQueue.push_back(bufWrapper);
+        mOutQueue.push_back(bufWrapper);
         
-        if (OutQueue.size() > 1) {
+        if (mOutQueue.size() > 1) {
             // We have the lock, so if the queue has more than one, then a chained launch is guaranteed.
             return;
         }
@@ -63,11 +65,13 @@ namespace HelloAsio
     }
 
     
-	void UdpListener::BeginChainedRead(IoNotifyAvailableCallback&& available, int datagramSize) {
+	void UdpListener::BeginChainedRead(IoNotifyAvailableCallback&& available, int datagramSize)
+	{
         _readBuffer.BeginChainedRead(std::move(available), datagramSize);
     }
 
-    void UdpListener::LaunchWrite() {
+    void UdpListener::LaunchWrite()
+	{
         
         // Boost buffer does not hang on to data, so we bind a shared pointer to buffer wrapper to the callback,
         // to ensure that the buffer lasts the lifetime of the async completion.
@@ -87,17 +91,27 @@ namespace HelloAsio
 		*/
 	}
     
-    void UdpListener::CopyTo(std::vector<uint8_t>& dest, int len) {
+    void UdpListener::CopyTo(std::vector<uint8_t>& dest, int len)
+	{
         _readBuffer.CopyTo(dest, len);
     }
+
+	void UdpListener::StopListening()
+	{
+		// FIX ME if we close the socket, the error handler is called and removes the listener. This is good, but there may be thread contention for the listener map.
+
+		//_readBuffer.EndReadSome();
+		PeerSocket.close();
+	}
     
     void UdpListener::WriteHandler(
                                          std::shared_ptr<UdpListener> conn,
                                          std::shared_ptr<IoBufferWrapper> bufWrapper,
                                          boost::system::error_code ec,
-                                         std::size_t written) {
-        
-        if (written != bufWrapper->Buffer.size()) {
+                                         std::size_t written)
+	{        
+        if (written != bufWrapper->Buffer.size())
+		{
             std::cerr << "Incomplete write, buffer: " << bufWrapper->Buffer.size() << " written: " << written << std::endl;
             conn->PeerSocket.close();
             _errorCallback(conn, ec);
@@ -106,11 +120,12 @@ namespace HelloAsio
         
         // Discard processed message.
         std::lock_guard<std::mutex> guard(Mutex);
-        OutQueue.pop_front();
+        mOutQueue.pop_front();
         
         // If there are no more queued messages then nothing more to do, otherwise chain another async write onto
         // the next message in the queue.
-        if (OutQueue.size() == 0) {
+        if (mOutQueue.size() == 0)
+		{
             return;
         }
         

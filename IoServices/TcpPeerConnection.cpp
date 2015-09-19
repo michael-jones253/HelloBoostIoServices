@@ -1,24 +1,25 @@
 //
 //  TcpConnection.cpp
-//  HelloAsio
+//  AsyncIo
 //
 //  Created by Michael Jones on 29/07/2015.
-//  Copyright (c) 2015 Michael Jones. All rights reserved.
+//  https://github.com/michael-jones253/HelloBoostIoServices
 //
 #include "stdafx.h"
 
 #include "TcpPeerConnection.h"
 #include <iostream>
 
-namespace HelloAsio
+namespace AsyncIo
 {
-    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService, HelloAsio::ErrorCallback&& errorCallback) :
+    TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService, AsyncIo::ErrorCallback&& errorCallback) :
         PeerSocket{*ioService},
         PeerEndPoint{},
         Mutex{},
-        OutQueue{},
+        mOutQueue{},
 		_errorCallback{ std::move(errorCallback) },
-        _readBuffer{} {
+        _readBuffer{}
+	{
             auto cb = [this](uint8_t* bufPtr, size_t len, std::function<void(size_t)>&&handler) {
 				auto myHandler = move(handler);
                 auto boostHandler = [this, myHandler](const boost::system::error_code& ec,
@@ -35,7 +36,6 @@ namespace HelloAsio
                 };
 
                 // Unless buffer is created with a mutable pointer the boost buffer will not be mutable.
-                // FIX ME auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(_readBuffer.Get()), len);
 				auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(bufPtr), len);
 				boost::asio::async_read(PeerSocket, boostBuf, boost::asio::transfer_at_least(1), std::move(boostHandler));
 
@@ -45,16 +45,17 @@ namespace HelloAsio
             _readBuffer = std::move(bufWithCb);
     }
 
-	void TcpPeerConnection::AsyncWrite(std::string&& msg, bool nullTerminate) {
+	void TcpPeerConnection::AsyncWrite(std::string&& msg, bool nullTerminate)
+	{
         auto hack = std::move(msg);
         auto bufWrapper = std::make_shared<IoBufferWrapper>(hack, nullTerminate);
         
         // Boost documentation says that for each stream only one async write can be outstanding at a time.
         // So we queue rather than launch straight away.
         std::lock_guard<std::mutex> guard(Mutex);
-        OutQueue.push_back(bufWrapper);
+        mOutQueue.push_back(bufWrapper);
         
-        if (OutQueue.size() > 1) {
+        if (mOutQueue.size() > 1) {
             // We have the lock, so if the queue has more than one, then a chained launch is guaranteed.
             return;
         }
@@ -73,7 +74,8 @@ namespace HelloAsio
 	}
 
     
-	void TcpPeerConnection::BeginChainedRead(IoNotifyAvailableCallback&& available, int chunkSize) {
+	void TcpPeerConnection::BeginChainedRead(IoNotifyAvailableCallback&& available, int chunkSize)
+	{
         _readBuffer.BeginChainedRead(std::move(available), chunkSize);
     }
 
@@ -87,14 +89,15 @@ namespace HelloAsio
                                  &TcpPeerConnection::WriteHandler,
                                  this,
                                  shared_from_this(),
-                                 OutQueue.front(),
+                                 mOutQueue.front(),
                                  std::placeholders::_1,
                                  std::placeholders::_2);
         
-        boost::asio::async_write(PeerSocket, boost::asio::buffer(OutQueue.front()->Buffer), std::move(handler));
+        boost::asio::async_write(PeerSocket, boost::asio::buffer(mOutQueue.front()->Buffer), std::move(handler));
     }
     
-    void TcpPeerConnection::CopyTo(std::vector<uint8_t>& dest, int len) {
+    void TcpPeerConnection::CopyTo(std::vector<uint8_t>& dest, int len)
+	{
         _readBuffer.CopyTo(dest, len);
     }
     
@@ -113,9 +116,11 @@ namespace HelloAsio
                                          std::shared_ptr<TcpPeerConnection> conn,
                                          std::shared_ptr<IoBufferWrapper> bufWrapper,
                                          boost::system::error_code ec,
-                                         std::size_t written) {
+                                         std::size_t written)
+	{
         
-        if (written != bufWrapper->Buffer.size()) {
+        if (written != bufWrapper->Buffer.size())
+		{
             std::cerr << "Incomplete write, buffer: " << bufWrapper->Buffer.size() << " written: " << written << std::endl;
             conn->PeerSocket.close();
             _errorCallback(conn, ec);
@@ -124,11 +129,12 @@ namespace HelloAsio
         
         // Discard processed message.
         std::lock_guard<std::mutex> guard(Mutex);
-        OutQueue.pop_front();
+        mOutQueue.pop_front();
         
         // If there are no more queued messages then nothing more to do, otherwise chain another async write onto
         // the next message in the queue.
-        if (OutQueue.size() == 0) {
+        if (mOutQueue.size() == 0)
+		{
             return;
         }
         
