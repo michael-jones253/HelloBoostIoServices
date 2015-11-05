@@ -20,6 +20,7 @@
 #include <deque>
 #include <boost/asio.hpp>
 #include <vector>
+
 #if defined(__GNUC__)
 /* The classes below are exported */
 #pragma GCC visibility push(default)
@@ -38,9 +39,9 @@ namespace AsyncIo {
 
     class TcpPeerConnection final : public std::enable_shared_from_this<TcpPeerConnection> {
     private:
-        std::mutex Mutex;
+        std::mutex _mutex;
         std::deque<std::shared_ptr<IoBufferWrapper>> mOutQueue;
-        const ErrorCallback _errorCallback;
+        ErrorCallback _errorCallback;
 		ConnectCallback _connectCallback;
         IoCircularBuffer _readBuffer;
         
@@ -53,11 +54,17 @@ namespace AsyncIo {
 			std::cout << "Closing TCP peer connection: " << PeerEndPoint << std::endl;
 		}
         
-        void AsyncWrite(std::string&& msg, bool nullTerminate);
+		// NB returns backlog.
+        int AsyncWrite(std::string&& msg, bool nullTerminate);
+
+		// NB returns backlog.
+		int AsyncWrite(std::vector<uint8_t>&& msg);
 
 		void AsyncConnect(ConnectCallback&& connectCb, std::string ipAddress, int port);
         
-        void BeginChainedRead(IoNotifyAvailableCallback&& available, int chunkSize);
+		void BeginChainedRead(IoNotifyAvailableCallback&& available,
+			AsyncIo::ErrorCallback&& errorCallback,
+			int chunkSize);
         
         boost::asio::ip::tcp::socket& GetPeerSocket() { return PeerSocket; }
         

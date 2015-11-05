@@ -34,6 +34,29 @@ namespace AsyncIo {
 	}
 
 	/// <summary>
+	/// Only needed if writing. Once connected to the destination address all async writes go to this address.
+	/// </summary>
+	/// <param name="connectCb">The connect callback - if unsuccesful the error callback supplied for the bind will be called.</param>
+	/// <param name="destIp">The destination ip in dot notation form.</param>
+	/// <param name="port">Int the destination UDP port.</param>
+	void DgramListener::Connect(DgramConnectCallback&& connectCb, const std::string& destIp, int port)
+	{
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		auto connectCbCopy = move(connectCb);
+		auto handler = [this, connectCbCopy]() {
+			connectCbCopy(shared_from_this());
+		};
+
+		auto boostIp = boost::asio::ip::address::from_string(destIp);
+		listener->AsyncConnect(boostIp, port, move(handler));
+	}
+
+	/// <summary>
 	/// Asynchronous write of a string message.
 	/// NB if the length of the message is greater than MTU it will be split across datagrams.
 	/// </summary>
@@ -48,6 +71,22 @@ namespace AsyncIo {
 		}
 
 		listener->AsyncWrite(std::move(msg), nullTerminate);
+	}
+
+	/// <summary>
+	/// Asynchronous write of a string message.
+	/// NB if the length of the message is greater than MTU it will be split across datagrams.
+	/// </summary>
+	/// <param name="msg">The byte vector message to send.</param>
+	void DgramListener::AsyncWrite(std::vector<uint8_t>&& msg)
+	{
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		listener->AsyncWrite(std::move(msg));
 	}
 
 	/// <summary>
@@ -157,5 +196,13 @@ namespace AsyncIo {
 		return ep;
 	}
 
+	/// <summary>
+	/// Checks whether the listener is valid or not.
+	/// </summary>
+	/// <returns>True for whether the listener is valid, false otherwise.</returns>
+	bool DgramListener::IsValid() const
+	{
+		return !_udpListener.expired();
+	}
 
 }

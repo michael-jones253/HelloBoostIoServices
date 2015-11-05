@@ -9,6 +9,7 @@
 #ifndef __HelloAsio__TcpServer__
 #define __HelloAsio__TcpServer__
 
+#include "StreamConnection.h"
 #include "TcpPeerConnection.h"
 
 #include <boost/asio.hpp>
@@ -29,12 +30,14 @@ namespace AsyncIo
     class TcpServer final
 	{
     private:
-        boost::asio::io_service* _ioService;
-        std::mutex _mutex;
-        int _port;
-        std::unique_ptr<boost::asio::ip::tcp::acceptor> _acceptor;
-        std::vector<std::shared_ptr<TcpPeerConnection>> _peerConnections;
-        ReadSomeCallback _readSomeCb;
+		boost::asio::io_service* _ioService{};
+		std::mutex _mutex{};
+		int _port{};
+		std::unique_ptr<boost::asio::ip::tcp::acceptor> _acceptor{};
+		std::vector<std::shared_ptr<TcpPeerConnection>> _peerConnections{};
+		AcceptStreamCallback _acceptStreamCb{};
+		ReadStreamCallback _readSomeCb{};
+		
     public:
 		TcpServer() = delete;
 
@@ -44,9 +47,9 @@ namespace AsyncIo
 		/// </summary>
 		/// <param name="ioService">The boost IO service.</param>
 		/// <param name="port">The port to listen on.</param>
+		/// <param name="acceptsStream">Client connection accepted callback.</param>
 		/// <param name="readSomeCb">Client read some data callback.</param>
-
-		TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb);
+		TcpServer(boost::asio::io_service* ioService, int port, AcceptStreamCallback&& acceptsStream, ReadStreamCallback&& readSomeCb);
         TcpServer(TcpServer&& rhs);
 		TcpServer& operator=(TcpServer&& rhs);
 		TcpServer(const TcpServer&) = delete;

@@ -7,6 +7,8 @@
 //
 
 #include "IoServices.h"
+#include "TestPeriodicTimer.h"
+#include "TestTimer.h"
 #include <iostream>
 #include <thread>
 #include <chrono>
@@ -15,6 +17,7 @@
 #include <assert.h>
 
 using namespace AsyncIo;
+using namespace TestAsyncIo;
 using namespace std;
 using namespace std::this_thread;
 using namespace std::chrono;
@@ -23,15 +26,23 @@ using namespace std::chrono;
 int main(int argc, const char * argv[]) {
     // insert code here...
     
-    IoServices servicesInstance{};
+    auto errLogger = [](const std::string& msg, const std::exception&) {
+        
+    };
+
+    IoServices servicesInstance{ move(errLogger) };
     
     servicesInstance.Start();
     
     // servicesInstance.RunTcpServer(23);
     
+    auto errLogger2 = [](const std::string& msg, const std::exception&) {
+        
+    };
+
     // MJ Unless I make another wrapped instance of io_service, then the thread group
     // blocks the timers. Running timers from a second instance overcomes this.
-    IoServices secondInstance{};
+    IoServices secondInstance{ move(errLogger2) };
     
     secondInstance.Start();
     
@@ -57,8 +68,12 @@ int main(int argc, const char * argv[]) {
             cout << "MSG: " << msgFromBuf << endl;
         }
     };
+    
+    auto clientConnected = [](shared_ptr<StreamConnection> conn) {
+        
+    };
 
-    secondInstance.AddTcpServer(23, move(readStream));
+    secondInstance.AddTcpServer(23, move(clientConnected), move(readStream));
     secondInstance.StartTcpServer(23);
     mutex workMutex{};
     
@@ -68,12 +83,12 @@ int main(int argc, const char * argv[]) {
     int secondaryCount{};
     
     auto timeout = [&](PeriodicTimer id) {
-        switch (id) {
-            case PeriodicTimer::General:
+        switch (id.Id) {
+            case static_cast<int>(TestPeriodicTimer::General):
                 generalCount++;
                 break;
                 
-            case PeriodicTimer::Secondary:
+            case static_cast<int>(TestPeriodicTimer::Secondary):
                 secondaryCount++;
                 break;
                 
@@ -84,8 +99,8 @@ int main(int argc, const char * argv[]) {
         cout << "Hello Timeout id: " << id << endl;
     };
     
-    secondInstance.SetPeriodicTimer(PeriodicTimer::General, seconds(1), timeout);
-    secondInstance.SetPeriodicTimer(PeriodicTimer::Secondary, seconds(2), timeout);
+    secondInstance.SetPeriodicTimer(ToId(TestPeriodicTimer::General), seconds(1), timeout);
+    secondInstance.SetPeriodicTimer(ToId(TestPeriodicTimer::Secondary), seconds(2), timeout);
     
     {
         // Test scope of work outliving this block.

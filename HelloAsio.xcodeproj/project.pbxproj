@@ -98,6 +98,8 @@
 		B22AA07A1BA3B158006E58F5 /* IoServices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoServices.cpp; sourceTree = "<group>"; };
 		B22AA07C1BA3B19D006E58F5 /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdafx.h; sourceTree = "<group>"; };
 		B22AA07D1BA3B19D006E58F5 /* targetver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = targetver.h; sourceTree = "<group>"; };
+		B238F8311BEB53E60091DEBE /* TestPeriodicTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestPeriodicTimer.h; sourceTree = "<group>"; };
+		B238F8321BEB53E60091DEBE /* TestTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestTimer.h; sourceTree = "<group>"; };
 		B26B48121B64583E009262A4 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = ../../../../../../opt/local/lib/libboost_system.dylib; sourceTree = "<group>"; };
 		B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamConnection.cpp; sourceTree = "<group>"; };
 		B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamConnection.h; sourceTree = "<group>"; };
@@ -189,6 +191,8 @@
 		B2AADA8C1B64455C00688FC5 /* HelloAsio */ = {
 			isa = PBXGroup;
 			children = (
+				B238F8311BEB53E60091DEBE /* TestPeriodicTimer.h */,
+				B238F8321BEB53E60091DEBE /* TestTimer.h */,
 				B2AADA8D1B64455C00688FC5 /* main.cpp */,
 			);
 			path = HelloAsio;

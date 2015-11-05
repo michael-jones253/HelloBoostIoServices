@@ -14,12 +14,13 @@ using namespace boost::asio::ip;
 
 namespace AsyncIo
 {
-	UdpListener::UdpListener(boost::asio::io_service* ioService, AsyncIo::UdpErrorCallback&& errorCallback, int port) :
-		PeerSocket{ *ioService, udp::endpoint(udp::v4(), static_cast<unsigned short>(port)) },
+	UdpListener::UdpListener(boost::asio::io_service* ioService, const boost::asio::ip::address& address, int port) :
+		PeerSocket{ *ioService, udp::endpoint(address, static_cast<unsigned short>(port)) },
         PeerEndPoint{},
         Mutex{},
         mOutQueue{},
-		_errorCallback{ std::move(errorCallback) },
+		_errorCallback{},
+		_connectCallback{},
         _readBuffer{}
 	{
             auto cb = [this](uint8_t* bufPtr, size_t len, std::function<void(size_t)>&&handler) {
@@ -46,27 +47,37 @@ namespace AsyncIo
             _readBuffer = std::move(bufWithCb);
     }
 
+	// For already bound listeners.
+	void UdpListener::AsyncConnect(const boost::asio::ip::address& destIp, int port, std::function<void()>&& connectHandler) {
+		assert(_errorCallback != nullptr);
+		_connectCallback = move(connectHandler);
+
+		auto handler = std::bind(
+			&UdpListener::ConnectHandler,
+			this,
+			shared_from_this(),
+			std::placeholders::_1);
+		
+		PeerSocket.async_connect(udp::endpoint(destIp, static_cast<unsigned short>(port)), handler);
+	}
+
 	void UdpListener::AsyncWrite(std::string&& msg, bool nullTerminate)
 	{
-        auto hack = std::move(msg);
-        auto bufWrapper = std::make_shared<IoBufferWrapper>(hack, nullTerminate);
-        
-        // Boost documentation says that for each stream only one async write can be outstanding at a time.
-        // So we queue rather than launch straight away.
-        std::lock_guard<std::mutex> guard(Mutex);
-        mOutQueue.push_back(bufWrapper);
-        
-        if (mOutQueue.size() > 1) {
-            // We have the lock, so if the queue has more than one, then a chained launch is guaranteed.
-            return;
-        }
-        
-        LaunchWrite();
-    }
+		auto bufWrapper = std::make_shared<IoBufferWrapper>(std::move(msg), nullTerminate);
 
-    
-	void UdpListener::BeginChainedRead(IoNotifyAvailableCallback&& available, int datagramSize)
+		QueueOrWriteBuffer(bufWrapper);
+	}
+
+	void UdpListener::AsyncWrite(std::vector<uint8_t>&& msg)
 	{
+		auto bufWrapper = std::make_shared<IoBufferWrapper>(move(msg));
+
+		QueueOrWriteBuffer(bufWrapper);
+	}
+    
+	void UdpListener::BeginChainedRead(IoNotifyAvailableCallback&& available, AsyncIo::UdpErrorCallback&& errCb, int datagramSize)
+	{
+		_errorCallback = std::move(errCb);
         _readBuffer.BeginChainedRead(std::move(available), datagramSize);
     }
 
@@ -77,18 +88,15 @@ namespace AsyncIo
         // to ensure that the buffer lasts the lifetime of the async completion.
         // MJ update - this isn't really needed now, except under a shutdown situation where the queue gets cleared
         // and there is an async operation outstanding.
-		/*
-		FIX ME for UDP
         auto handler = std::bind(
                                  &UdpListener::WriteHandler,
                                  this,
                                  shared_from_this(),
-                                 OutQueue.front(),
+                                 mOutQueue.front(),
                                  std::placeholders::_1,
                                  std::placeholders::_2);
         
-        boost::asio::async_write(PeerSocket, boost::asio::buffer(OutQueue.front()->Buffer), std::move(handler));
-		*/
+       PeerSocket.async_send(mOutQueue.front()->ToBoost(), std::move(handler));
 	}
     
     void UdpListener::CopyTo(std::vector<uint8_t>& dest, int len)
@@ -104,15 +112,26 @@ namespace AsyncIo
 		PeerSocket.close();
 	}
     
+	// For already bound listeners.
+	void UdpListener::ConnectHandler(std::shared_ptr<UdpListener> conn, boost::system::error_code ec)
+	{
+		if (ec != 0) {
+			_errorCallback(conn, ec);
+		}
+		else {
+			_connectCallback();
+		}
+	}
+
     void UdpListener::WriteHandler(
                                          std::shared_ptr<UdpListener> conn,
                                          std::shared_ptr<IoBufferWrapper> bufWrapper,
                                          boost::system::error_code ec,
                                          std::size_t written)
 	{        
-        if (written != bufWrapper->Buffer.size())
+        if (written != bufWrapper->BoostSize())
 		{
-            std::cerr << "Incomplete write, buffer: " << bufWrapper->Buffer.size() << " written: " << written << std::endl;
+            std::cerr << "Incomplete write, buffer: " << bufWrapper->BoostSize() << " written: " << written << std::endl;
             conn->PeerSocket.close();
             _errorCallback(conn, ec);
             return;
@@ -132,5 +151,20 @@ namespace AsyncIo
         // Chain another async write onto for the next message in the queue.
         LaunchWrite();
     }
+
+	void UdpListener::QueueOrWriteBuffer(std::shared_ptr<IoBufferWrapper> bufWrapper)
+	{
+		// Boost documentation says that for each stream only one async write can be outstanding at a time.
+		// So we queue rather than launch straight away.
+		std::lock_guard<std::mutex> guard(Mutex);
+		mOutQueue.push_back(bufWrapper);
+
+		if (mOutQueue.size() > 1) {
+			// We have the lock, so if the queue has more than one, then a chained launch is guaranteed.
+			return;
+		}
+
+		LaunchWrite();
+	}
 
 }

@@ -19,7 +19,9 @@ namespace AsyncIo
 	class UdpListener;
 	class DgramListener;
 
-	using DgramErrorCallback = std::function<void(const std::string& msg)>;
+	using DgramErrorCallback = std::function<void(std::shared_ptr<DgramListener> listener, const std::string& msg)>;
+
+	using DgramConnectCallback = std::function<void(std::shared_ptr<DgramListener> listener)>;
 
 	using DgramReceiveCallback = std::function<void(std::shared_ptr<DgramListener>, int bytesAvailable)>;
 
@@ -58,6 +60,14 @@ namespace AsyncIo
 		~DgramListener();
 
 		/// <summary>
+		/// Only needed if writing. Once connected to the destination address all async writes go to this address.
+		/// </summary>
+		/// <param name="connectCb">The connect callback - if unsuccesful the error callback supplied for the bind will be called.</param>
+		/// <param name="destIp">The destination ip in dot notation form.</param>
+		/// <param name="port">Int the destination UDP port.</param>
+		void Connect(DgramConnectCallback&& connectCb, const std::string& destIp, int port);
+
+		/// <summary>
 		/// Asynchronous write of a string message.
 		/// NB if the length of the message is greater than MTU it will be split across datagrams.
 		/// </summary>
@@ -66,6 +76,13 @@ namespace AsyncIo
 		void AsyncWrite(std::string&& msg, bool nullTerminate);
 
 		/// <summary>
+		/// Asynchronous write of a string message.
+		/// NB if the length of the message is greater than MTU it will be split across datagrams.
+		/// </summary>
+		/// <param name="msg">The byte vector message to send.</param>
+		void AsyncWrite(std::vector<uint8_t>&& msg);
+
+		/// 		/// <summary>
 		/// Consume from the start of the circular buffer and copy to the destination buffer.
 		/// </summary>
 		/// <param name="buf">The destination buffer.</param>
@@ -99,6 +116,12 @@ namespace AsyncIo
 		void StopListening();
 
 		IoEndPoint GetPeerEndPoint() const;
+
+		/// <summary>
+		/// Checks whether the listener is valid or not.
+		/// </summary>
+		/// <returns>True for whether the listener is valid, false otherwise.</returns>
+		bool IsValid() const;
 	};
 }
 #if defined(__GNUC__)

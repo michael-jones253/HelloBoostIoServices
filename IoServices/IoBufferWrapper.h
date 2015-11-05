@@ -9,6 +9,8 @@
 #ifndef __HelloAsio__IoBufferWrapper__
 #define __HelloAsio__IoBufferWrapper__
 
+#include <boost/asio/buffer.hpp>
+
 #include <string>
 #include <vector>
 #include <cstdint>
@@ -23,16 +25,23 @@ namespace AsyncIo
 	/// <summary>
 	/// Convenience wrapper for constructing a message to send.
 	/// </summary>
-    struct IoBufferWrapper
+    class IoBufferWrapper
 	{
-        std::vector<uint8_t> Buffer;
+	private:
+		std::vector<uint8_t> Buffer{};
+		std::string StringBuffer{};
+		bool NullTerminate{};
         
+	public:
         IoBufferWrapper(const std::string& msg, bool nullTerminate);
+		IoBufferWrapper(std::string&& msg, bool nullTerminate);
         IoBufferWrapper(std::vector<uint8_t>&& rhs);
         
         IoBufferWrapper(IoBufferWrapper&& rhs);
         IoBufferWrapper& operator=(AsyncIo::IoBufferWrapper&& rhs);
 
+		boost::asio::const_buffers_1 ToBoost();
+		size_t BoostSize() const;
     };
 }
 

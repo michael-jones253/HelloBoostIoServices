@@ -18,22 +18,30 @@ using namespace boost::asio;
 
 namespace AsyncIo {
     
-    IoServicesImpl::IoServicesImpl()
-	 {
-        for (Timer t{}; t < Timer::End; ++t) {
-            _oneShotTimers.emplace(
-                                   std::piecewise_construct,
-                                   std::forward_as_tuple(t),
-                                   std::forward_as_tuple(std::ref(_ioService)));
-        }
+	IoServicesImpl::IoServicesImpl(IoExceptionCallback&& ioExceptionCb) :
+		_exceptionNotifier{ std::move(ioExceptionCb) }
+	{
 
-        for (PeriodicTimer t{}; t < PeriodicTimer::End; ++t) {
-            _periodicTimers.emplace(
-                                   std::piecewise_construct,
-                                   std::forward_as_tuple(t),
-                                   std::forward_as_tuple(std::ref(_ioService)));
-        }
-    }
+	}
+
+
+	void IoServicesImpl::InitialisePeriodicTimer(int id, const::std::string& name) {
+		auto key = PeriodicTimer{ id, name };
+		_periodicTimers.emplace(
+			std::piecewise_construct,
+			std::forward_as_tuple(key),
+			std::forward_as_tuple(std::ref(_ioService)));
+	}
+
+	void IoServicesImpl::InitialiseOneShotTimer(int id, const::std::string& name) {
+		auto key = Timer{id, name};
+		_oneShotTimers.emplace(
+			std::piecewise_construct,
+			std::forward_as_tuple(key),
+			std::forward_as_tuple(std::ref(_ioService)));
+
+	}
+
     
     IoServicesImpl::~IoServicesImpl() {
 		try
@@ -42,8 +50,7 @@ namespace AsyncIo {
 		}
 		catch (const std::exception& ex)
 		{
-			// FIX ME log this.
-			std::cout << "Exception stopping IO service: " << ex.what() << std::endl;
+			_exceptionNotifier("Exception stopping IO service: ", ex);
 		}
     }
     
@@ -72,7 +79,7 @@ namespace AsyncIo {
 		return res;
     }
     
-    void IoServicesImpl::AddTcpServer(int port, ReadSomeCallback&& readSome) {
+	void IoServicesImpl::AddTcpServer(int port, AcceptStreamCallback&& acceptsStream, ReadStreamCallback&& readSome) {
         auto predicate = [this,port](const TcpServer& it) {
             return it.GetPort() == port;
         };
@@ -82,7 +89,7 @@ namespace AsyncIo {
             throw std::runtime_error("Server already on port");
         }
         
-        _tcpServers.emplace_back(&_ioService, port, std::move(readSome));        
+        _tcpServers.emplace_back(&_ioService, port, std::move(acceptsStream), std::move(readSome));        
     }
 
 	void IoServicesImpl::StartTcpServer(int port)
@@ -125,9 +132,8 @@ namespace AsyncIo {
 		// All access is from the context of the IO service so should not need mutexing.
 		if (_clientConnections.find(conn) == _clientConnections.end())
 		{
-			// FIX ME log this.
-			std::cout << "Connection not found:" << conn->PeerEndPoint << std::endl;
-			return;
+			// Not expecting this to happen, but if it does the main loop will catch it and log.
+			throw std::runtime_error("Connection not found");
 		}
 
 		_clientConnections.erase(conn);
@@ -137,9 +143,8 @@ namespace AsyncIo {
 		std::lock_guard<std::mutex> listenerGuard(_mutex);
 		if (_listeners.find(listener) == _listeners.end())
 		{
-			// FIX ME log this.
-			std::cout << "Listener not found: " << listener->PeerEndPoint << std::endl;
-			return;
+			// Not expecting this to happen, but if it does the main loop will catch it and log.
+			throw std::runtime_error("Listener not found");
 		}
 
 		_listeners.erase(listener);
@@ -152,18 +157,11 @@ namespace AsyncIo {
 		}
     }
     
-	std::shared_ptr<UdpListener> IoServicesImpl::BindDgramListener(UdpErrorCallback&& errCb, std::string ipAddress, int port) {
+	std::shared_ptr<UdpListener> IoServicesImpl::BindDgramListener(std::string ipAddress, int port) {
+		// Bind to specific ip interface address for receiving on that interface only.
+		boost::asio::ip::address boostAddress = boost::asio::ip::address::from_string(ipAddress);
 
-		auto errHandler = [this, errCb](std::shared_ptr<UdpListener> listener, const boost::system::error_code& ec) {
-			// Call the application error handler first.
-			errCb(listener, ec);
-
-			// Then call our cleanup handler.
-			ErrorHandler(listener, ec);
-		};
-
-		// FIX ME bind to ip address too.
-		auto listener = std::make_shared<UdpListener>(&_ioService, std::move(errHandler), port);
+		auto listener = std::make_shared<UdpListener>(&_ioService, boostAddress, port);
 		std::lock_guard<std::mutex> listenerGuard(_mutex);
 		_listeners[listener] = listener;
 
@@ -198,8 +196,7 @@ namespace AsyncIo {
 			}
 			catch (const std::exception& ex)
 			{
-				// FIX ME log this.
-				std::cout << "Exception in IO service: " << ex.what() << std::endl;
+				_exceptionNotifier("Exception in IO service: ", ex);
 			}
 		}
 
@@ -220,8 +217,8 @@ namespace AsyncIo {
                 --_freeWorkerCount;
                 work();
             } catch (const std::exception& ex) {
-                std::cerr << "Exception in work: " << ex.what() << std::endl;
-            }
+				_exceptionNotifier("Exception in work: ", ex);
+			}
             
             _freeWorkerCount++;
         };
@@ -235,8 +232,16 @@ namespace AsyncIo {
                                           boost::posix_time::time_duration durationFromNow,
                                           const std::function<void(PeriodicTimer id)>& handler) {
         auto resetHandler = [this, id, durationFromNow, handler](boost::system::error_code ec) {
-            handler(id);
-            this->SetPeriodicTimer(id, durationFromNow, handler);
+			if (ec == boost::asio::error::operation_aborted)
+			{
+				// User cancelled.
+				return;
+			}
+
+			// Chain the next periodic timeout.
+			this->SetPeriodicTimer(id, durationFromNow, handler);
+
+			handler(id);
         };
         
         auto timer = _periodicTimers.find(id);
@@ -246,6 +251,13 @@ namespace AsyncIo {
         }
     }
 
+	void IoServicesImpl::CancelPeriodicTimer(PeriodicTimer id) {
+		auto timer = _periodicTimers.find(id);
+		// Review: throw if not found.
+		if (timer != _periodicTimers.end()) {
+			timer->second.cancel();
+		}
+	}
     
     void IoServicesImpl::AddWorker() {
         auto work = std::bind(&IoServicesImpl::WorkerThread, this, std::ref(_ioService) );

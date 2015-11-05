@@ -10,12 +10,12 @@ using namespace std::chrono;
 namespace
 {
 	const int ReadSomeChunkSize = 12;
-	const int DatagramMtu = 1470;
+	const int DatagramMtu = 65535;
 }
 
 namespace AsyncIo
 {
-	IoServices::IoServices() : _impl(std::make_unique<IoServicesImpl>())
+	IoServices::IoServices(IoExceptionCallback&& exceptionCb) : _impl(std::make_unique<IoServicesImpl>(move(exceptionCb)))
 	{
 	}
 
@@ -42,21 +42,43 @@ namespace AsyncIo
 	}
 
 	/// <summary>
+	/// Stops the IO services.
+	/// NB This blocks.
+	void IoServices::Stop()
+	{
+		_impl->Stop();
+	}
+
+	/// <summary>
+	/// Initialise a periodic timer.
+	/// </summary>
+	/// <param name="id">The unique periodic timer id.</param>
+	void IoServices::InitialisePeriodicTimer(const PeriodicTimer& id)
+	{
+		_impl->InitialisePeriodicTimer(id.Id, id.Name);
+	}
+
+	/// <summary>
+	/// Initialise a one shot timer timer.
+	/// </summary>
+	/// <param name="id">The unique timer id.</param>
+	/// <param name="name">The name for logging.</param>
+	void IoServices::InitialiseOneShotTimer(const Timer& id)
+	{
+		_impl->InitialiseOneShotTimer(id.Id, id.Name);
+	}
+
+
+	/// <summary>
 	/// Add a TCP server to listen on the specified port.
 	/// </summary>
 	/// <param name="port">The port to listen on.</param>
+	/// <param name="acceptsStream">Client connection accepted callback.</param>
 	/// <param name="readStream">Client connection data received callback.</param>
-	void IoServices::AddTcpServer(int port, ReadStreamCallback&& readStream)
+	void IoServices::AddTcpServer(int port, AcceptStreamCallback&& acceptsStream, ReadStreamCallback&& readStream)
 	{
 		// take a copy to bind it to each server's read stream callback.
-		auto serverReadStream = move(readStream);
-		auto readSome = [this, serverReadStream](std::shared_ptr<TcpPeerConnection> peerConn, std::size_t bytesRead) {
-			// Call the application with the opaque connection wrapper and the amount of bytes read.
-			auto streamConnection = make_shared<StreamConnection>(peerConn, false /* not client side */);
-			serverReadStream(streamConnection, bytesRead);
-		};
-
-		_impl->AddTcpServer(port, std::move(readSome));
+		_impl->AddTcpServer(port, std::move(acceptsStream), std::move(readStream));
 	}
 
 	/// <summary>
@@ -74,8 +96,9 @@ namespace AsyncIo
 	/// </summary>
 	/// <param name="connectCb">Connect stream callback passed in by value to get a copy.</param>
 	/// <param name="readCb">Read stream callback passed in by value to get a copy.</param>
+	/// <param name="errCb">Stream error callback passed in by value to get a copy.</param>
 	/// <param name="peerConn">The peer connection generated during the connection.</param>
-	void ConnectHandler(ConnectStreamCallback connectCb, ReadStreamCallback readCb, std::shared_ptr<TcpPeerConnection> peerConn)
+	void ConnectHandler(ConnectStreamCallback connectCb, ReadStreamCallback readCb, StreamIoErrorCallback errCb, std::shared_ptr<TcpPeerConnection> peerConn)
 	{
 		auto streamConnection = make_shared<StreamConnection>(peerConn, true /* is client side */);
 
@@ -85,16 +108,29 @@ namespace AsyncIo
 		// The weak pointer can be used to give a guaranteed handle to the parent stream connection and avoid circular ownership
 		// destruction problems.
 		auto weakStreamConn = weak_ptr<StreamConnection>(streamConnection);
-		auto available = [weakStreamConn, readCb](size_t available) {
-			// std::cout << "Client side GOT STUFF!!!!!: " << streamConnection->GetPeerEndPoint() << available << std::endl;
+		auto available = [weakStreamConn, readCb, peerConn](size_t available) {
 			auto lockedConn = weakStreamConn.lock();
 			if (lockedConn)
 			{
 				readCb(lockedConn, available);
 			}
+			else
+			{
+				// If this happens examine the application code for any destruction order design issues.
+				std::cout << "Client side received data with no handler available: " << peerConn->PeerEndPoint << available << std::endl;
+			}
 		};
 
-		peerConn->BeginChainedRead(std::move(available), ReadSomeChunkSize);
+		auto errorHandler = [weakStreamConn, errCb](std::shared_ptr<TcpPeerConnection> conn, const boost::system::error_code& ec) {
+			stringstream errStr;
+			errStr << "Stream connection error: " << ec.message();
+
+			// NB this may be null, caller of connect must test for this in error callback.
+			auto lockedConn = weakStreamConn.lock();
+			errCb(lockedConn, errStr.str());
+		};
+
+		peerConn->BeginChainedRead(std::move(available), std::move(errorHandler), ReadSomeChunkSize);
 
 		connectCb(streamConnection);
 	}
@@ -104,18 +140,18 @@ namespace AsyncIo
 	/// </summary>
 	/// <param name="connectCb">The connected callback.</param>
 	/// <param name="readCb">Asynchronous data read callback.</param>
-	/// <param name="errCb">Error callback if socket errors encountered.</param>
+	/// <param name="connErrCb">Error callback if socket connect errors encountered.</param>
+	/// <param name="ioErrCb">Error callback if socket I/O errors encountered.</param>
 	/// <param name="ipAddress">The destination IP.</param>
 	/// <param name="port">The destination port.</param>
-	void IoServices::AsyncConnect(ConnectStreamCallback&& connectCb, ReadStreamCallback&& readCb, StreamErrorCallback&& errCb, std::string ipAddress, int port)
+	void IoServices::AsyncConnect(ConnectStreamCallback&& connectCb, ReadStreamCallback&& readCb, StreamConnectionErrorCallback&& connErrCb, StreamIoErrorCallback&& ioErrCb, std::string ipAddress, int port)
 	{
-		auto connect = bind(ConnectHandler, std::move(connectCb), std::move(readCb), std::placeholders::_1);
+		auto connect = bind(ConnectHandler, std::move(connectCb), std::move(readCb), std::move(ioErrCb), std::placeholders::_1);
 
-		auto cbCopy = move(errCb);
-		auto error = [cbCopy, ipAddress, port](std::shared_ptr<TcpPeerConnection> conn, const boost::system::error_code& err) {
+		auto error = [connErrCb, ipAddress, port](std::shared_ptr<TcpPeerConnection> conn, const boost::system::error_code& ec) {
 			stringstream errStr;
-			errStr << "Client connection error on: " << ipAddress << ":" << port;
-			cbCopy(errStr.str());
+			errStr << "Client connection error on: " << ipAddress << ":" << port << " " << ec.message();
+			connErrCb(errStr.str());
 		};
 
 		_impl->AsyncConnect(std::move(connect), std::move(error), ipAddress, port);
@@ -127,18 +163,12 @@ namespace AsyncIo
 	/// </summary>
 	/// <param name="receiveCb">The receive callback for UDP receive.</param>
 	/// <param name="errCb">The error callback for socket errors.</param>
-	/// <param name="ipAddress">The IP address to bind.</param>
+	/// <param name="ipAddress">The IP interface address to bind. Can be 0.0.0.0 for address any.</param>
 	/// <param name="port">The port to bind to.</param>
 	/// <returns>An instance that is listening for datagrams.</returns>
 	shared_ptr<DgramListener> IoServices::BindDgramListener(DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, const std::string& ipAddress, int port)
 	{
-		auto udpErrCb = [errCb](std::shared_ptr<UdpListener> listener, const boost::system::error_code& ec) {
-			stringstream errStr;
-			errStr << "Datagram listener error: " << listener->PeerEndPoint << ec.message() << endl;
-			errCb(errStr.str());
-		};
-
-		auto udpListener = _impl->BindDgramListener(move(udpErrCb), ipAddress, port);
+		auto udpListener = _impl->BindDgramListener(ipAddress, port);
 		
 		// The binded listener to return.
 		auto sharedListener = make_shared<DgramListener>(udpListener);
@@ -157,7 +187,28 @@ namespace AsyncIo
 			}
 		};
 
-		udpListener->BeginChainedRead(move(notify), DatagramMtu);
+		auto udpErrCb = [this, errCb, weakListener](std::shared_ptr<UdpListener> listener, const boost::system::error_code& ec) {
+			auto lockedListener = weakListener.lock();
+			if (lockedListener)
+			{
+				stringstream errStr;
+				errStr << "Datagram listener error: " << listener->PeerEndPoint << " " << ec.message() << endl;
+
+				// Call the application error handler first.
+				errCb(lockedListener, errStr.str());
+			}
+			else
+			{
+				stringstream errStr;
+				errStr << "Datagram listener destructed: " << listener->PeerEndPoint << " " << ec.message();
+				errCb(nullptr, errStr.str());
+			}
+
+			// Then call the cleanup handler.
+			_impl->ErrorHandler(listener, ec);
+		};
+
+		udpListener->BeginChainedRead(move(notify), move(udpErrCb), DatagramMtu);
 
 		return sharedListener;
 	}
@@ -186,6 +237,16 @@ namespace AsyncIo
 		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(du);
 		auto ptimeFromNow = boost::posix_time::milliseconds(ms.count());
 		_impl->SetPeriodicTimer(id, ptimeFromNow, handler);
+	}
+
+	/// <summary>
+	/// Cancel the periodic timer. Cannot guarantee that we will get there just before it goes off.
+	/// So timer applications must protect the callback with a predicate.
+	/// </summary>
+	/// <param name="id">The timer id.</param>
+	void IoServices::CancelPeriodicTimer(PeriodicTimer id)
+	{
+		_impl->CancelPeriodicTimer(id);
 	}
 
 }

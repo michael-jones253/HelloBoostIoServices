@@ -20,14 +20,26 @@ int main(int argc, const char * argv[]) {
     // insert code here...
     std::cout << "Hello, World!\n";
     
-    IoServices servicesInstance{};
-    
-    auto readCb = [](std::shared_ptr<TcpPeerConnection>, std::size_t bytesRead) {
+    auto errLogger = [](const std::string& msg, const std::exception&) {
         
     };
     
-    servicesInstance.RunTcpServer(23, move(readCb));
+    IoServices servicesInstance{ move(errLogger) };
     
+    auto readCb = [](std::shared_ptr<StreamConnection> conn, int bytesAvailable) {
+        
+    };
+    
+    auto acceptStream = [](std::shared_ptr<StreamConnection> conn) {
+        
+    };
+    
+    servicesInstance.AddTcpServer(23, move(acceptStream), move(readCb));
+    servicesInstance.StartTcpServer(23);
+    
+    while (true) {
+        sleep_for(seconds(3));
+    }
     
 
     return 0;

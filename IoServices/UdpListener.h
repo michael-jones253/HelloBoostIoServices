@@ -36,22 +36,28 @@ namespace AsyncIo
     private:
         std::mutex Mutex;
         std::deque<std::shared_ptr<IoBufferWrapper>> mOutQueue;
-        const UdpErrorCallback _errorCallback;
+        UdpErrorCallback _errorCallback;
+		std::function<void()> _connectCallback;
         IoCircularBuffer _readBuffer;
         
     public:
         boost::asio::ip::udp::socket PeerSocket;
         boost::asio::ip::udp::endpoint PeerEndPoint;
 
-		UdpListener(boost::asio::io_service* ioService, AsyncIo::UdpErrorCallback&& errorCallback, int port);
+		UdpListener(boost::asio::io_service* ioService, const boost::asio::ip::address& address, int port);
 		~UdpListener()
 		{
 			std::cout << "Closing UDP listener: " << PeerEndPoint << std::endl;
 		}
         
+		// For already bound listeners.
+		void AsyncConnect(const boost::asio::ip::address& destIp, int port, std::function<void()>&& connectHandler);
+
         void AsyncWrite(std::string&& msg, bool nullTerminate);
 
-		void BeginChainedRead(IoNotifyAvailableCallback&& available, int datagramSize);
+		void AsyncWrite(std::vector<uint8_t>&& msg);
+
+		void BeginChainedRead(IoNotifyAvailableCallback&& available, AsyncIo::UdpErrorCallback&& errCb, int datagramSize);
         
         boost::asio::ip::udp::socket& GetPeerSocket() { return PeerSocket; }
         
@@ -66,8 +72,12 @@ namespace AsyncIo
 		void StopListening();
         
     private:
+		void QueueOrWriteBuffer(std::shared_ptr<IoBufferWrapper> bufWrapper);
 
 		void LaunchWrite();
+
+		// For already bound listeners.
+		void ConnectHandler(std::shared_ptr<UdpListener> conn, boost::system::error_code ec);
 
 		void WriteHandler(
 			std::shared_ptr<UdpListener> conn,

@@ -26,13 +26,12 @@ namespace AsyncIo
 	/// </summary>
 	/// <param name="ioService">The boost IO service.</param>
 	/// <param name="port">The port to listen on.</param>
+	/// <param name="acceptsStream">Client connection accepted callback.</param>
 	/// <param name="readSomeCb">Client read some data callback.</param>
-    TcpServer::TcpServer(boost::asio::io_service* ioService, int port, ReadSomeCallback&& readSomeCb) :
+	TcpServer::TcpServer(boost::asio::io_service* ioService, int port, AcceptStreamCallback&& acceptsStream, ReadStreamCallback&& readSomeCb) :
     _ioService{ioService},
-	_mutex{},
     _port{port},
-    _acceptor{},
-    _peerConnections{},
+	_acceptStreamCb{ std::move(acceptsStream) },
     _readSomeCb{ std::move(readSomeCb) }
     {
     }
@@ -43,7 +42,8 @@ namespace AsyncIo
         _port = rhs._port;
         _acceptor = std::move(rhs._acceptor);
         _peerConnections = std::move(rhs._peerConnections);
-        _readSomeCb = std::move(rhs._readSomeCb);
+		_acceptStreamCb = std::move(rhs._acceptStreamCb);
+		_readSomeCb = std::move(rhs._readSomeCb);
     }
 
 	TcpServer& TcpServer::operator=(TcpServer&& rhs)
@@ -52,6 +52,7 @@ namespace AsyncIo
 		_port = rhs._port;
 		_acceptor = std::move(rhs._acceptor);
 		_peerConnections = std::move(rhs._peerConnections);
+		_acceptStreamCb = std::move(rhs._acceptStreamCb);
 		_readSomeCb = std::move(rhs._readSomeCb);
 
 		return *this;
@@ -94,16 +95,23 @@ namespace AsyncIo
             std::cerr << "Accept error: " << ec << std::endl;
         }
         
-        auto available = [this, acceptedConn](size_t available) {
+		auto streamConn = std::make_shared<StreamConnection>(acceptedConn, false /* is server side */);
+		auto available = [this, streamConn](size_t available) {
             // std::cout << "Got stuff available: " << acceptedConn->PeerEndPoint << available << std::endl;
-            _readSomeCb(acceptedConn, available);
+			_readSomeCb(streamConn, available);
         };
         
-        acceptedConn->BeginChainedRead(std::move(available), ChunkSize);
+		// Review: opportunity to have the error handler take a stream connection parameter.
+		auto errorHandler = std::bind(&TcpServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
+
+        acceptedConn->BeginChainedRead(std::move(available), std::move(errorHandler), ChunkSize);
         
 		std::lock_guard<std::mutex> connGuard(_mutex);
         _peerConnections.push_back(acceptedConn);
         std::cout << "Accepted: " << _peerConnections.size() << std::endl;
+
+		// Notify the application that a client has connected.
+		_acceptStreamCb(streamConn);
         
         // Kick off another async accept to handle another connection.
         AsyncAccept();
@@ -140,22 +148,20 @@ namespace AsyncIo
 	void TcpServer::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec)
 	{
         if (ec != 0) {
-			// FIX ME log this.
-            std::cerr << "Write error" << std::endl;
-            
             std::lock_guard<std::mutex> guard(_mutex);
             conn->PeerSocket.close();
-            for (auto pos = _peerConnections.begin(); pos != _peerConnections.end(); pos++)
-			{
-                if (pos->get()->PeerSocket.is_open())
+
+			auto SocketClosedPredicate = [](std::shared_ptr<TcpPeerConnection> conn) {
+				auto shouldErase = !(conn->PeerSocket.is_open());
+				if (shouldErase)
 				{
-                    continue;
-                }
-                
-                std::cerr << "ERASING PEER: " << pos->get()->PeerEndPoint.address() << std::endl;
-                _peerConnections.erase(pos);
-                break;
-            }
+					std::cout << "TCP server ERASING peer: " << conn->PeerEndPoint.address() << std::endl;
+				}
+
+				return shouldErase;
+			};
+
+			_peerConnections.erase(std::remove_if(_peerConnections.begin(), _peerConnections.end(), SocketClosedPredicate), _peerConnections.end());
         }
     }
 

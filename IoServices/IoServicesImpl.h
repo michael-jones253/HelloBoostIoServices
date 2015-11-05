@@ -26,6 +26,9 @@
 
 namespace AsyncIo {
     class IoServicesImpl final {
+		using IoExceptionCallback = std::function<void(const std::string& msg, const std::exception&)>;
+
+		IoExceptionCallback _exceptionNotifier{};
 		std::atomic<bool> _shouldRun{};
 		std::promise<bool> _started{};
 		boost::asio::io_service _ioService{};
@@ -34,20 +37,20 @@ namespace AsyncIo {
 		boost::thread_group _threadPool{};
 		std::vector<boost::thread*> _workerHandles{};
 		std::atomic<int> _freeWorkerCount{};
-		std::unordered_map<Timer, boost::asio::deadline_timer> _oneShotTimers{};
-		std::unordered_map<PeriodicTimer, boost::asio::deadline_timer> _periodicTimers{};
+		std::unordered_map<Timer, boost::asio::deadline_timer, TimerHasher> _oneShotTimers{};
+		std::unordered_map<PeriodicTimer, boost::asio::deadline_timer, PeriodicTimerHasher> _periodicTimers{};
 		std::map<std::shared_ptr<TcpPeerConnection>, std::shared_ptr<TcpPeerConnection>> _clientConnections{};
 		std::map<std::shared_ptr<UdpListener>, std::shared_ptr<UdpListener>> _listeners{};
 		std::mutex _mutex{};
         
     public:
-        IoServicesImpl();
+		IoServicesImpl(IoExceptionCallback&& ioExceptionCb);
         
         ~IoServicesImpl();
         
         std::future<bool> Start();
         
-        void AddTcpServer(int port, ReadSomeCallback&& readSome);
+		void AddTcpServer(int port, AcceptStreamCallback&& acceptsStream, ReadStreamCallback&& readSome);
 
 		void StartTcpServer(int port);
 
@@ -55,24 +58,30 @@ namespace AsyncIo {
         
 		void SendToAllServerConnections(const std::string& msg, bool nullTerminate);
 
-		std::shared_ptr<UdpListener> BindDgramListener(UdpErrorCallback&& errCb, std::string ipAddress, int port);
+		std::shared_ptr<UdpListener> BindDgramListener(std::string ipAddress, int port);
         
         void Stop();
         
         void RunWork(const std::function<void(void)>& work);
+
+		void InitialisePeriodicTimer(int id, const::std::string& name);
         
-        void SetPeriodicTimer(
-                              PeriodicTimer id,
+		void InitialiseOneShotTimer(int id, const::std::string& name);
+
+		void SetPeriodicTimer(PeriodicTimer id,
                               boost::posix_time::time_duration durationFromNow,
                               const std::function<void(PeriodicTimer id)>& handler);
-        
+
+		void CancelPeriodicTimer(PeriodicTimer id);
+
+		void ErrorHandler(std::shared_ptr<UdpListener> listener, boost::system::error_code ec);
+
     private:
         bool Run();
         void AddWorker();
         void RemoveWorker();
         void WorkerThread(boost::asio::io_service& ioService);
 		void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
-		void ErrorHandler(std::shared_ptr<UdpListener> listener, boost::system::error_code ec);
 	};
 }
 

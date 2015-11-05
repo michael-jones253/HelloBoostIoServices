@@ -15,7 +15,7 @@ namespace AsyncIo
     TcpPeerConnection::TcpPeerConnection(boost::asio::io_service* ioService, AsyncIo::ErrorCallback&& errorCallback) :
         PeerSocket{*ioService},
         PeerEndPoint{},
-        Mutex{},
+        _mutex{},
         mOutQueue{},
 		_errorCallback{ std::move(errorCallback) },
         _readBuffer{}
@@ -45,23 +45,42 @@ namespace AsyncIo
             _readBuffer = std::move(bufWithCb);
     }
 
-	void TcpPeerConnection::AsyncWrite(std::string&& msg, bool nullTerminate)
+	int TcpPeerConnection::AsyncWrite(std::string&& msg, bool nullTerminate)
 	{
-        auto hack = std::move(msg);
-        auto bufWrapper = std::make_shared<IoBufferWrapper>(hack, nullTerminate);
-        
+		auto bufWrapper = std::make_shared<IoBufferWrapper>(move(msg), nullTerminate);
+
         // Boost documentation says that for each stream only one async write can be outstanding at a time.
         // So we queue rather than launch straight away.
-        std::lock_guard<std::mutex> guard(Mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         mOutQueue.push_back(bufWrapper);
         
         if (mOutQueue.size() > 1) {
             // We have the lock, so if the queue has more than one, then a chained launch is guaranteed.
-            return;
-        }
+			return static_cast<int>(mOutQueue.size());
+		}
         
         LaunchWrite();
+		return static_cast<int>(mOutQueue.size());
     }
+
+	int TcpPeerConnection::AsyncWrite(std::vector<uint8_t>&& msg)
+	{
+		auto bufWrapper = std::make_shared<IoBufferWrapper>(move(msg));
+		// Boost documentation says that for each stream only one async write can be outstanding at a time.
+		// So we queue rather than launch straight away.
+		std::lock_guard<std::mutex> guard(_mutex);
+		mOutQueue.push_back(bufWrapper);
+
+		if (mOutQueue.size() > 1) {
+			// We have the lock, so if the queue has more than one, then a chained launch is guaranteed.
+			return static_cast<int>(mOutQueue.size());
+		}
+
+		LaunchWrite();
+
+		return static_cast<int>(mOutQueue.size());
+	}
+
 
 	void TcpPeerConnection::AsyncConnect(ConnectCallback&& connectCb, std::string ipAddress, int port)
 	{
@@ -73,11 +92,14 @@ namespace AsyncIo
 		PeerSocket.async_connect(PeerEndPoint, std::move(boostHandler));
 	}
 
-    
-	void TcpPeerConnection::BeginChainedRead(IoNotifyAvailableCallback&& available, int chunkSize)
+	void TcpPeerConnection::BeginChainedRead(
+		IoNotifyAvailableCallback&& available,
+		AsyncIo::ErrorCallback&& errorCallback,
+		int chunkSize)
 	{
-        _readBuffer.BeginChainedRead(std::move(available), chunkSize);
-    }
+		_errorCallback = std::move(errorCallback);
+		_readBuffer.BeginChainedRead(std::move(available), chunkSize);
+	}
 
     void TcpPeerConnection::LaunchWrite() {
         
@@ -93,8 +115,9 @@ namespace AsyncIo
                                  std::placeholders::_1,
                                  std::placeholders::_2);
         
-        boost::asio::async_write(PeerSocket, boost::asio::buffer(mOutQueue.front()->Buffer), std::move(handler));
-    }
+        // boost::asio::async_write(PeerSocket, boost::asio::buffer(mOutQueue.front()->Buffer), std::move(handler));
+		boost::asio::async_write(PeerSocket, mOutQueue.front()->ToBoost(), std::move(handler));
+	}
     
     void TcpPeerConnection::CopyTo(std::vector<uint8_t>& dest, int len)
 	{
@@ -119,16 +142,16 @@ namespace AsyncIo
                                          std::size_t written)
 	{
         
-        if (written != bufWrapper->Buffer.size())
+        if (written != bufWrapper->BoostSize())
 		{
-            std::cerr << "Incomplete write, buffer: " << bufWrapper->Buffer.size() << " written: " << written << std::endl;
+			std::cerr << "Incomplete write, buffer: " << bufWrapper->BoostSize() << " written: " << written << std::endl;
             conn->PeerSocket.close();
             _errorCallback(conn, ec);
             return;
         }
         
         // Discard processed message.
-        std::lock_guard<std::mutex> guard(Mutex);
+        std::lock_guard<std::mutex> guard(_mutex);
         mOutQueue.pop_front();
         
         // If there are no more queued messages then nothing more to do, otherwise chain another async write onto

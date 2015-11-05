@@ -3,7 +3,7 @@
 //  AsyncIo
 //
 //  Created by Michael Jones on 2/08/2015.
-//  Copyright (c)All rights reserved.
+//   https://github.com/michael-jones253/HelloBoostIoServices
 //
 #include "stdafx.h"
 

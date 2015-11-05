@@ -13,17 +13,50 @@
 #pragma GCC visibility push(default)
 #endif
 
+#include <string>
+#include <functional>
+
 namespace AsyncIo {
     
-    enum class Timer : int {
-        General,
-        End
-    };
+    struct Timer final {
+		const int Id;
+		const std::string Name;
 
-    inline Timer& operator++(Timer& rhs) {
-        rhs = static_cast<Timer>(static_cast<int>(rhs) + 1);
-        return rhs;
+		bool operator<(const Timer& rhs) const;
+		bool operator==(const Timer& rhs) const;
+	};
+
+	/// <summary>
+	/// For map key operations.
+	/// </summary>
+	inline bool Timer::operator<(const Timer& rhs) const {
+        return Id < rhs.Id;
     }
+
+	inline bool Timer::operator==(const Timer& rhs) const {
+		return Id == rhs.Id;
+	}
+
+	/// <summary>
+	/// For unordered map.
+	/// </summary>
+	struct TimerHasher
+	{
+		std::size_t operator()(const Timer& k) const
+		{
+			using std::size_t;
+			using std::hash;
+
+			// Operate on integer id only, for simplicity and efficiency.
+			return hash<int>()(k.Id);
+		}
+	};
+
+	inline std::ostream& operator<<(std::ostream& os, Timer rhs) {
+		os << rhs.Name;
+		return os;
+	}
+
 }
 #if defined(__GNUC__)
 #pragma GCC visibility pop

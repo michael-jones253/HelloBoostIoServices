@@ -26,9 +26,13 @@ namespace AsyncIo
     class TcpPeerConnection;
     class StreamConnection;
     
-    using StreamErrorCallback = std::function<void(const std::string& msg)>;
+	using StreamConnectionErrorCallback = std::function<void(const std::string& msg)>;
+
+	using StreamIoErrorCallback = std::function<void(std::shared_ptr<StreamConnection>, const std::string& msg)>;
     
     using ReadStreamCallback = std::function<void(std::shared_ptr<StreamConnection>, int bytesAvailable)>;
+
+	using AcceptStreamCallback = std::function<void(std::shared_ptr<StreamConnection> acceptedConn)>;
 
 	using ConnectStreamCallback = std::function<void(std::shared_ptr<StreamConnection>)>;
 
@@ -71,13 +75,27 @@ namespace AsyncIo
 		~StreamConnection();
 
 		/// <summary>
+		/// Returns whether the connection has expired (been closed).
+		/// </summary>
+		/// <returns>True if expired.</returns>
+		bool Expired() const;
+
+		/// <summary>
 		/// Asynchronous write of string message.
 		/// NB Safe to call in rapid succession. Messages internally queued.
 		/// </summary>
 		/// <param name="msg">The string message to send.</param>
 		/// <param name="nullTerminate">Whether to null terminate the message or not.</param>
-		void AsyncWrite(std::string&& msg, bool nullTerminate);
-        
+		/// <returns>The backlog of messages queued for writing.</returns>
+		int AsyncWrite(std::string&& msg, bool nullTerminate);
+
+		/// <summary>
+		/// Asynchronous write of byte vector message.
+		/// </summary>
+		/// <param name="msg">The message to send.</param>
+		/// <returns>The backlog of messages queued for writing.</returns>
+		int AsyncWrite(std::vector<uint8_t>&& msg);
+
 		/// <summary>
 		/// Consume from the start of the circular buffer storage and copy to the destination buffer.
 		/// </summary>

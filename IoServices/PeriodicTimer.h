@@ -15,36 +15,49 @@
 #pragma GCC visibility push(default)
 #endif
 
+#include <string>
+#include <functional>
+
 namespace AsyncIo {
     
-    enum class PeriodicTimer : int {
-        General,
-        Secondary,
-        End
-    };
+	struct PeriodicTimer final {
+		const int Id;
+		const std::string Name;
 
-    inline PeriodicTimer operator++(PeriodicTimer& rhs) {
-        rhs = static_cast<PeriodicTimer>(static_cast<int>(rhs) + 1);
-        return rhs;
-    }
+		bool operator<(const PeriodicTimer& rhs) const;
+		bool operator==(const PeriodicTimer& rhs) const;
+	};
 
-    inline std::ostream& operator<<(std::ostream& os, PeriodicTimer rhs) {
-        switch (rhs) {
-            case PeriodicTimer::General:
-                os << "PeriodicTimer::General";
-                break;
-            case PeriodicTimer::Secondary:
-                os << "PeriodicTimer::Secondary";
-                break;
-            case PeriodicTimer::End:
-                os << "PeriodicTimer::End";
-                break;
-            default:
-                break;
-        }
-        
-        return os;
-    }
+	/// <summary>
+	/// For map key operations.
+	/// </summary>
+	inline bool PeriodicTimer::operator<(const PeriodicTimer& rhs) const {
+		return Id < rhs.Id;
+	}
+
+	inline bool PeriodicTimer::operator==(const PeriodicTimer& rhs) const {
+		return Id == rhs.Id;
+	}
+
+	/// <summary>
+	/// For unordered map.
+	/// </summary>
+	struct PeriodicTimerHasher
+	{
+		std::size_t operator()(const PeriodicTimer& k) const
+		{
+			using std::size_t;
+			using std::hash;
+
+			// Operate on integer id only, for simplicity and efficiency.
+			return hash<int>()(k.Id);
+		}
+	};
+
+	inline std::ostream& operator<<(std::ostream& os, PeriodicTimer rhs) {
+		os << rhs.Name;
+		return os;
+	}
 
 }
 

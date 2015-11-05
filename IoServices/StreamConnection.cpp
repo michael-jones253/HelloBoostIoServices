@@ -3,7 +3,7 @@
 //  AsyncIo
 //
 //  Created by Michael Jones on 29/08/2015.
-//  Copyright (c)All rights reserved.
+//   https://github.com/michael-jones253/HelloBoostIoServices
 //
 #include "stdafx.h"
 
@@ -27,28 +27,30 @@ namespace AsyncIo
 	/// </summary>
 	StreamConnection::~StreamConnection()
 	{
-		if (!_isClientSide)
-		{
-			// Server manages lifetime of underlying peer connection.
-			return;
-		}
-
-		// Only client side initiated connections destruct the underlying peer connection.
 		auto peerConn = _peerConnection.lock();
 		if (peerConn)
 		{
 			peerConn->PeerSocket.close();
 		}
 	}
-
     
+	/// <summary>
+	/// Returns whether the connection has expired (been closed).
+	/// </summary>
+	/// <returns>True if expired.</returns>
+	bool StreamConnection::Expired() const
+	{
+		return _peerConnection.expired();
+	}
+
 	/// <summary>
 	/// Asynchronous write of string message.
 	/// NB Safe to call in rapid succession. Messages internally queued.
 	/// </summary>
 	/// <param name="msg">The string message to send.</param>
 	/// <param name="nullTerminate">Whether to null terminate the message or not.</param>
-	void StreamConnection::AsyncWrite(std::string&& msg, bool nullTerminate)
+	/// <returns>The backlog of messages queued for writing.</returns>
+	int StreamConnection::AsyncWrite(std::string&& msg, bool nullTerminate)
 	{
 		auto conn = _peerConnection.lock();
 		if (!conn)
@@ -56,7 +58,23 @@ namespace AsyncIo
 			throw runtime_error("Connection expired.");
 		}
 
-		conn->AsyncWrite(std::move(msg), nullTerminate);
+		return conn->AsyncWrite(std::move(msg), nullTerminate);
+	}
+
+	/// <summary>
+	/// Asynchronous write of byte vector message.
+	/// </summary>
+	/// <param name="msg">The message to send.</param>
+	/// <returns>The backlog of messages queued for writing.</returns>
+	int StreamConnection::AsyncWrite(std::vector<uint8_t>&& msg)
+	{
+		auto conn = _peerConnection.lock();
+		if (!conn)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		return conn->AsyncWrite(std::move(msg));
 	}
 
     /// <summary>
