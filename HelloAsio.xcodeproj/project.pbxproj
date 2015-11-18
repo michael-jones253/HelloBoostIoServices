@@ -7,10 +7,17 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B21153BD1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */; };
+		B21153BF1BF9C109006C0723 /* libssl.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */; };
+		B21153C01BF9C1CA006C0723 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B216B1A31B87E57100CE0DE9 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B216B1A21B87E57100CE0DE9 /* main.cpp */; };
+		B21E69341BF819EA00532135 /* EgSslServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21E69321BF819EA00532135 /* EgSslServer.cpp */; settings = {ASSET_TAGS = (); }; };
+		B21E69351BF819EA00532135 /* EgSslServer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B21E69331BF819EA00532135 /* EgSslServer.hpp */; settings = {ASSET_TAGS = (); }; };
 		B21F0B3B1B68875E00D1FE09 /* TcpServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21F0B391B68875E00D1FE09 /* TcpServer.cpp */; };
 		B21F0B3C1B68875E00D1FE09 /* TcpServer.h in Headers */ = {isa = PBXBuildFile; fileRef = B21F0B3A1B68875E00D1FE09 /* TcpServer.h */; };
 		B21F0B401B68914700D1FE09 /* TcpPeerConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = B21F0B3E1B68914700D1FE09 /* TcpPeerConnection.h */; };
+		B2208D1F1BFB11D7005003E2 /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
+		B2208D201BFB1203005003E2 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
 		B226FB7F1BA7B5DF00CFF893 /* DgramListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B226FB7B1BA7B5DF00CFF893 /* DgramListener.cpp */; };
 		B226FB801BA7B5DF00CFF893 /* DgramListener.h in Headers */ = {isa = PBXBuildFile; fileRef = B226FB7C1BA7B5DF00CFF893 /* DgramListener.h */; };
 		B226FB811BA7B5DF00CFF893 /* UdpListener.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B226FB7D1BA7B5DF00CFF893 /* UdpListener.cpp */; };
@@ -18,10 +25,15 @@
 		B22AA07B1BA3B158006E58F5 /* IoServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22AA07A1BA3B158006E58F5 /* IoServices.cpp */; };
 		B22AA07E1BA3B19D006E58F5 /* stdafx.h in Headers */ = {isa = PBXBuildFile; fileRef = B22AA07C1BA3B19D006E58F5 /* stdafx.h */; };
 		B22AA07F1BA3B19D006E58F5 /* targetver.h in Headers */ = {isa = PBXBuildFile; fileRef = B22AA07D1BA3B19D006E58F5 /* targetver.h */; };
+		B23325551BF6FE5700D63355 /* TcpSslConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23325531BF6FE5700D63355 /* TcpSslConnection.cpp */; settings = {ASSET_TAGS = (); }; };
+		B23325561BF6FE5700D63355 /* TcpSslConnection.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B23325541BF6FE5700D63355 /* TcpSslConnection.hpp */; settings = {ASSET_TAGS = (); }; };
+		B23325581BF7053E00D63355 /* libssl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B23325571BF7053E00D63355 /* libssl.tbd */; };
+		B233255A1BF7057A00D63355 /* libcrypto.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B23325591BF7057A00D63355 /* libcrypto.tbd */; };
 		B248B60D1B6488A700ABD4A5 /* libboost_system.dylib in Resources */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B248B6101B648BB300ABD4A5 /* libboost_system.dylib in Resources */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B248C74C1B69E63F00B1A1DF /* TcpPeerConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21F0B3D1B68914700D1FE09 /* TcpPeerConnection.cpp */; };
 		B26B48131B64583E009262A4 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
+		B270188F1BF8868B00BDEDCE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B270188E1BF8868B00BDEDCE /* main.cpp */; };
 		B2A9E43D1B917DA0003B6FB3 /* StreamConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */; };
 		B2A9E43E1B917DA0003B6FB3 /* StreamConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */; };
 		B2AA92F21B64AB5600855ACA /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
@@ -50,10 +62,26 @@
 			remoteGlobalIDString = B2AADA971B64460400688FC5;
 			remoteInfo = IoServices;
 		};
+		B2D62C111BF9D65A000137E5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2AADA821B64455C00688FC5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2AADA971B64460400688FC5;
+			remoteInfo = IoServices;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
 		B216B19E1B87E57100CE0DE9 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		B270188A1BF8868B00BDEDCE /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
 			dstPath = /usr/share/man/man1/;
@@ -85,8 +113,12 @@
 /* Begin PBXFileReference section */
 		B2036AFC1B6759880037C5B2 /* Timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
 		B2036AFD1B67599E0037C5B2 /* PeriodicTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PeriodicTimer.h; sourceTree = "<group>"; };
+		B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.1.0.0.dylib; path = ../../../../../../opt/local/lib/libcrypto.1.0.0.dylib; sourceTree = "<group>"; };
+		B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.1.0.0.dylib; path = ../../../../../../opt/local/lib/libssl.1.0.0.dylib; sourceTree = "<group>"; };
 		B216B1A01B87E57100CE0DE9 /* TestCircularAsio */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestCircularAsio; sourceTree = BUILT_PRODUCTS_DIR; };
 		B216B1A21B87E57100CE0DE9 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		B21E69321BF819EA00532135 /* EgSslServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = EgSslServer.cpp; sourceTree = "<group>"; };
+		B21E69331BF819EA00532135 /* EgSslServer.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = EgSslServer.hpp; sourceTree = "<group>"; };
 		B21F0B391B68875E00D1FE09 /* TcpServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TcpServer.cpp; sourceTree = "<group>"; };
 		B21F0B3A1B68875E00D1FE09 /* TcpServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TcpServer.h; sourceTree = "<group>"; };
 		B21F0B3D1B68914700D1FE09 /* TcpPeerConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TcpPeerConnection.cpp; sourceTree = "<group>"; };
@@ -98,9 +130,15 @@
 		B22AA07A1BA3B158006E58F5 /* IoServices.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoServices.cpp; sourceTree = "<group>"; };
 		B22AA07C1BA3B19D006E58F5 /* stdafx.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stdafx.h; sourceTree = "<group>"; };
 		B22AA07D1BA3B19D006E58F5 /* targetver.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = targetver.h; sourceTree = "<group>"; };
+		B23325531BF6FE5700D63355 /* TcpSslConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TcpSslConnection.cpp; sourceTree = "<group>"; };
+		B23325541BF6FE5700D63355 /* TcpSslConnection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TcpSslConnection.hpp; sourceTree = "<group>"; };
+		B23325571BF7053E00D63355 /* libssl.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libssl.tbd; path = usr/lib/libssl.tbd; sourceTree = SDKROOT; };
+		B23325591BF7057A00D63355 /* libcrypto.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libcrypto.tbd; path = usr/lib/libcrypto.tbd; sourceTree = SDKROOT; };
 		B238F8311BEB53E60091DEBE /* TestPeriodicTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestPeriodicTimer.h; sourceTree = "<group>"; };
 		B238F8321BEB53E60091DEBE /* TestTimer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestTimer.h; sourceTree = "<group>"; };
 		B26B48121B64583E009262A4 /* libboost_system.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_system.dylib; path = ../../../../../../opt/local/lib/libboost_system.dylib; sourceTree = "<group>"; };
+		B270188C1BF8868B00BDEDCE /* RunSslServer */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RunSslServer; sourceTree = BUILT_PRODUCTS_DIR; };
+		B270188E1BF8868B00BDEDCE /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamConnection.cpp; sourceTree = "<group>"; };
 		B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamConnection.h; sourceTree = "<group>"; };
 		B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_thread.dylib; path = ../../../../../../opt/local/lib/libboost_thread.dylib; sourceTree = "<group>"; };
@@ -128,6 +166,18 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B27018891BF8868B00BDEDCE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2208D201BFB1203005003E2 /* libIoServices.dylib in Frameworks */,
+				B2208D1F1BFB11D7005003E2 /* libboost_thread.dylib in Frameworks */,
+				B21153C01BF9C1CA006C0723 /* libboost_system.dylib in Frameworks */,
+				B21153BF1BF9C109006C0723 /* libssl.1.0.0.dylib in Frameworks */,
+				B21153BD1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2AADA871B64455C00688FC5 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -140,6 +190,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B233255A1BF7057A00D63355 /* libcrypto.tbd in Frameworks */,
+				B23325581BF7053E00D63355 /* libssl.tbd in Frameworks */,
 				B2AA92F21B64AB5600855ACA /* libboost_thread.dylib in Frameworks */,
 				B26B48131B64583E009262A4 /* libboost_system.dylib in Frameworks */,
 			);
@@ -164,15 +216,28 @@
 			path = TestCircularAsio;
 			sourceTree = "<group>";
 		};
+		B270188D1BF8868B00BDEDCE /* RunSslServer */ = {
+			isa = PBXGroup;
+			children = (
+				B270188E1BF8868B00BDEDCE /* main.cpp */,
+			);
+			path = RunSslServer;
+			sourceTree = "<group>";
+		};
 		B2AADA811B64455C00688FC5 = {
 			isa = PBXGroup;
 			children = (
+				B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */,
+				B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */,
+				B23325591BF7057A00D63355 /* libcrypto.tbd */,
+				B23325571BF7053E00D63355 /* libssl.tbd */,
 				B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */,
 				B26B48121B64583E009262A4 /* libboost_system.dylib */,
 				B2AADA8C1B64455C00688FC5 /* HelloAsio */,
 				B2AADA991B64460400688FC5 /* IoServices */,
 				B2DFE9A91B6B3B3600CED951 /* TestServices */,
 				B216B1A11B87E57100CE0DE9 /* TestCircularAsio */,
+				B270188D1BF8868B00BDEDCE /* RunSslServer */,
 				B2AADA8B1B64455C00688FC5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -184,6 +249,7 @@
 				B2AADA981B64460400688FC5 /* libIoServices.dylib */,
 				B2DFE9A81B6B3B3600CED951 /* TestServices */,
 				B216B1A01B87E57100CE0DE9 /* TestCircularAsio */,
+				B270188C1BF8868B00BDEDCE /* RunSslServer */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -224,6 +290,10 @@
 				B2F813C11B6AF66A00018DE7 /* IoBufferWrapper.cpp */,
 				B2F813C21B6AF66A00018DE7 /* IoBufferWrapper.h */,
 				B21F0B3E1B68914700D1FE09 /* TcpPeerConnection.h */,
+				B23325531BF6FE5700D63355 /* TcpSslConnection.cpp */,
+				B23325541BF6FE5700D63355 /* TcpSslConnection.hpp */,
+				B21E69321BF819EA00532135 /* EgSslServer.cpp */,
+				B21E69331BF819EA00532135 /* EgSslServer.hpp */,
 			);
 			path = IoServices;
 			sourceTree = "<group>";
@@ -251,7 +321,9 @@
 				B22AA07F1BA3B19D006E58F5 /* targetver.h in Headers */,
 				B2F65EA21B677B5F00035D30 /* PeriodicTimer.h in Headers */,
 				B21F0B3C1B68875E00D1FE09 /* TcpServer.h in Headers */,
+				B23325561BF6FE5700D63355 /* TcpSslConnection.hpp in Headers */,
 				B226FB821BA7B5DF00CFF893 /* UdpListener.h in Headers */,
+				B21E69351BF819EA00532135 /* EgSslServer.hpp in Headers */,
 				B226FB801BA7B5DF00CFF893 /* DgramListener.h in Headers */,
 				B2F9DED81B6D858C00FC02B2 /* IoCircularBuffer.h in Headers */,
 				B22AA07E1BA3B19D006E58F5 /* stdafx.h in Headers */,
@@ -278,6 +350,24 @@
 			name = TestCircularAsio;
 			productName = TestCircularAsio;
 			productReference = B216B1A01B87E57100CE0DE9 /* TestCircularAsio */;
+			productType = "com.apple.product-type.tool";
+		};
+		B270188B1BF8868B00BDEDCE /* RunSslServer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B27018921BF8868B00BDEDCE /* Build configuration list for PBXNativeTarget "RunSslServer" */;
+			buildPhases = (
+				B27018881BF8868B00BDEDCE /* Sources */,
+				B27018891BF8868B00BDEDCE /* Frameworks */,
+				B270188A1BF8868B00BDEDCE /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				B2D62C121BF9D65A000137E5 /* PBXTargetDependency */,
+			);
+			name = RunSslServer;
+			productName = RunSslServer;
+			productReference = B270188C1BF8868B00BDEDCE /* RunSslServer */;
 			productType = "com.apple.product-type.tool";
 		};
 		B2AADA891B64455C00688FC5 /* HelloAsio */ = {
@@ -346,6 +436,9 @@
 					B216B19F1B87E57100CE0DE9 = {
 						CreatedOnToolsVersion = 6.4;
 					};
+					B270188B1BF8868B00BDEDCE = {
+						CreatedOnToolsVersion = 7.0.1;
+					};
 					B2AADA891B64455C00688FC5 = {
 						CreatedOnToolsVersion = 6.4;
 					};
@@ -373,6 +466,7 @@
 				B2AADA971B64460400688FC5 /* IoServices */,
 				B2DFE9A71B6B3B3600CED951 /* TestServices */,
 				B216B19F1B87E57100CE0DE9 /* TestCircularAsio */,
+				B270188B1BF8868B00BDEDCE /* RunSslServer */,
 			);
 		};
 /* End PBXProject section */
@@ -405,6 +499,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B27018881BF8868B00BDEDCE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B270188F1BF8868B00BDEDCE /* main.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		B2AADA861B64455C00688FC5 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -420,11 +522,13 @@
 				B248C74C1B69E63F00B1A1DF /* TcpPeerConnection.cpp in Sources */,
 				B2AADAA61B6448B100688FC5 /* IoServicesImpl.cpp in Sources */,
 				B21F0B3B1B68875E00D1FE09 /* TcpServer.cpp in Sources */,
+				B21E69341BF819EA00532135 /* EgSslServer.cpp in Sources */,
 				B226FB7F1BA7B5DF00CFF893 /* DgramListener.cpp in Sources */,
 				B226FB811BA7B5DF00CFF893 /* UdpListener.cpp in Sources */,
 				B2F9DED71B6D858C00FC02B2 /* IoCircularBuffer.cpp in Sources */,
 				B22AA07B1BA3B158006E58F5 /* IoServices.cpp in Sources */,
 				B2F813C31B6AF66A00018DE7 /* IoBufferWrapper.cpp in Sources */,
+				B23325551BF6FE5700D63355 /* TcpSslConnection.cpp in Sources */,
 				B2A9E43D1B917DA0003B6FB3 /* StreamConnection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -445,6 +549,11 @@
 			target = B2AADA971B64460400688FC5 /* IoServices */;
 			targetProxy = B2AADAA81B644AB600688FC5 /* PBXContainerItemProxy */;
 		};
+		B2D62C121BF9D65A000137E5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2AADA971B64460400688FC5 /* IoServices */;
+			targetProxy = B2D62C111BF9D65A000137E5 /* PBXContainerItemProxy */;
+		};
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
@@ -464,6 +573,35 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		B27018901BF8868B00BDEDCE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				ENABLE_TESTABILITY = YES;
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		B27018911BF8868B00BDEDCE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					/opt/local/lib,
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
@@ -635,6 +773,15 @@
 			buildConfigurations = (
 				B216B1A41B87E57100CE0DE9 /* Debug */,
 				B216B1A51B87E57100CE0DE9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B27018921BF8868B00BDEDCE /* Build configuration list for PBXNativeTarget "RunSslServer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B27018901BF8868B00BDEDCE /* Debug */,
+				B27018911BF8868B00BDEDCE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
