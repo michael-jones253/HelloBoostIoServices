@@ -51,6 +51,7 @@ namespace AsyncIo {
             return;
         }
         
+        std::cout << "connected!!" << std::endl;
         SslSocket.async_handshake(boost::asio::ssl::stream_base::client,
                                 std::bind(&TcpSslConnection::HandleHandshake, this,
                                             std::placeholders::_1));
@@ -73,6 +74,7 @@ namespace AsyncIo {
             return;
         }
         
+        std::cout << "handle handshake" << std::endl;
         _connectCallback(shared_from_this());
 
     }
