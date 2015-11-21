@@ -27,8 +27,8 @@ void server::set_context() {
                          | boost::asio::ssl::context::no_sslv2
                          | boost::asio::ssl::context::single_dh_use);
     context_.set_password_callback(boost::bind(&server::get_password, this));
-    context_.use_certificate_chain_file("fd.crt");
-    context_.use_rsa_private_key_file("fd.key", boost::asio::ssl::context::pem);
+    context_.use_certificate_chain_file("fd-serv.crt");
+    context_.use_rsa_private_key_file("fd-rsa-priv.key", boost::asio::ssl::context::pem);
     context_.use_tmp_dh_file("dh1024.pem");
 }
 

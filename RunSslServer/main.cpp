@@ -10,8 +10,10 @@
 #include <openssl/err.h>
 #include <boost/asio.hpp>
 #include <iostream>
+#include <stdlib.h>
 
 using namespace boost::asio;
+using namespace std; // For atoi.
 
 int main(int argc, const char * argv[]) {
     // insert code here...
@@ -23,10 +25,10 @@ int main(int argc, const char * argv[]) {
         }
         
         boost::asio::io_service io_service;
-        io_service::work keepRunning(io_service);
-        
-        using namespace std; // For atoi.
         server s(io_service, atoi(argv[1]));
+
+        io_service::work keepRunning(io_service);
+
         std::cout << "Hello, World!\n";
         
         s.set_context();
