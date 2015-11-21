@@ -7,6 +7,7 @@
 //
 
 #include "EgSslServer.hpp"
+#include <string>
 
 server::server(boost::asio::io_service& io_service, unsigned short port)
 : io_service_(io_service),
@@ -83,6 +84,7 @@ void session::handle_handshake(const boost::system::error_code& error)
 {
     if (!error)
     {
+        std::cout << "handle handshake" << std::endl;
         socket_.async_read_some(boost::asio::buffer(data_, max_length),
                                 boost::bind(&session::handle_read, this,
                                             boost::asio::placeholders::error,
@@ -90,6 +92,12 @@ void session::handle_handshake(const boost::system::error_code& error)
     }
     else
     {
+        SSL_load_error_strings();
+        unsigned long n = ERR_get_error();
+        char buf[1024];
+        printf("%s\n", ERR_error_string(n, buf));
+
+        std::cout << "deleting client" /* << error.message() */ << std::endl;
         delete this;
     }
 }
@@ -99,6 +107,8 @@ void session::handle_read(const boost::system::error_code& error,
 {
     if (!error)
     {
+        std::cout << std::string(data_, bytes_transferred) << std::endl;
+        
         boost::asio::async_write(socket_,
                                  boost::asio::buffer(data_, bytes_transferred),
                                  boost::bind(&session::handle_write, this,
@@ -106,6 +116,7 @@ void session::handle_read(const boost::system::error_code& error,
     }
     else
     {
+        std::cout << "read error" << std::endl;
         delete this;
     }
 }

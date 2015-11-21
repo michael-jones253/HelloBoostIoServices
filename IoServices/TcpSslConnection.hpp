@@ -92,7 +92,7 @@ namespace AsyncIo {
         
         void ConnectHandler(std::shared_ptr<TcpSslConnection> conn, boost::system::error_code ec);
         
-        void HandleHandshake(const boost::system::error_code& error);
+        void HandleHandshake(const boost::system::error_code error);
         
         void WriteHandler(
                           std::shared_ptr<TcpSslConnection> conn,
