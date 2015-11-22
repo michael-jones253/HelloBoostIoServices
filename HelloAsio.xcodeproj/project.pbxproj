@@ -200,10 +200,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B275D68E1BFDBAC50061D372 /* libssl.1.0.0.dylib in Frameworks */,
 				B275D68B1BFDBA5C0061D372 /* libcrypto.1.0.0.dylib in Frameworks */,
-				B275D68A1BFDBA3B0061D372 /* libboost_thread.dylib in Frameworks */,
+				B275D68E1BFDBAC50061D372 /* libssl.1.0.0.dylib in Frameworks */,
 				B275D6891BFDBA1D0061D372 /* libboost_system.dylib in Frameworks */,
+				B275D68A1BFDBA3B0061D372 /* libboost_thread.dylib in Frameworks */,
 				B275D6881BFDB9F60061D372 /* libIoServices.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -222,8 +222,8 @@
 			files = (
 				B233255A1BF7057A00D63355 /* libcrypto.tbd in Frameworks */,
 				B23325581BF7053E00D63355 /* libssl.tbd in Frameworks */,
-				B2AA92F21B64AB5600855ACA /* libboost_thread.dylib in Frameworks */,
 				B26B48131B64583E009262A4 /* libboost_system.dylib in Frameworks */,
+				B2AA92F21B64AB5600855ACA /* libboost_thread.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -890,6 +890,7 @@
 				B275D6861BFDB6730061D372 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		B2AADA851B64455C00688FC5 /* Build configuration list for PBXProject "HelloAsio" */ = {
 			isa = XCConfigurationList;

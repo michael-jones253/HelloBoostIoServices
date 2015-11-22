@@ -26,8 +26,8 @@ using namespace std::chrono;
 int main(int argc, const char * argv[]) {
     // insert code here...
     
-    auto errLogger = [](const std::string& msg, const std::exception&) {
-        
+    auto errLogger = [](const std::string& msg, const std::exception& ex) {
+        cout << "IO services exception: " << ex.what() << " " << msg << endl;
     };
 
     IoServices servicesInstance{ move(errLogger) };
@@ -36,8 +36,8 @@ int main(int argc, const char * argv[]) {
     
     // servicesInstance.RunTcpServer(23);
     
-    auto errLogger2 = [](const std::string& msg, const std::exception&) {
-        
+    auto errLogger2 = [](const std::string& msg, const std::exception& ex) {
+        cout << "IO services exception: " << ex.what() << " " << msg << endl;
     };
 
     // MJ Unless I make another wrapped instance of io_service, then the thread group
