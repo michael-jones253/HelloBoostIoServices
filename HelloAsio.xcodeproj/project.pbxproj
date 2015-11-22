@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B202B4AC1C018B2F006F6F9B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B275D6831BFDB6730061D372 /* main.cpp */; settings = {ASSET_TAGS = (); }; };
 		B21153BD1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */; };
 		B21153BF1BF9C109006C0723 /* libssl.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */; };
 		B21153C01BF9C1CA006C0723 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
@@ -34,7 +35,6 @@
 		B248C74C1B69E63F00B1A1DF /* TcpPeerConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21F0B3D1B68914700D1FE09 /* TcpPeerConnection.cpp */; };
 		B26B48131B64583E009262A4 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B270188F1BF8868B00BDEDCE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B270188E1BF8868B00BDEDCE /* main.cpp */; };
-		B275D6841BFDB6730061D372 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B275D6831BFDB6730061D372 /* main.cpp */; };
 		B275D6881BFDB9F60061D372 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
 		B275D6891BFDBA1D0061D372 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B275D68A1BFDBA3B0061D372 /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
@@ -573,7 +573,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B275D6841BFDB6730061D372 /* main.cpp in Sources */,
+				B202B4AC1C018B2F006F6F9B /* main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
