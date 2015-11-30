@@ -8,7 +8,8 @@
 
 // #define BOOST_EXCEPTION_DISABLE
 //#define BOOST_NO_EXCEPTIONS
-
+// #include <boost/asio/ssl.hpp>
+#include <boost/system/error_code.hpp>
 #include <boost/asio.hpp>
 
 #include "TcpSslConnection.hpp"
@@ -26,12 +27,17 @@ int main(int argc, const char * argv[]) {
         // insert code here...
         // Attempt to see if loading the strings was the problem - it isn't.
         SSL_load_error_strings();
+        
+#if defined(BOOST_ASIO_HEADER_ONLY)
+        cout << "BOOST HEADER ONLY" << endl;
+#endif
 
         const auto& sa = boost::system::get_system_category();
+        auto sn = sa.name();
 
         //static const boost::system::error_category& ecat = get_ssl_category();
                     
-        const boost::system::error_category& ssl_category = boost::asio::error::get_ssl_category();
+        const auto& ssl_category = boost::asio::error::get_ssl_category();
         
         // In debug mode this gives an access violation. This means that every time a boost ssl error is thrown an
         // attempt to print out message will seg fault the program. In release mode it is fine. I tried this after

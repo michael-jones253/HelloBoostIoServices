@@ -8,6 +8,7 @@
 
 #include "EgSslServer.hpp"
 #include <string>
+#include <iostream>
 
 server::server(boost::asio::io_service& io_service, unsigned short port)
 : io_service_(io_service),

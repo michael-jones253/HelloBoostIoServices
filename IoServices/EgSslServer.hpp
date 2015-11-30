@@ -9,11 +9,13 @@
 #ifndef EgSslServer_hpp
 #define EgSslServer_hpp
 
-#include <cstdlib>
-#include <iostream>
+#include <boost/system/error_code.hpp>
 #include <boost/bind.hpp>
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
+
+#include <cstdlib>
+
 
 using ssl_socket = boost::asio::ssl::stream<boost::asio::ip::tcp::socket>;
 

@@ -33,7 +33,6 @@
 		B248B60D1B6488A700ABD4A5 /* libboost_system.dylib in Resources */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B248B6101B648BB300ABD4A5 /* libboost_system.dylib in Resources */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B248C74C1B69E63F00B1A1DF /* TcpPeerConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21F0B3D1B68914700D1FE09 /* TcpPeerConnection.cpp */; };
-		B26B48131B64583E009262A4 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B270188F1BF8868B00BDEDCE /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B270188E1BF8868B00BDEDCE /* main.cpp */; };
 		B275D6881BFDB9F60061D372 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
 		B275D6891BFDBA1D0061D372 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
@@ -42,7 +41,6 @@
 		B275D68E1BFDBAC50061D372 /* libssl.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */; };
 		B2A9E43D1B917DA0003B6FB3 /* StreamConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */; };
 		B2A9E43E1B917DA0003B6FB3 /* StreamConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */; };
-		B2AA92F21B64AB5600855ACA /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
 		B2AADA8E1B64455C00688FC5 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2AADA8D1B64455C00688FC5 /* main.cpp */; };
 		B2AADA9B1B64460400688FC5 /* IoServices.h in Headers */ = {isa = PBXBuildFile; fileRef = B2AADA9A1B64460400688FC5 /* IoServices.h */; };
 		B2AADA9D1B64460400688FC5 /* IoServicesPriv.h in Headers */ = {isa = PBXBuildFile; fileRef = B2AADA9C1B64460400688FC5 /* IoServicesPriv.h */; };
@@ -50,6 +48,8 @@
 		B2AADAA61B6448B100688FC5 /* IoServicesImpl.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2AADAA51B6448B100688FC5 /* IoServicesImpl.cpp */; };
 		B2AADAA71B644A8E00688FC5 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
 		B2BB3E3E1B88662A00712206 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
+		B2DB88941C04522C004AD336 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
+		B2DB88951C045240004AD336 /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
 		B2DFE9AB1B6B3B3600CED951 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DFE9AA1B6B3B3600CED951 /* main.cpp */; };
 		B2DFE9AF1B6B3B4C00CED951 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
 		B2F65EA11B677B5200035D30 /* Timer.h in Headers */ = {isa = PBXBuildFile; fileRef = B2036AFC1B6759880037C5B2 /* Timer.h */; };
@@ -61,6 +61,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		B202B4AD1C018F21006F6F9B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = B2AADA821B64455C00688FC5 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = B2AADA971B64460400688FC5;
+			remoteInfo = IoServices;
+		};
 		B2AADAA81B644AB600688FC5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = B2AADA821B64455C00688FC5 /* Project object */;
@@ -220,10 +227,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B2DB88951C045240004AD336 /* libboost_thread.dylib in Frameworks */,
+				B2DB88941C04522C004AD336 /* libboost_system.dylib in Frameworks */,
 				B233255A1BF7057A00D63355 /* libcrypto.tbd in Frameworks */,
 				B23325581BF7053E00D63355 /* libssl.tbd in Frameworks */,
-				B26B48131B64583E009262A4 /* libboost_system.dylib in Frameworks */,
-				B2AA92F21B64AB5600855ACA /* libboost_thread.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -422,6 +429,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				B202B4AE1C018F21006F6F9B /* PBXTargetDependency */,
 			);
 			name = RunSslClient;
 			productName = RunSslClient;
@@ -488,7 +496,7 @@
 		B2AADA821B64455C00688FC5 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0640;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Michael Jones";
 				TargetAttributes = {
 					B216B19F1B87E57100CE0DE9 = {
@@ -614,6 +622,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		B202B4AE1C018F21006F6F9B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = B2AADA971B64460400688FC5 /* IoServices */;
+			targetProxy = B202B4AD1C018F21006F6F9B /* PBXContainerItemProxy */;
+		};
 		B2AADAA91B644AB600688FC5 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = B2AADA971B64460400688FC5 /* IoServices */;
@@ -679,7 +692,7 @@
 		B275D6851BFDB6730061D372 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				ENABLE_TESTABILITY = YES;
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
@@ -687,13 +700,14 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				STRIP_INSTALLED_PRODUCT = NO;
 			};
 			name = Debug;
 		};
 		B275D6861BFDB6730061D372 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LANGUAGE_STANDARD = "c++14";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					/opt/local/lib,
@@ -723,6 +737,7 @@
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -743,7 +758,7 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/opt/local/include,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = macosx;
@@ -784,7 +799,7 @@
 					/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/include,
 					/opt/local/include,
 				);
-				MACOSX_DEPLOYMENT_TARGET = 10.10;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = macosx;
 			};
@@ -812,6 +827,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;
@@ -831,6 +847,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				EXECUTABLE_PREFIX = lib;

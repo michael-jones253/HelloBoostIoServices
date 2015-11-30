@@ -11,6 +11,7 @@
 
 // FIX ME - probably need a later version of boost.
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
+#include <boost/system/error_code.hpp>
 
 #include "IoBufferWrapper.h"
 #include "IoCircularBuffer.h"
