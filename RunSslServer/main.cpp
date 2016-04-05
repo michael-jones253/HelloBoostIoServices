@@ -24,6 +24,7 @@ int main(int argc, const char * argv[]) {
             return 1;
         }
         
+        cout << "Port: " << argv[1] << endl;
         boost::asio::io_service io_service;
         server s(io_service, atoi(argv[1]));
 

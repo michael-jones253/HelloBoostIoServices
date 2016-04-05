@@ -8,6 +8,7 @@
 
 #include "stdafx.h"
 #include "TcpServer.h"
+#include "TcpConnection.hpp"
 
 #include <iostream>
 #include <thread>
@@ -98,7 +99,7 @@ namespace AsyncIo
 		auto streamConn = std::make_shared<StreamConnection>(acceptedConn, false /* is server side */);
 		auto available = [this, streamConn](size_t available) {
             // std::cout << "Got stuff available: " << acceptedConn->PeerEndPoint << available << std::endl;
-			_readSomeCb(streamConn, available);
+			_readSomeCb(streamConn, static_cast<int>(available));
         };
         
 		// Review: opportunity to have the error handler take a stream connection parameter.
@@ -121,7 +122,7 @@ namespace AsyncIo
 	{
         auto errorHandler = std::bind(&TcpServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
         
-        auto conn = std::make_shared<TcpPeerConnection>(_ioService, std::move(errorHandler));
+        auto conn = std::make_shared<TcpConnection>(_ioService, std::move(errorHandler));
 
         auto acceptor = std::bind(&TcpServer::AcceptHandler, this, conn, std::placeholders::_1);
 

@@ -58,7 +58,7 @@ int main(int argc, const char * argv[]) {
         // this should be a list of certificates that are trusted.
         ctx.load_verify_file("ca.pem"); // calls SSL_CTX_load_verify_locations
         
-        auto errCb = [](std::shared_ptr<TcpSslConnection>, const boost::system::error_code& ec) {
+        auto errCb = [](std::shared_ptr<TcpPeerConnection>, const boost::system::error_code& ec) {
             
             SSL_load_error_strings();
             unsigned long n = ERR_get_error();
@@ -70,11 +70,11 @@ int main(int argc, const char * argv[]) {
         shared_ptr<TcpSslConnection> client = make_shared<TcpSslConnection>(&io_service, move(ctx), move(errCb));
         future<bool> inputHandle{};
         
-        auto notifyData = [](std::shared_ptr<TcpSslConnection> clientConn, size_t available) {
+        auto notifyData = [](std::shared_ptr<TcpPeerConnection> clientConn, size_t available) {
             cout << "Available: " << available << endl;
         };
         
-        auto connectCb = [&inputHandle, &notifyData, &errCb](std::shared_ptr<TcpSslConnection> clientConn) {
+        auto connectCb = [&inputHandle, &notifyData, &errCb](std::shared_ptr<TcpPeerConnection> clientConn) {
             cout << "CLIENT CONN!!!" << endl;
             
             auto availableCb = [clientConn, &notifyData](size_t available) {
@@ -99,6 +99,7 @@ int main(int argc, const char * argv[]) {
             
         };
         
+        cout << "Port: " << argv[1] << endl;
         client->AsyncConnect(move(connectCb), "127.0.0.1", atoi(argv[1]));
         
         std::cout << "Hello, World!\n";

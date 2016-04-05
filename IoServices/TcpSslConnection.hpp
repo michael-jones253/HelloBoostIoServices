@@ -12,16 +12,8 @@
 // FIX ME - probably need a later version of boost.
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 #include <boost/system/error_code.hpp>
-
-#include "IoBufferWrapper.h"
-#include "IoCircularBuffer.h"
-#include <memory>
-#include <mutex>
-#include <functional>
-#include <deque>
-#include <boost/asio.hpp>
+#include "TcpPeerConnection.h"
 #include <boost/asio/ssl.hpp>
-#include <vector>
 
 #if defined(__GNUC__)
 /* The classes below are exported */
@@ -33,24 +25,10 @@ namespace AsyncIo {
     
     class TcpSslConnection;
     
-    // using ErrorCallback = std::function<void(std::shared_ptr<TcpSslConnection>, boost::system::error_code)>;
-    using ErrorCallback = std::function<void(std::shared_ptr<TcpSslConnection>, const boost::system::error_code&)>;
-    
-    using ReadSomeCallback = std::function<void(std::shared_ptr<TcpSslConnection>, std::size_t bytesAvailable)>;
-    
-    using SslConnectCallback = std::function<void(std::shared_ptr<TcpSslConnection>)>;
-    
-    class TcpSslConnection final : public std::enable_shared_from_this<TcpSslConnection> {
+    class TcpSslConnection final : public TcpPeerConnection {
     private:
-        std::mutex _mutex;
-        std::deque<std::shared_ptr<IoBufferWrapper>> mOutQueue;
-        ErrorCallback _errorCallback;
-        SslConnectCallback _connectCallback;
-        IoCircularBuffer _readBuffer;
         
     public:
-        boost::asio::ip::tcp::socket PeerSocket;
-        boost::asio::ip::tcp::endpoint PeerEndPoint;
         boost::asio::ssl::context Ctx;
         boost::asio::ssl::stream<boost::asio::ip::tcp::socket&> SslSocket;
         
@@ -62,30 +40,11 @@ namespace AsyncIo {
             std::cout << "Closing TCP peer connection: " << PeerEndPoint << std::endl;
         }
         
-        // NB returns backlog.
-        int AsyncWrite(std::string&& msg, bool nullTerminate);
-        
-        // NB returns backlog.
-        int AsyncWrite(std::vector<uint8_t>&& msg);
-        
-        void AsyncConnect(SslConnectCallback&& connectCb, std::string ipAddress, int port);
-        
-        void BeginChainedRead(IoNotifyAvailableCallback&& available,
-                              AsyncIo::ErrorCallback&& errorCallback,
-                              int chunkSize);
-        
-        boost::asio::ip::tcp::socket& GetPeerSocket() { return PeerSocket; }
-        
-        const uint8_t* Data() const { return _readBuffer.Get(); }
-        
-        size_t Size() const { return _readBuffer.Size(); }
-        
-        void Consume(size_t len) { _readBuffer.Consume(len); }
-        
-        void CopyTo(std::vector<uint8_t>& dest, int len);
-        
     private:
-        
+        void AsyncWriteToSocket(std::shared_ptr<IoBufferWrapper>& bufferWrapper, BoostIoHandler&& handler) override;
+        void AsyncReadSome(uint8_t* bufPtr, size_t len, BoostIoHandler&& handler) override;
+        void UpperLayerHandleConnect() override;
+
         bool VerifyCertificate(bool preverified,
                                boost::asio::ssl::verify_context& ctx);
         

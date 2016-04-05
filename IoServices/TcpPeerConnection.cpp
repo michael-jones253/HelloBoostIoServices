@@ -35,9 +35,8 @@ namespace AsyncIo
                     
                 };
 
-                // Unless buffer is created with a mutable pointer the boost buffer will not be mutable.
-				auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(bufPtr), len);
-				boost::asio::async_read(PeerSocket, boostBuf, boost::asio::transfer_at_least(1), std::move(boostHandler));
+                // Virtual
+                AsyncReadSome(bufPtr, len, std::move(boostHandler));
 
             };
             
@@ -115,8 +114,8 @@ namespace AsyncIo
                                  std::placeholders::_1,
                                  std::placeholders::_2);
         
-        // boost::asio::async_write(PeerSocket, boost::asio::buffer(mOutQueue.front()->Buffer), std::move(handler));
-		boost::asio::async_write(PeerSocket, mOutQueue.front()->ToBoost(), std::move(handler));
+        // Virtual
+        AsyncWriteToSocket(mOutQueue.front(), std::move(handler));
 	}
     
     void TcpPeerConnection::CopyTo(std::vector<uint8_t>& dest, int len)
@@ -132,7 +131,7 @@ namespace AsyncIo
 			return;
 		}
 
-		_connectCallback(conn);
+		UpperLayerHandleConnect();
 	}
 
     void TcpPeerConnection::WriteHandler(

@@ -7,6 +7,7 @@
 //
 #include "stdafx.h"
 #include "IoServicesImpl.h"
+#include "TcpConnection.hpp"
 
 #include <stdio.h>
 #include <chrono>
@@ -119,8 +120,7 @@ namespace AsyncIo {
 			ErrorHandler(conn, ec);
 		};
 
-		auto conn = std::make_shared<TcpPeerConnection>(&_ioService, std::move(errHandler));
-		static int ConnectionIds{};
+		auto conn = std::make_shared<TcpConnection>(&_ioService, std::move(errHandler));
 
 		// All access is from the context of the IO service so should not need mutexing.
 		_clientConnections[conn] = conn;

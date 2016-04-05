@@ -36,14 +36,22 @@ namespace AsyncIo {
     using ReadSomeCallback = std::function<void(std::shared_ptr<TcpPeerConnection>, std::size_t bytesAvailable)>;
 
 	using ConnectCallback = std::function<void(std::shared_ptr<TcpPeerConnection>)>;
+    
+    using BoostIoHandler = std::function<void(const boost::system::error_code& error, // Result of operation.
+                                                         std::size_t bytes_transferred           // Number of bytes written from the
+                                                         // buffers. If an error occurred,
+                                                         // this will be less than the sum
+                                                         // of the buffer sizes.
+                                                         )>;
 
-    class TcpPeerConnection final : public std::enable_shared_from_this<TcpPeerConnection> {
+    class TcpPeerConnection : public std::enable_shared_from_this<TcpPeerConnection> {
     private:
         std::mutex _mutex;
         std::deque<std::shared_ptr<IoBufferWrapper>> mOutQueue;
-        ErrorCallback _errorCallback;
-		ConnectCallback _connectCallback;
         IoCircularBuffer _readBuffer;
+    protected:
+        ErrorCallback _errorCallback;
+        ConnectCallback _connectCallback;
         
     public:
         boost::asio::ip::tcp::socket PeerSocket;
@@ -87,7 +95,12 @@ namespace AsyncIo {
                           std::shared_ptr<IoBufferWrapper> bufWrapper,
                           boost::system::error_code ec,
                           std::size_t written);
+        
+        virtual void AsyncWriteToSocket(std::shared_ptr<IoBufferWrapper>& bufferWrapper, BoostIoHandler&& handler) = 0;
 
+        virtual void AsyncReadSome(uint8_t* bufPtr, size_t len, BoostIoHandler&& handler) = 0;
+        
+        virtual void UpperLayerHandleConnect() = 0;
     };
 }
 #if defined(__GNUC__)

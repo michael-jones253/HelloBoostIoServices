@@ -112,7 +112,7 @@ namespace AsyncIo
 			auto lockedConn = weakStreamConn.lock();
 			if (lockedConn)
 			{
-				readCb(lockedConn, available);
+				readCb(lockedConn, static_cast<int>(available));
 			}
 			else
 			{

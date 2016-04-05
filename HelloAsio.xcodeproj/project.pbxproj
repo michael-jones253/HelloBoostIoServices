@@ -54,6 +54,8 @@
 		B2DFE9AF1B6B3B4C00CED951 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
 		B2F65EA11B677B5200035D30 /* Timer.h in Headers */ = {isa = PBXBuildFile; fileRef = B2036AFC1B6759880037C5B2 /* Timer.h */; };
 		B2F65EA21B677B5F00035D30 /* PeriodicTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = B2036AFD1B67599E0037C5B2 /* PeriodicTimer.h */; };
+		B2F6E8751CB36F53006719FA /* TcpConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F6E8731CB36F53006719FA /* TcpConnection.cpp */; settings = {ASSET_TAGS = (); }; };
+		B2F6E8761CB36F53006719FA /* TcpConnection.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B2F6E8741CB36F53006719FA /* TcpConnection.hpp */; settings = {ASSET_TAGS = (); }; };
 		B2F813C31B6AF66A00018DE7 /* IoBufferWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F813C11B6AF66A00018DE7 /* IoBufferWrapper.cpp */; };
 		B2F813C41B6AF66A00018DE7 /* IoBufferWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = B2F813C21B6AF66A00018DE7 /* IoBufferWrapper.h */; };
 		B2F9DED71B6D858C00FC02B2 /* IoCircularBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F9DED51B6D858C00FC02B2 /* IoCircularBuffer.cpp */; };
@@ -176,6 +178,8 @@
 		B2AADAA51B6448B100688FC5 /* IoServicesImpl.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoServicesImpl.cpp; sourceTree = "<group>"; };
 		B2DFE9A81B6B3B3600CED951 /* TestServices */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestServices; sourceTree = BUILT_PRODUCTS_DIR; };
 		B2DFE9AA1B6B3B3600CED951 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
+		B2F6E8731CB36F53006719FA /* TcpConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TcpConnection.cpp; sourceTree = "<group>"; };
+		B2F6E8741CB36F53006719FA /* TcpConnection.hpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = TcpConnection.hpp; sourceTree = "<group>"; };
 		B2F813C11B6AF66A00018DE7 /* IoBufferWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoBufferWrapper.cpp; sourceTree = "<group>"; };
 		B2F813C21B6AF66A00018DE7 /* IoBufferWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IoBufferWrapper.h; sourceTree = "<group>"; };
 		B2F9DED51B6D858C00FC02B2 /* IoCircularBuffer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoCircularBuffer.cpp; sourceTree = "<group>"; };
@@ -342,6 +346,8 @@
 				B23325541BF6FE5700D63355 /* TcpSslConnection.hpp */,
 				B21E69321BF819EA00532135 /* EgSslServer.cpp */,
 				B21E69331BF819EA00532135 /* EgSslServer.hpp */,
+				B2F6E8731CB36F53006719FA /* TcpConnection.cpp */,
+				B2F6E8741CB36F53006719FA /* TcpConnection.hpp */,
 			);
 			path = IoServices;
 			sourceTree = "<group>";
@@ -368,6 +374,7 @@
 				B2AADA9D1B64460400688FC5 /* IoServicesPriv.h in Headers */,
 				B22AA07F1BA3B19D006E58F5 /* targetver.h in Headers */,
 				B2F65EA21B677B5F00035D30 /* PeriodicTimer.h in Headers */,
+				B2F6E8761CB36F53006719FA /* TcpConnection.hpp in Headers */,
 				B21F0B3C1B68875E00D1FE09 /* TcpServer.h in Headers */,
 				B23325561BF6FE5700D63355 /* TcpSslConnection.hpp in Headers */,
 				B226FB821BA7B5DF00CFF893 /* UdpListener.h in Headers */,
@@ -602,6 +609,7 @@
 				B21F0B3B1B68875E00D1FE09 /* TcpServer.cpp in Sources */,
 				B21E69341BF819EA00532135 /* EgSslServer.cpp in Sources */,
 				B226FB7F1BA7B5DF00CFF893 /* DgramListener.cpp in Sources */,
+				B2F6E8751CB36F53006719FA /* TcpConnection.cpp in Sources */,
 				B226FB811BA7B5DF00CFF893 /* UdpListener.cpp in Sources */,
 				B2F9DED71B6D858C00FC02B2 /* IoCircularBuffer.cpp in Sources */,
 				B22AA07B1BA3B158006E58F5 /* IoServices.cpp in Sources */,
