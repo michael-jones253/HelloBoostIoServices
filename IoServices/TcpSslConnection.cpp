@@ -95,6 +95,16 @@ namespace AsyncIo {
                            boost::asio::ssl::verify_context& ctx) {
         std::cout << "Verifying certificate, pre-verified: " << std::string(preverified ? "true" : "false");
         // FIX ME - verify.
+        
+        char subject_name[256];
+        X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
+        X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
+        std::cout << "Verifying, subject: " << subject_name << "\n";
+        
+        char issuer_name[256];
+        X509_NAME_oneline(X509_get_issuer_name(cert), issuer_name, 256);
+        std::cout << "Verifying, issuer: " << issuer_name << "\n";
+        
         return preverified;
     }
 
