@@ -99,6 +99,12 @@ namespace AsyncIo
 		/// <returns>An instance that is listening for datagrams.</returns>
 		std::shared_ptr<DgramListener> BindDgramListener(DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, const std::string& ipAddress, int port);
 
+		// Overload for address any.
+		std::shared_ptr<DgramListener> BindDgramListener(DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, int port);
+
+		// For sockets that are not bound to a listening port. Any reads will be on the ephemeral port.
+		std::shared_ptr<DgramListener> UnboundDgramListener(DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb);
+
 		void SendToAllServerConnections(const std::string& msg, bool nullTerminate);
         
         void RunWork(std::function<void(void)>const& work);

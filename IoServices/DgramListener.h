@@ -25,11 +25,11 @@ namespace AsyncIo
 
 	using DgramReceiveCallback = std::function<void(std::shared_ptr<DgramListener>, int bytesAvailable)>;
 
-	// MJ Review: - use this for TCP and put in a separate file.
 	struct IoEndPoint
 	{
 		std::string IpAddress;
 		int Port;
+		bool AsyncConnected;
 	};
 
 	/// <summary>
@@ -65,7 +65,7 @@ namespace AsyncIo
 		/// <param name="connectCb">The connect callback - if unsuccesful the error callback supplied for the bind will be called.</param>
 		/// <param name="destIp">The destination ip in dot notation form.</param>
 		/// <param name="port">Int the destination UDP port.</param>
-		void Connect(DgramConnectCallback&& connectCb, const std::string& destIp, int port);
+		void AsyncConnect(DgramConnectCallback&& connectCb, const std::string& destIp, int port);
 
 		/// <summary>
 		/// Asynchronous write of a string message.
@@ -116,6 +116,8 @@ namespace AsyncIo
 		void StopListening();
 
 		IoEndPoint GetPeerEndPoint() const;
+
+		bool HasAsyncConnected() const;
 
 		/// <summary>
 		/// Checks whether the listener is valid or not.

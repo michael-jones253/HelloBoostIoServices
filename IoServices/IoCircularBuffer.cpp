@@ -68,7 +68,7 @@ namespace AsyncIo {
     }
 
 
-    void IoCircularBuffer::BeginChainedRead(IoNotifyAvailableCallback&& notifySome, int chunkSize) {
+    void IoCircularBuffer::BeginChainedRead(IoNotifyAvailableCallback&& notifySome, int chunkSize, bool immediate) {
         // Only one chained readsome allowed in progress.
         if (_notifyAvailable != nullptr) {
             throw runtime_error("IO circular buffer - read some already in progress");
@@ -76,8 +76,11 @@ namespace AsyncIo {
         
         _notifyAvailable = move(notifySome);
         _chunkSize = chunkSize;
-		_shouldRead = true;
-        ReadSome();
+		_shouldRead = immediate;
+
+		if (immediate) {
+			ReadSome();
+		}
     }
     
     void IoCircularBuffer::ReadSome() {

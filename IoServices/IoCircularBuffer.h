@@ -91,7 +91,18 @@ namespace AsyncIo
         
         IoCircularBuffer& operator=(IoCircularBuffer&& rhs);
         
-        void BeginChainedRead(IoNotifyAvailableCallback&& notifySome, int chunkSize);
+		void BeginChainedRead(IoNotifyAvailableCallback&& notifySome, int chunkSize, bool immediate = true);
+
+		// For when the above is called with immediate == false.
+		void BeginReadSome() {
+			if (_shouldRead) {
+				return;
+			}
+
+			_shouldRead = true;
+			ReadSome();
+		}
+
 		void EndReadSome() { _shouldRead = false;  }
         
         void Consume(size_t len);
@@ -104,10 +115,10 @@ namespace AsyncIo
         
         // This is only needed for memory consumption diagnostics.
         size_t Capacity() const;
-        
+
     private:
-        void ReadSome();
-        void ReadSomeHandler(size_t bytesRead);
+		void ReadSome();
+		void ReadSomeHandler(size_t bytesRead);
     };
 }
 #if defined(__GNUC__)

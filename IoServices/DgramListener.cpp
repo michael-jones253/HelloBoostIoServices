@@ -39,7 +39,7 @@ namespace AsyncIo {
 	/// <param name="connectCb">The connect callback - if unsuccesful the error callback supplied for the bind will be called.</param>
 	/// <param name="destIp">The destination ip in dot notation form.</param>
 	/// <param name="port">Int the destination UDP port.</param>
-	void DgramListener::Connect(DgramConnectCallback&& connectCb, const std::string& destIp, int port)
+	void DgramListener::AsyncConnect(DgramConnectCallback&& connectCb, const std::string& destIp, int port)
 	{
 		auto listener = _udpListener.lock();
 		if (!listener)
@@ -191,9 +191,20 @@ namespace AsyncIo {
 		stringstream addressStr;
 		addressStr << listener->PeerEndPoint.address();
 
-		IoEndPoint ep{ addressStr.str(), listener->PeerEndPoint.port() };
+		IoEndPoint ep{ addressStr.str(), listener->PeerEndPoint.port(), listener->HasAsyncConnected() };
 
 		return ep;
+	}
+
+	bool DgramListener::HasAsyncConnected() const
+	{
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		return listener->HasAsyncConnected();
 	}
 
 	/// <summary>

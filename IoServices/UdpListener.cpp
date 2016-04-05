@@ -9,6 +9,7 @@
 
 #include "UdpListener.h"
 #include <iostream>
+#include <future>
 
 using namespace boost::asio::ip;
 
@@ -23,29 +24,58 @@ namespace AsyncIo
 		_connectCallback{},
         _readBuffer{}
 	{
-            auto cb = [this](uint8_t* bufPtr, size_t len, std::function<void(size_t)>&&handler) {
-				auto myHandler = move(handler);
-                auto boostHandler = [this, myHandler](const boost::system::error_code& ec,
-                              std::size_t bytes_transferred) {
-                    if (bytes_transferred == 0 || ec != 0) {
-						auto me = this->shared_from_this();
-						_readBuffer.EndReadSome();
-						_errorCallback(me, ec);
-                        return;
-                    }
-                    
-                    myHandler(bytes_transferred);
-                    
-                };
-
-                // Unless buffer is created with a mutable pointer the boost buffer will not be mutable.
-				auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(bufPtr), len);
-				PeerSocket.async_receive_from(boostBuf, PeerEndPoint, std::move(boostHandler));
-            };
-            
-            IoCircularBuffer bufWithCb{ cb };
-            _readBuffer = std::move(bufWithCb);
+		SetupCircularBufferCallbacks();
     }
+
+	UdpListener::UdpListener(boost::asio::io_service* ioService, int port) :
+		PeerSocket{ *ioService, udp::endpoint(udp::v4(), static_cast<unsigned short>(port)) },
+		PeerEndPoint{},
+		Mutex{},
+		mOutQueue{},
+		_errorCallback{},
+		_connectCallback{},
+		_asyncConnected{},
+		_readBuffer{}
+	{
+		SetupCircularBufferCallbacks();
+	}
+
+	UdpListener::UdpListener(boost::asio::io_service* ioService) :
+		PeerSocket{ *ioService },
+		PeerEndPoint{},
+		Mutex{},
+		mOutQueue{},
+		_errorCallback{},
+		_connectCallback{},
+		_asyncConnected{},
+		_readBuffer{}
+	{
+		SetupCircularBufferCallbacks();
+	}
+
+	void UdpListener::SetupCircularBufferCallbacks() {
+		auto cb = [this](uint8_t* bufPtr, size_t len, std::function<void(size_t)>&&handler) {
+			auto myHandler = move(handler);
+			auto boostHandler = [this, myHandler](const boost::system::error_code& ec,
+				std::size_t bytes_transferred) {
+				if (/* ec.value() != 10061 && */(bytes_transferred == 0 || ec != 0)) { // Weird windows/boost behavior: read with error code 10061 (connection refused) after write on loopback un-bound socket.
+					auto me = this->shared_from_this();
+					_readBuffer.EndReadSome();
+					_errorCallback(me, ec);
+					return;
+				}
+
+				myHandler(bytes_transferred);
+			};
+
+			// Unless buffer is created with a mutable pointer the boost buffer will not be mutable.
+			auto boostBuf = boost::asio::buffer(const_cast<uint8_t*>(bufPtr), len);
+			PeerSocket.async_receive_from(boostBuf, PeerEndPoint, std::move(boostHandler));
+		};
+
+		IoCircularBuffer bufWithCb{ cb };
+		_readBuffer = std::move(bufWithCb);
+	}
 
 	// For already bound listeners.
 	void UdpListener::AsyncConnect(const boost::asio::ip::address& destIp, int port, std::function<void()>&& connectHandler) {
@@ -75,10 +105,10 @@ namespace AsyncIo
 		QueueOrWriteBuffer(bufWrapper);
 	}
     
-	void UdpListener::BeginChainedRead(IoNotifyAvailableCallback&& available, AsyncIo::UdpErrorCallback&& errCb, int datagramSize)
+	void UdpListener::SetupChainedRead(IoNotifyAvailableCallback&& available, AsyncIo::UdpErrorCallback&& errCb, int datagramSize, bool immediate)
 	{
 		_errorCallback = std::move(errCb);
-        _readBuffer.BeginChainedRead(std::move(available), datagramSize);
+        _readBuffer.BeginChainedRead(std::move(available), datagramSize, immediate);
     }
 
     void UdpListener::LaunchWrite()
@@ -112,15 +142,24 @@ namespace AsyncIo
 		PeerSocket.close();
 	}
     
-	// For already bound listeners.
 	void UdpListener::ConnectHandler(std::shared_ptr<UdpListener> conn, boost::system::error_code ec)
 	{
+		auto launchRead = [this]() {
+			_readBuffer.BeginReadSome();
+		};
+
+
 		if (ec != 0) {
 			_errorCallback(conn, ec);
 		}
 		else {
+			// If this is a connect of an un-bound socket then launch the chained read.
+			auto handle = std::async(std::launch::async, std::move(launchRead));
+			handle.get();
+			_asyncConnected.store(true);
 			_connectCallback();
 		}
+
 	}
 
     void UdpListener::WriteHandler(
@@ -132,8 +171,9 @@ namespace AsyncIo
         if (written != bufWrapper->BoostSize())
 		{
             std::cerr << "Incomplete write, buffer: " << bufWrapper->BoostSize() << " written: " << written << std::endl;
-            conn->PeerSocket.close();
-            _errorCallback(conn, ec);
+			// Boost method to stop an async read is to close the socket.
+			// The async read callback will then call the error callback to cleanup the connection and inform the application.
+			conn->PeerSocket.close();
             return;
         }
         

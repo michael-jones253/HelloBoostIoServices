@@ -168,7 +168,23 @@ namespace AsyncIo {
 		return listener;
 	}
 
-    void IoServicesImpl::Stop() {
+	std::shared_ptr<UdpListener> IoServicesImpl::BindDgramListener(int port) {
+		auto listener = std::make_shared<UdpListener>(&_ioService, port);
+		std::lock_guard<std::mutex> listenerGuard(_mutex);
+		_listeners[listener] = listener;
+
+		return listener;
+	}
+
+	std::shared_ptr<UdpListener> IoServicesImpl::MakeUnboundUdpListener() {
+		auto listener = std::make_shared<UdpListener>(&_ioService);
+		std::lock_guard<std::mutex> listenerGuard(_mutex);
+		_listeners[listener] = listener;
+
+		return listener;
+	}
+
+	void IoServicesImpl::Stop() {
 		if (!_serviceRunHandle.valid())
 		{
 			return;

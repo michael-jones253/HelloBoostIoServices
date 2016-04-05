@@ -60,7 +60,11 @@ namespace AsyncIo {
 
 		std::shared_ptr<UdpListener> BindDgramListener(std::string ipAddress, int port);
         
-        void Stop();
+		std::shared_ptr<UdpListener> BindDgramListener(int port);
+
+		std::shared_ptr<UdpListener> MakeUnboundUdpListener();
+
+		void Stop();
         
         void RunWork(const std::function<void(void)>& work);
 

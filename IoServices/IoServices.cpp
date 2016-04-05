@@ -157,21 +157,9 @@ namespace AsyncIo
 		_impl->AsyncConnect(std::move(connect), std::move(error), ipAddress, port);
 	}
 
-	/// <summary>
-	/// Binds a datagram listener for asynchronous UDP receive.
-	/// NB. This will start receiving straight away.
-	/// </summary>
-	/// <param name="receiveCb">The receive callback for UDP receive.</param>
-	/// <param name="errCb">The error callback for socket errors.</param>
-	/// <param name="ipAddress">The IP interface address to bind. Can be 0.0.0.0 for address any.</param>
-	/// <param name="port">The port to bind to.</param>
-	/// <returns>An instance that is listening for datagrams.</returns>
-	shared_ptr<DgramListener> IoServices::BindDgramListener(DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, const std::string& ipAddress, int port)
+
+	void SetupReadCallbacks(shared_ptr<DgramListener> sharedListener, DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, IoServicesImpl* impl, std::shared_ptr<UdpListener> udpListener, bool immediate = true)
 	{
-		auto udpListener = _impl->BindDgramListener(ipAddress, port);
-		
-		// The binded listener to return.
-		auto sharedListener = make_shared<DgramListener>(udpListener);
 
 		// NB if we inject a shared pointer to the datagram Listener into the UDP listener callback
 		// it would means that the UDP listener effectively owns the parent datagram listener. This
@@ -187,7 +175,7 @@ namespace AsyncIo
 			}
 		};
 
-		auto udpErrCb = [this, errCb, weakListener](std::shared_ptr<UdpListener> listener, const boost::system::error_code& ec) {
+		auto udpErrCb = [impl, errCb, weakListener](std::shared_ptr<UdpListener> listener, const boost::system::error_code& ec) {
 			auto lockedListener = weakListener.lock();
 			if (lockedListener)
 			{
@@ -205,11 +193,52 @@ namespace AsyncIo
 			}
 
 			// Then call the cleanup handler.
-			_impl->ErrorHandler(listener, ec);
+			impl->ErrorHandler(listener, ec);
 		};
 
-		udpListener->BeginChainedRead(move(notify), move(udpErrCb), DatagramMtu);
+		udpListener->SetupChainedRead(move(notify), move(udpErrCb), DatagramMtu, immediate);
+	}
 
+	/// <summary>
+	/// Binds a datagram listener for asynchronous UDP receive.
+	/// NB. This will start receiving straight away.
+	/// </summary>
+	/// <param name="receiveCb">The receive callback for UDP receive.</param>
+	/// <param name="errCb">The error callback for socket errors.</param>
+	/// <param name="ipAddress">The IP interface address to bind. Can be 0.0.0.0 for address any.</param>
+	/// <param name="port">The port to bind to.</param>
+	/// <returns>An instance that is listening for datagrams.</returns>
+	shared_ptr<DgramListener> IoServices::BindDgramListener(DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, const std::string& ipAddress, int port)
+	{
+		auto udpListener = _impl->BindDgramListener(ipAddress, port);
+		
+		// The binded listener to return.
+		auto sharedListener = make_shared<DgramListener>(udpListener);
+
+		SetupReadCallbacks(sharedListener, move(receiveCb), move(errCb), _impl.get(), udpListener);
+
+		return sharedListener;
+	}
+
+	shared_ptr<DgramListener> IoServices::BindDgramListener(DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, int port)
+	{
+		auto udpListener = _impl->BindDgramListener(port);
+
+		// The binded listener to return.
+		auto sharedListener = make_shared<DgramListener>(udpListener);
+
+		SetupReadCallbacks(sharedListener, move(receiveCb), move(errCb), _impl.get(), udpListener);
+
+		return sharedListener;
+	}
+
+	std::shared_ptr<DgramListener> IoServices::UnboundDgramListener(DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb) {
+		auto udpListener = _impl->MakeUnboundUdpListener();
+
+		// The binded listener to return.
+		auto sharedListener = make_shared<DgramListener>(udpListener);
+
+		SetupReadCallbacks(sharedListener, move(receiveCb), move(errCb), _impl.get(), udpListener, false /* defer read */); // The async read cannot be started now because the socket is not ready until connected.
 		return sharedListener;
 	}
 

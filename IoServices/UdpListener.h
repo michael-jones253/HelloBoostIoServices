@@ -9,6 +9,7 @@
 #include "IoCircularBuffer.h"
 #include <memory>
 #include <mutex>
+#include <atomic>
 #include <functional>
 #include <deque>
 #include <boost/asio.hpp>
@@ -38,13 +39,18 @@ namespace AsyncIo
         std::deque<std::shared_ptr<IoBufferWrapper>> mOutQueue;
         UdpErrorCallback _errorCallback;
 		std::function<void()> _connectCallback;
-        IoCircularBuffer _readBuffer;
-        
+		std::atomic<bool> _asyncConnected;
+		IoCircularBuffer _readBuffer;
     public:
         boost::asio::ip::udp::socket PeerSocket;
         boost::asio::ip::udp::endpoint PeerEndPoint;
 
 		UdpListener(boost::asio::io_service* ioService, const boost::asio::ip::address& address, int port);
+
+		UdpListener(boost::asio::io_service* ioService, int port);
+
+		UdpListener(boost::asio::io_service* ioService);
+
 		~UdpListener()
 		{
 			std::cout << "Closing UDP listener: " << PeerEndPoint << std::endl;
@@ -57,7 +63,7 @@ namespace AsyncIo
 
 		void AsyncWrite(std::vector<uint8_t>&& msg);
 
-		void BeginChainedRead(IoNotifyAvailableCallback&& available, AsyncIo::UdpErrorCallback&& errCb, int datagramSize);
+		void SetupChainedRead(IoNotifyAvailableCallback&& available, AsyncIo::UdpErrorCallback&& errCb, int datagramSize, bool immediate = true);
         
         boost::asio::ip::udp::socket& GetPeerSocket() { return PeerSocket; }
         
@@ -70,13 +76,18 @@ namespace AsyncIo
         void CopyTo(std::vector<uint8_t>& dest, int len);
 
 		void StopListening();
+
+		bool HasAsyncConnected() const {
+			return _asyncConnected.load();
+		}
         
     private:
+		void SetupCircularBufferCallbacks();
+
 		void QueueOrWriteBuffer(std::shared_ptr<IoBufferWrapper> bufWrapper);
 
 		void LaunchWrite();
 
-		// For already bound listeners.
 		void ConnectHandler(std::shared_ptr<UdpListener> conn, boost::system::error_code ec);
 
 		void WriteHandler(
