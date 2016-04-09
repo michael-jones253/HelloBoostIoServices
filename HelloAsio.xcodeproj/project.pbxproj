@@ -137,6 +137,7 @@
 /* Begin PBXFileReference section */
 		B2036AFC1B6759880037C5B2 /* Timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
 		B2036AFD1B67599E0037C5B2 /* PeriodicTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PeriodicTimer.h; sourceTree = "<group>"; };
+		B20BF4EA1CB88D630008B372 /* SecurityOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SecurityOptions.h; sourceTree = "<group>"; };
 		B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.1.0.0.dylib; path = ../../../../../../opt/local/lib/libcrypto.1.0.0.dylib; sourceTree = "<group>"; };
 		B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.1.0.0.dylib; path = ../../../../../../opt/local/lib/libssl.1.0.0.dylib; sourceTree = "<group>"; };
 		B216B1A01B87E57100CE0DE9 /* TestCircularAsio */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestCircularAsio; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -320,6 +321,7 @@
 			isa = PBXGroup;
 			children = (
 				B22AA07A1BA3B158006E58F5 /* IoServices.cpp */,
+				B20BF4EA1CB88D630008B372 /* SecurityOptions.h */,
 				B226FB7B1BA7B5DF00CFF893 /* DgramListener.cpp */,
 				B226FB7C1BA7B5DF00CFF893 /* DgramListener.h */,
 				B226FB7D1BA7B5DF00CFF893 /* UdpListener.cpp */,

@@ -11,6 +11,8 @@
 
 #include "StreamConnection.h"
 #include "TcpPeerConnection.h"
+#include "TcpSslConnection.hpp"
+#include "SecurityOptions.h"
 
 #include <boost/asio.hpp>
 #include <memory>
@@ -37,7 +39,7 @@ namespace AsyncIo
 		std::vector<std::shared_ptr<TcpPeerConnection>> _peerConnections{};
 		AcceptStreamCallback _acceptStreamCb{};
 		ReadStreamCallback _readSomeCb{};
-		
+        SecurityOptions _securityOptions{};
     public:
 		TcpServer() = delete;
 
@@ -57,14 +59,20 @@ namespace AsyncIo
 
 		~TcpServer();
         void Start();
+        void Start(SecurityOptions&& security);
         void Stop();
         void SendMessageToAllPeers(const std::string& msg, bool nullTerminate);
         int GetPort() const { return _port; }
     private:
+        void OnAccept(std::shared_ptr<TcpPeerConnection> acceptedConn);
         void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec);
         void AsyncAccept();
+        void HandleSslHandshake(std::shared_ptr<TcpSslConnection>acceptedConn, const boost::system::error_code& error);
+        void SecureAcceptHandler(std::shared_ptr<TcpSslConnection>acceptedConn, const boost::system::error_code& ec);
+        void AsyncSecureAccept();
         void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
         void CloseAllPeerConnections();
+        std::string GetPassword() const;
     };
 }
 #if defined(__GNUC__)
