@@ -100,7 +100,9 @@ int main(int argc, const char * argv[]) {
         };
         
         cout << "Port: " << argv[1] << endl;
-        client->AsyncConnect(move(connectCb), "127.0.0.1", atoi(argv[1]));
+        cout << "server: " << argv[2] << endl;
+        auto serverIp = argv[2];
+        client->AsyncConnect(move(connectCb), serverIp, atoi(argv[1]));
         
         std::cout << "Hello, World!\n";
         

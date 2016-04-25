@@ -39,6 +39,7 @@
 		B275D68A1BFDBA3B0061D372 /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
 		B275D68B1BFDBA5C0061D372 /* libcrypto.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */; };
 		B275D68E1BFDBAC50061D372 /* libssl.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */; };
+		B2A192041CC32F3400A93DF4 /* libboost_program_options.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2A192031CC32F3400A93DF4 /* libboost_program_options.dylib */; };
 		B2A9E43D1B917DA0003B6FB3 /* StreamConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */; };
 		B2A9E43E1B917DA0003B6FB3 /* StreamConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */; };
 		B2AADA8E1B64455C00688FC5 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2AADA8D1B64455C00688FC5 /* main.cpp */; };
@@ -167,6 +168,7 @@
 		B275D6811BFDB6730061D372 /* RunSslClient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RunSslClient; sourceTree = BUILT_PRODUCTS_DIR; };
 		B275D6831BFDB6730061D372 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B275D68C1BFDBA8B0061D372 /* libsasl2.2.0.25.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsasl2.2.0.25.dylib; path = ../../../../../../opt/local/lib/libsasl2.2.0.25.dylib; sourceTree = "<group>"; };
+		B2A192031CC32F3400A93DF4 /* libboost_program_options.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_program_options.dylib; path = ../../../../../../opt/local/lib/libboost_program_options.dylib; sourceTree = "<group>"; };
 		B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamConnection.cpp; sourceTree = "<group>"; };
 		B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamConnection.h; sourceTree = "<group>"; };
 		B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_thread.dylib; path = ../../../../../../opt/local/lib/libboost_thread.dylib; sourceTree = "<group>"; };
@@ -201,8 +203,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				B2208D201BFB1203005003E2 /* libIoServices.dylib in Frameworks */,
-				B2208D1F1BFB11D7005003E2 /* libboost_thread.dylib in Frameworks */,
 				B21153C01BF9C1CA006C0723 /* libboost_system.dylib in Frameworks */,
+				B2A192041CC32F3400A93DF4 /* libboost_program_options.dylib in Frameworks */,
+				B2208D1F1BFB11D7005003E2 /* libboost_thread.dylib in Frameworks */,
 				B21153BF1BF9C109006C0723 /* libssl.1.0.0.dylib in Frameworks */,
 				B21153BD1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib in Frameworks */,
 			);
@@ -277,6 +280,7 @@
 		B2AADA811B64455C00688FC5 = {
 			isa = PBXGroup;
 			children = (
+				B2A192031CC32F3400A93DF4 /* libboost_program_options.dylib */,
 				B275D68C1BFDBA8B0061D372 /* libsasl2.2.0.25.dylib */,
 				B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */,
 				B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */,
