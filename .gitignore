@@ -1,0 +1,24 @@
+# Windows shortcuts
+*.lnk
+*.sdf
+*.suo
+*.tlog
+*.log
+*.pdb
+*.idb
+*.ipch
+*.pch
+*.obj
+*.lib
+*.exe
+*.ilk
+*.nupkg
+*.targets
+*.cache
+*.opensdf
+*.dll
+
+
+IoServices/Debug/
+IoServices/Release/
+HelloBoostIoServices/packages/boost.1.59.0.0/

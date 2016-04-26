@@ -5,6 +5,7 @@
 //  Created by Michael Jones on 5/04/2016.
 //  Copyright © 2016 Michael Jones. All rights reserved.
 //
+#include "stdafx.h"
 
 #include "TcpConnection.hpp"
 namespace AsyncIo {

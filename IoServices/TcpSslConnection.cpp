@@ -5,7 +5,7 @@
 //  Created by Michael Jones on 14/11/2015.
 //  Copyright © 2015 Michael Jones. All rights reserved.
 //
-
+#include "stdafx.h"
 #include "TcpSslConnection.hpp"
 
 #include <iostream>
