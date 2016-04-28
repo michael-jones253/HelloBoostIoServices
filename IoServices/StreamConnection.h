@@ -135,6 +135,11 @@ namespace AsyncIo
 		/// </summary>
 		/// <returns>The ip address/port information.</returns>
 		EndPoint GetPeerEndPoint() const;
+
+		/// <summary>
+		/// Close the underlying socket.
+		/// </summary>
+		void Close();
     };
 }
 #if defined(__GNUC__)

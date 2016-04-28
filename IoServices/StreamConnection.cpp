@@ -184,5 +184,18 @@ namespace AsyncIo
 		return ep;
 	}
 
-    
+	/// <summary>
+	/// Close the underlying socket.
+	/// </summary>
+	void StreamConnection::Close()
+	{
+		auto conn = _peerConnection.lock();
+		if (!conn)
+		{
+			// Already closed.
+			return;
+		}
+
+		conn->Close();
+	}
 }

@@ -83,6 +83,8 @@ namespace AsyncIo {
         void Consume(size_t len) { _readBuffer.Consume(len); }
         
         void CopyTo(std::vector<uint8_t>& dest, int len);
+
+		void Close();
         
     private:
         
