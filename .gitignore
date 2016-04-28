@@ -18,6 +18,11 @@
 *.opensdf
 *.dll
 
+# Do not publish secret SSL stuff!
+*.crt
+*.pem
+*.ca
+*.key
 
 IoServices/Debug/
 IoServices/Release/
