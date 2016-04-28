@@ -17,7 +17,10 @@
 *.cache
 *.opensdf
 *.dll
+*.user
 
+# certificate stuff
+*.pem
 
 IoServices/Debug/
 IoServices/Release/

@@ -55,6 +55,7 @@ int _tmain(int argc, wchar_t* wargv[]) {
 			("port", po::value<int>()->default_value(23), "server port")
 			("cert", po::wvalue<wstring>(), "server certificate")
 			("private-key", po::wvalue<wstring>(), "private key")
+			("diffie-hellman", po::wvalue<wstring>(), "DH key exchange")
 			("password", po::wvalue<wstring>(), "password");
 
 		po::variables_map vm;
