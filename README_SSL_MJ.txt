@@ -10,3 +10,6 @@ Running server - supply server certificate, private key and private key password
 
 Running client - supply list of trusted certificates - simply copy server certificate into ca.pem. No password needed.
 
+
+#  For msys/mingw
+export OPENSSL_CONF=/usr/local/ssl/openssl.cnf

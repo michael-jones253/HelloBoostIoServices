@@ -21,6 +21,11 @@
 
 # certificate stuff
 *.pem
+*.pvk
+*.pfx
+
+# general gitignore documents
+*.nogit
 
 IoServices/Debug/
 IoServices/Release/
