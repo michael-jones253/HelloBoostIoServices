@@ -23,6 +23,7 @@
 *.pem
 *.pvk
 *.pfx
+*.cer
 
 # general gitignore documents
 *.nogit
