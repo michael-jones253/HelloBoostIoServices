@@ -19,11 +19,12 @@
 *.dll
 *.user
 
-# certificate stuff
+# Do not publish secret SSL stuff!
 *.pem
 *.pvk
 *.pfx
 *.cer
+*.crt
 
 # general gitignore documents
 *.nogit
