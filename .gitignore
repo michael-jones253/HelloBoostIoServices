@@ -17,12 +17,17 @@
 *.cache
 *.opensdf
 *.dll
+*.user
 
 # Do not publish secret SSL stuff!
-*.crt
 *.pem
-*.ca
-*.key
+*.pvk
+*.pfx
+*.cer
+*.crt
+
+# general gitignore documents
+*.nogit
 
 IoServices/Debug/
 IoServices/Release/

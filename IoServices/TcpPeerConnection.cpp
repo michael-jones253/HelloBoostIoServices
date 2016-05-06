@@ -122,6 +122,11 @@ namespace AsyncIo
 	{
         _readBuffer.CopyTo(dest, len);
     }
+
+	void TcpPeerConnection::Close()
+	{
+		PeerSocket.close();
+	}
     
 	void TcpPeerConnection::ConnectHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec)
 	{
