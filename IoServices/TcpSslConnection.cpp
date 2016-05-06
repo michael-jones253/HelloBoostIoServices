@@ -51,6 +51,8 @@ namespace AsyncIo {
         // FIX ME - verify.
         
         char subject_name[256];
+        // NB current cert is what the server supplied and not what the client loaded.
+        // If what the client loaded matches, then the preverified arg will be true.
         X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
         X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
         std::cout << "Verifying, subject: " << subject_name << "\n";
