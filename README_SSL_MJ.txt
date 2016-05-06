@@ -60,3 +60,18 @@ mingw_convert_pem_to_cer.sh
 
 Then run MMC - see HelloSslCSharpWithClientAuth/MJ_README.txt
 This worked!
+
+Next Step - client authentication.
+Tried xor the context flags with boost::asio::ssl::context::verify_fail_if_no_peer_cert | boost::asio::ssl::verify_peer
+
+This did not call the verify callback for the client connection.
+
+Then called context.set_verify_mode directly with these flags and verify callback worked.
+
+Ran mingw_convert_cert_to_pem.sh on the makecert generated client.cer and loaded it via the load_verify_file method
+
+This didn't work.
+
+Ran mingw_convert_cert_to_pem.sh on the makecert generated CARoot.cer and loaded it via the load_verify_file method
+
+This worked (preverified == true)

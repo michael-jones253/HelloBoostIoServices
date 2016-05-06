@@ -188,10 +188,40 @@ namespace AsyncIo
         auto errorHandler = std::bind(&TcpServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
         
         auto context = boost::asio::ssl::context(boost::asio::ssl::context::sslv23);
-        context.set_options(
-                            boost::asio::ssl::context::default_workarounds
-                            | boost::asio::ssl::context::no_sslv2
-                            | boost::asio::ssl::context::single_dh_use);
+
+		auto optionsMask = 
+			boost::asio::ssl::context::default_workarounds
+			| boost::asio::ssl::context::no_sslv2
+			| boost::asio::ssl::context::single_dh_use;
+
+		bool FIXMEValidateClient = true;
+		if (FIXMEValidateClient)
+		{
+//			optionsMask |= boost::asio::ssl::context::verify_fail_if_no_peer_cert | boost::asio::ssl::verify_peer;
+
+			auto verifyCallback = [](bool preverified,
+				boost::asio::ssl::verify_context& ctx) {
+
+				std::cout << "Verifying certificate, pre-verified: " << std::string(preverified ? "true" : "false");
+				char subject_name[256];
+				X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
+				X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
+				std::cout << "Verifying, subject: " << subject_name << "\n";
+
+				char issuer_name[256];
+				X509_NAME_oneline(X509_get_issuer_name(cert), issuer_name, 256);
+				std::cout << "Verifying, issuer: " << issuer_name << "\n";
+
+				return preverified;
+			};
+
+			context.set_verify_mode(boost::asio::ssl::context::verify_fail_if_no_peer_cert | boost::asio::ssl::verify_peer);
+			context.set_verify_callback(verifyCallback);
+			// context.load_verify_file("client.pem");
+			context.load_verify_file("CARoot.pem");
+		}
+
+		context.set_options(optionsMask);
         
         context.set_password_callback(std::bind(&TcpServer::GetPassword, this));
         context.use_certificate_chain_file(_securityOptions.CertificateFilename);
