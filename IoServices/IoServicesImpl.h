@@ -54,6 +54,8 @@ namespace AsyncIo {
 
 		void StartTcpServer(int port);
 
+		void StartTcpServer(int port, SecurityOptions&& security);
+
 		void AsyncConnect(ConnectCallback&& connectCb, ErrorCallback&& errCb, std::string ipAddress, int port);
         
 		void SendToAllServerConnections(const std::string& msg, bool nullTerminate);

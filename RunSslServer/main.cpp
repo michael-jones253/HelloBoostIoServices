@@ -8,7 +8,7 @@
 #include "stdafx.h"
 
 #include "StreamConnection.h"
-#include "TcpServer.h"
+#include "IoServices.h"
 #include <openssl/err.h>
 #include <boost/asio.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -18,9 +18,13 @@
 #include <boost/program_options/detail/utf8_codecvt_facet.hpp>
 #include <iostream>
 #include <stdlib.h>
+#include <openssl/ssl.h>
+#include <chrono>
+#include <thread>
 
-using namespace boost::asio;
 using namespace std; // For atoi.
+using namespace std::chrono;
+using namespace std::this_thread;
 using namespace AsyncIo;
 
 namespace po = boost::program_options;
@@ -129,8 +133,12 @@ int _tmain(int argc, wchar_t* wargv[]) {
 
 		};
 
-		TcpServer server(&io_service, port, move(AcceptStreamCallback), move(ReadStreamCallback));
-		io_service::work keepRunning(io_service);
+		auto exceptionReporter = [](const std::string& msg, const std::exception&) {
+
+		};
+
+		IoServices serviceInstance(move(exceptionReporter));
+		serviceInstance.Start();
 
 		std::cout << "Hello, World!\n";
 
@@ -147,8 +155,13 @@ int _tmain(int argc, wchar_t* wargv[]) {
 		options.VerifyClient = verifyClient;
 		options.ClientVerifyFile = std::string(clientVerifyFile.begin(), clientVerifyFile.end());
 
-		server.Start(move(options));
-		io_service.run();
+		serviceInstance.AddTcpServer(port, move(AcceptStreamCallback), move(ReadStreamCallback));
+		serviceInstance.StartTcpServer(port, move(options));
+
+		while (true)
+		{
+			sleep_for(seconds(2));
+		}
 	}
 	catch (std::exception& e)
 	{
@@ -157,8 +170,6 @@ int _tmain(int argc, wchar_t* wargv[]) {
 		char buf[1024];
 		printf("%s\n", ERR_error_string(n, buf));
 		std::cerr << "Exception: " << e.what() << "\n";
-
-
 	}
 
 	return 0;

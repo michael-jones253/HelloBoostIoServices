@@ -39,7 +39,7 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
-    <NuGetPackageImportStamp>54ae981e</NuGetPackageImportStamp>
+    <NuGetPackageImportStamp>75e8cc0f</NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -112,6 +112,8 @@
     <Import Project="..\HelloBoostIoServices\packages\boost_date_time-vc120.1.59.0.0\build\native\boost_date_time-vc120.targets" Condition="Exists('..\HelloBoostIoServices\packages\boost_date_time-vc120.1.59.0.0\build\native\boost_date_time-vc120.targets')" />
     <Import Project="..\HelloBoostIoServices\packages\boost_program_options-vc120.1.59.0.0\build\native\boost_program_options-vc120.targets" Condition="Exists('..\HelloBoostIoServices\packages\boost_program_options-vc120.1.59.0.0\build\native\boost_program_options-vc120.targets')" />
     <Import Project="..\HelloBoostIoServices\packages\boost_regex-vc120.1.59.0.0\build\native\boost_regex-vc120.targets" Condition="Exists('..\HelloBoostIoServices\packages\boost_regex-vc120.1.59.0.0\build\native\boost_regex-vc120.targets')" />
+    <Import Project="..\HelloBoostIoServices\packages\boost_thread-vc120.1.59.0.0\build\native\boost_thread-vc120.targets" Condition="Exists('..\HelloBoostIoServices\packages\boost_thread-vc120.1.59.0.0\build\native\boost_thread-vc120.targets')" />
+    <Import Project="..\HelloBoostIoServices\packages\boost_chrono-vc120.1.59.0.0\build\native\boost_chrono-vc120.targets" Condition="Exists('..\HelloBoostIoServices\packages\boost_chrono-vc120.1.59.0.0\build\native\boost_chrono-vc120.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -122,5 +124,7 @@
     <Error Condition="!Exists('..\HelloBoostIoServices\packages\boost_date_time-vc120.1.59.0.0\build\native\boost_date_time-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\HelloBoostIoServices\packages\boost_date_time-vc120.1.59.0.0\build\native\boost_date_time-vc120.targets'))" />
     <Error Condition="!Exists('..\HelloBoostIoServices\packages\boost_program_options-vc120.1.59.0.0\build\native\boost_program_options-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\HelloBoostIoServices\packages\boost_program_options-vc120.1.59.0.0\build\native\boost_program_options-vc120.targets'))" />
     <Error Condition="!Exists('..\HelloBoostIoServices\packages\boost_regex-vc120.1.59.0.0\build\native\boost_regex-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\HelloBoostIoServices\packages\boost_regex-vc120.1.59.0.0\build\native\boost_regex-vc120.targets'))" />
+    <Error Condition="!Exists('..\HelloBoostIoServices\packages\boost_thread-vc120.1.59.0.0\build\native\boost_thread-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\HelloBoostIoServices\packages\boost_thread-vc120.1.59.0.0\build\native\boost_thread-vc120.targets'))" />
+    <Error Condition="!Exists('..\HelloBoostIoServices\packages\boost_chrono-vc120.1.59.0.0\build\native\boost_chrono-vc120.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\HelloBoostIoServices\packages\boost_chrono-vc120.1.59.0.0\build\native\boost_chrono-vc120.targets'))" />
   </Target>
 </Project>

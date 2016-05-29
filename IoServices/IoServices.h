@@ -14,6 +14,7 @@
 #include "Timer.h"
 #include "StreamConnection.h"
 #include "DgramListener.h"
+#include "SecurityOptions.h"
 #include <memory>
 #include <functional>
 #include <chrono>
@@ -76,6 +77,13 @@ namespace AsyncIo
 		/// </summary>
 		/// <param name="port">Identifies the server to start.</param>
 		void StartTcpServer(int port);
+
+		/// <summary>
+		/// Starts the TCP server to accept SSL/TLS connections.
+		/// </summary>
+		/// <param name="port">Identifies the server to start.</param>
+		/// <param name="security">The SSL/TLS options.</param>
+		void StartTcpServer(int port, SecurityOptions&& security);
 
 		/// <summary>
 		///  Asynchronous connect handler. Once connected the stream will begin asynchronous reading straight away.

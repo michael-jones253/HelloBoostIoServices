@@ -92,6 +92,16 @@ namespace AsyncIo
 	}
 
 	/// <summary>
+	/// Starts the TCP server to accept SSL/TLS connections.
+	/// </summary>
+	/// <param name="port">Identifies the server to start.</param>
+	/// <param name="security">The SSL/TLS options.</param>
+	void IoServices::StartTcpServer(int port, SecurityOptions&& security)
+	{
+		_impl->StartTcpServer(port, std::move(security));
+	}
+
+	/// <summary>
 	/// NB private Asynchronous connect handler.
 	/// </summary>
 	/// <param name="connectCb">Connect stream callback passed in by value to get a copy.</param>

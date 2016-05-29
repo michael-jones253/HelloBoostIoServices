@@ -109,6 +109,22 @@ namespace AsyncIo {
 		server->Start();
 	}
 
+	void IoServicesImpl::StartTcpServer(int port, SecurityOptions&& security) {
+		auto predicate = [this, port](const TcpServer& it) {
+			return it.GetPort() == port;
+		};
+
+		auto server = std::find_if(_tcpServers.begin(), _tcpServers.end(), predicate);
+		if (server == _tcpServers.end()) {
+			std::stringstream errStr;
+			errStr << "No secure server for port: " << port;
+			throw std::runtime_error(errStr.str());
+		}
+
+		server->Start(std::move(security));
+	}
+
+
 	void IoServicesImpl::AsyncConnect(ConnectCallback&& connectCb, ErrorCallback&& errCb, std::string ipAddress, int port)
 	{
 		auto errCbCopy = std::move(errCb);
