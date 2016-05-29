@@ -194,11 +194,8 @@ namespace AsyncIo
 			| boost::asio::ssl::context::no_sslv2
 			| boost::asio::ssl::context::single_dh_use;
 
-		bool FIXMEValidateClient = true;
-		if (FIXMEValidateClient)
+		if (_securityOptions.VerifyClient)
 		{
-//			optionsMask |= boost::asio::ssl::context::verify_fail_if_no_peer_cert | boost::asio::ssl::verify_peer;
-
 			auto verifyCallback = [](bool preverified,
 				boost::asio::ssl::verify_context& ctx) {
 
@@ -217,8 +214,7 @@ namespace AsyncIo
 
 			context.set_verify_mode(boost::asio::ssl::context::verify_fail_if_no_peer_cert | boost::asio::ssl::verify_peer);
 			context.set_verify_callback(verifyCallback);
-			// context.load_verify_file("client.pem");
-			context.load_verify_file("CARoot.pem");
+			context.load_verify_file(_securityOptions.ClientVerifyFile);
 		}
 
 		context.set_options(optionsMask);

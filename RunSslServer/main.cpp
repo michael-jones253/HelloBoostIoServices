@@ -27,21 +27,21 @@ namespace po = boost::program_options;
 
 #if defined(__clang__)
 int main(int argc, char* argv[]) {
-    auto wideargs = vector<wchar_t*>(argc);
-    
-    auto wargv = wideargs.data();
-    auto wargstrings = vector<wstring>{};
-    
-    for (int x = 0; x < argc; x++) {
-        string argstring = argv[x];
-        
-        wargstrings.push_back(wstring(argstring.begin(), argstring.end()));
-    }
-    
-    for (int x = 0; x < argc; x++) {
-        wideargs[x] = (const_cast<wchar_t*>(wargstrings[x].data()));
-    }
-    
+	auto wideargs = vector<wchar_t*>(argc);
+
+	auto wargv = wideargs.data();
+	auto wargstrings = vector<wstring>{};
+
+	for (int x = 0; x < argc; x++) {
+		string argstring = argv[x];
+
+		wargstrings.push_back(wstring(argstring.begin(), argstring.end()));
+	}
+
+	for (int x = 0; x < argc; x++) {
+		wideargs[x] = (const_cast<wchar_t*>(wargstrings[x].data()));
+	}
+
 #else
 int _tmain(int argc, wchar_t* wargv[]) {
 #endif
@@ -56,7 +56,9 @@ int _tmain(int argc, wchar_t* wargv[]) {
 			("cert", po::wvalue<wstring>(), "server certificate")
 			("private-key", po::wvalue<wstring>(), "private key")
 			("diffie-hellman", po::wvalue<wstring>(), "DH key exchange")
-			("password", po::wvalue<wstring>(), "password");
+			("password", po::wvalue<wstring>(), "password")
+			("verify-client", "verify client")
+			("client-file", po::wvalue<wstring>(), "Client verify file");
 
 		po::variables_map vm;
 		auto parsed =
@@ -76,6 +78,8 @@ int _tmain(int argc, wchar_t* wargv[]) {
 		wstring cert{ L"fd-serv.crt" };
 		wstring privateKey{ L"fd-rsa-priv.key" };
 		wstring diffieHellman{ L"dh1024.pem" };
+		// "client.pem" did not work. The root certificate seems to be needed.
+		wstring clientVerifyFile{ L"CARoot.pem" };
 
 		if (vm.count("cert") > 0)
 		{
@@ -90,6 +94,15 @@ int _tmain(int argc, wchar_t* wargv[]) {
 		if (vm.count("diffie-hellman"))
 		{
 			diffieHellman = vm["diffie-hellman"].as<wstring>();
+		}
+
+		if (vm.count("client-file")) {
+			clientVerifyFile = vm["client-file"].as<wstring>();
+		}
+
+		bool verifyClient{};
+		if (vm.count("verify-client")) {
+			verifyClient = true;
 		}
 
 		auto port = vm["port"].as<int>();
@@ -131,7 +144,8 @@ int _tmain(int argc, wchar_t* wargv[]) {
 		options.PrivKeyFilename = std::string(privateKey.begin(), privateKey.end());
 		options.DHExchangeFilename = std::string(diffieHellman.begin(), diffieHellman.end());
 		options.GetPasswordCallback = getPwd;
-
+		options.VerifyClient = verifyClient;
+		options.ClientVerifyFile = std::string(clientVerifyFile.begin(), clientVerifyFile.end());
 
 		server.Start(move(options));
 		io_service.run();
