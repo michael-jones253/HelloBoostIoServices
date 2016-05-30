@@ -81,6 +81,8 @@
     <ClCompile Include="DgramListener.cpp" />
     <ClCompile Include="IoBufferWrapper.cpp" />
     <ClCompile Include="IoCircularBuffer.cpp" />
+    <ClCompile Include="IoLog.cpp" />
+    <ClCompile Include="IoLogConsumer.cpp" />
     <ClCompile Include="IoServices.cpp" />
     <ClCompile Include="IoServicesImpl.cpp" />
     <ClCompile Include="stdafx.cpp" />
@@ -96,6 +98,8 @@
     <ClInclude Include="EgSslServer.hpp" />
     <ClInclude Include="IoBufferWrapper.h" />
     <ClInclude Include="IoCircularBuffer.h" />
+    <ClInclude Include="IoLog.h" />
+    <ClInclude Include="IoLogConsumer.h" />
     <ClInclude Include="IoServices.h" />
     <ClInclude Include="IoServicesImpl.h" />
     <ClInclude Include="IoServicesPriv.h" />

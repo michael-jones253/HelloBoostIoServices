@@ -8,6 +8,7 @@
 #include "stdafx.h"
 
 #include "UdpListener.h"
+#include "IoLogConsumer.h"
 #include <iostream>
 #include <future>
 

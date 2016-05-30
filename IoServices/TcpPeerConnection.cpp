@@ -8,6 +8,7 @@
 #include "stdafx.h"
 
 #include "TcpPeerConnection.h"
+#include "IoLogConsumer.h"
 #include <iostream>
 
 namespace AsyncIo
@@ -148,7 +149,7 @@ namespace AsyncIo
         
         if (written != bufWrapper->BoostSize())
 		{
-			std::cerr << "Incomplete write, buffer: " << bufWrapper->BoostSize() << " written: " << written << std::endl;
+			LOG() << "Incomplete write, buffer: " << bufWrapper->BoostSize() << " written: " << written << std::endl;
 			// Boost method to stop an async read is to close the socket.
 			// The async read callback will then call the error callback to cleanup the connection and inform the application.
 			conn->PeerSocket.close();

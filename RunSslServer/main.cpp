@@ -9,6 +9,7 @@
 
 #include "StreamConnection.h"
 #include "IoServices.h"
+#include "IoLogConsumer.h"
 #include <openssl/err.h>
 #include <boost/asio.hpp>
 #include <boost/program_options/parsers.hpp>
@@ -136,6 +137,12 @@ int _tmain(int argc, wchar_t* wargv[]) {
 		auto exceptionReporter = [](const std::string& msg, const std::exception&) {
 
 		};
+
+		auto logFn = [](IoLog&& ioLog) {
+			wcout << ioLog;
+		};
+
+		IoLogConsumer::AttachLogger(move(logFn));
 
 		IoServices serviceInstance(move(exceptionReporter));
 		serviceInstance.Start();
