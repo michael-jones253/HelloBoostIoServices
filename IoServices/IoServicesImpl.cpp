@@ -8,6 +8,7 @@
 #include "stdafx.h"
 #include "IoServicesImpl.h"
 #include "TcpConnection.hpp"
+#include "IoLogConsumer.h"
 
 #include <stdio.h>
 #include <chrono>
@@ -232,7 +233,7 @@ namespace AsyncIo {
 			}
 		}
 
-		std::cout << "Stopping IO service." << std::endl;
+		LOG() << "Stopping IO service." << std::endl;
         
         return true;
     }

@@ -139,7 +139,7 @@ int _tmain(int argc, wchar_t* wargv[]) {
 		};
 
 		auto logFn = [](IoLog&& ioLog) {
-			wcout << ioLog;
+			wcout << move(ioLog);
 		};
 
 		IoLogConsumer::AttachLogger(move(logFn));
