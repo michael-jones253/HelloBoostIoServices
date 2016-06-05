@@ -54,11 +54,27 @@ namespace AsyncIo {
 		}
 	};
 
+	/// <summary>
+	/// For logging and error reporting.
+	/// </summary>
+	/// <param name="os">The output stream.</param>
+	/// <param name="rhs">The timer as a readable string.</param>
+	/// <returns>The output stream.</returns>
 	inline std::ostream& operator<<(std::ostream& os, PeriodicTimer rhs) {
 		os << rhs.Name;
 		return os;
 	}
 
+	/// <summary>
+	/// For logging and error reporting.
+	/// </summary>
+	/// <param name="os">The output stream.</param>
+	/// <param name="rhs">The timer as a readable string.</param>
+	/// <returns>The output stream.</returns>
+	inline std::wostream& operator<<(std::wostream& os, PeriodicTimer rhs) {
+		os << std::wstring(rhs.Name.begin(), rhs.Name.end());
+		return os;
+	}
 }
 
 #if defined(__GNUC__)
