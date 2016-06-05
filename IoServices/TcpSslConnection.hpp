@@ -37,7 +37,7 @@ namespace AsyncIo {
                          AsyncIo::ErrorCallback&& errorCallback);
         
         ~TcpSslConnection() {
-            std::cout << "Closing TCP peer connection: " << PeerEndPoint << std::endl;
+            std::cout << "Closing TCP SSL connection: " << PeerEndPoint << std::endl;
         }
         
     private:
