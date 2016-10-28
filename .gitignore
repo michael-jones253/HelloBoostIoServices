@@ -19,6 +19,15 @@
 *.dll
 *.user
 
+# Linux stuff
+*.lo
+*.o
+*.in
+*.la
+*.swp
+Makefile
+IoServices/Makefile
+
 # Do not publish secret SSL stuff!
 *.pem
 *.pvk
@@ -28,7 +37,11 @@
 
 # general gitignore documents
 *.nogit
+*.out
 
 IoServices/Debug/
 IoServices/Release/
+IoServices/.deps/
+IoServices/.libs/
+m4
 HelloBoostIoServices/packages/boost.1.59.0.0/

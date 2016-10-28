@@ -1,0 +1,33 @@
+  787  mkdir GitHub
+  788  cd GitHub/
+  789  cp /media/sf_Downloads/ioservices-clone.txt .
+  791  mv ioservices-clone.txt ioservices-clone.sh
+  792  chmod +x ioservices-clone.sh 
+  793  ./ioservices-clone.sh 
+  795  cd HelloBoostIoServices/
+  796  git status
+  818  git add AUTHORS 
+  819  git add COPYING 
+  820  git add ChangeLog 
+  821  git add INSTALL 
+  822  git add Makefile.am 
+  823  git add NEWS 
+  824  git add README 
+  825  git add RunCrossConfigure.sh 
+  826  git add configure.ac 
+  827  cd IoServices/
+  828  git add Makefile.am 
+  831  ls
+  832  libtoolize
+  833  aclocal
+  834  automake
+  835  automake --add-missing
+  836  autoconf
+  837  aclocal
+  838  automake --add-missing
+  839  autoreconf
+  840  ls config.h.in 
+  841  automake --add-missing
+  842  autoreconf
+  851  ./RunCrossConfigure.sh 
+  852  make

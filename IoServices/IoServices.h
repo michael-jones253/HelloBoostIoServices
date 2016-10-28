@@ -13,6 +13,7 @@
 #include "PeriodicTimer.h"
 #include "Timer.h"
 #include "StreamConnection.h"
+#include "UnixStreamConnection.h"
 #include "DgramListener.h"
 #include "SecurityOptions.h"
 #include <memory>
@@ -95,6 +96,16 @@ namespace AsyncIo
 		/// <param name="ipAddress">The destination IP.</param>
 		/// <param name="port">The destination port.</param>
 		void AsyncConnect(ConnectStreamCallback&& connectCb, ReadStreamCallback&& readCb, StreamConnectionErrorCallback&& connErrCb, StreamIoErrorCallback&& ioErrCb, std::string ipAddress, int port);
+        
+		/// <summary>
+		///  Asynchronous connect handler. Once connected the stream will begin asynchronous reading straight away.
+		/// </summary>
+		/// <param name="connectCb">The connected callback.</param>
+		/// <param name="readCb">Asynchronous data read callback.</param>
+		/// <param name="connErrCb">Error callback if socket connect errors encountered.</param>
+		/// <param name="ioErrCb">Error callback if socket I/O errors encountered.</param>
+		/// <param name="path">The destination unix domain path.</param>
+		void AsyncConnect(UnixConnectStreamCallback&& connectCb, UnixReadStreamCallback&& readCb, UnixStreamConnectionErrorCallback&& connErrCb, UnixStreamIoErrorCallback&& ioErrCb, std::string path);
         
 		/// <summary>
 		/// Binds a datagram listener for asynchronous UDP receive.

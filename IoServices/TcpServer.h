@@ -11,6 +11,7 @@
 
 #include "StreamConnection.h"
 #include "TcpPeerConnection.h"
+#include "TcpDomainConnection.h"
 #include "TcpSslConnection.hpp"
 #include "SecurityOptions.h"
 

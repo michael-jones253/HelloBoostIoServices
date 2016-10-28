@@ -29,12 +29,11 @@ namespace AsyncIo {
     
     class TcpDomainConnection;
     
-    // using ErrorCallback = std::function<void(std::shared_ptr<TcpDomainConnection>, boost::system::error_code)>;
-	using ErrorCallback = std::function<void(std::shared_ptr<TcpDomainConnection>, const boost::system::error_code&)>;
+	using DomainErrorCallback = std::function<void(std::shared_ptr<TcpDomainConnection>, const boost::system::error_code&)>;
 
-    using ReadSomeCallback = std::function<void(std::shared_ptr<TcpDomainConnection>, std::size_t bytesAvailable)>;
+    using DomainReadSomeCallback = std::function<void(std::shared_ptr<TcpDomainConnection>, std::size_t bytesAvailable)>;
 
-	using ConnectCallback = std::function<void(std::shared_ptr<TcpDomainConnection>)>;
+	using DomainConnectCallback = std::function<void(std::shared_ptr<TcpDomainConnection>)>;
     
     using BoostIoHandler = std::function<void(const boost::system::error_code& error, // Result of operation.
                                                          std::size_t bytes_transferred           // Number of bytes written from the
@@ -49,14 +48,14 @@ namespace AsyncIo {
         std::deque<std::shared_ptr<IoBufferWrapper>> mOutQueue;
         IoCircularBuffer _readBuffer;
     protected:
-        ErrorCallback _errorCallback;
-        ConnectCallback _connectCallback;
+        DomainErrorCallback _errorCallback;
+        DomainConnectCallback _connectCallback;
         
     public:
         boost::asio::local::stream_protocol::socket DomainSocket;
         boost::asio::local::stream_protocol::endpoint DomainEndPoint;
 
-		TcpDomainConnection(boost::asio::io_service* ioService, AsyncIo::ErrorCallback&& errorCallback);
+		TcpDomainConnection(boost::asio::io_service* ioService, AsyncIo::DomainErrorCallback&& errorCallback);
 		~TcpDomainConnection() {
 			std::cout << "Closing Unix domain connection: " << DomainEndPoint << std::endl;
 		}
@@ -67,10 +66,10 @@ namespace AsyncIo {
 		// NB returns backlog.
 		int AsyncWrite(std::vector<uint8_t>&& msg);
 
-		void AsyncConnect(ConnectCallback&& connectCb, const std::string& name);
+		void AsyncConnect(DomainConnectCallback&& connectCb, const std::string& name);
         
 		void BeginChainedRead(IoNotifyAvailableCallback&& available,
-			AsyncIo::ErrorCallback&& errorCallback,
+			AsyncIo::DomainErrorCallback&& errorCallback,
 			int chunkSize);
         
         boost::asio::local::stream_protocol::socket& GetDomainSocket() { return DomainSocket; }

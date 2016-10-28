@@ -13,7 +13,7 @@
 
 namespace AsyncIo
 {
-    TcpDomainConnection::TcpDomainConnection(boost::asio::io_service* ioService, AsyncIo::ErrorCallback&& errorCallback) :
+    TcpDomainConnection::TcpDomainConnection(boost::asio::io_service* ioService, DomainErrorCallback&& errorCallback) :
         DomainSocket{*ioService},
         DomainEndPoint{},
         _mutex{},
@@ -81,7 +81,7 @@ namespace AsyncIo
 	}
 
 
-	void TcpDomainConnection::AsyncConnect(ConnectCallback&& connectCb, const std::string& name)
+	void TcpDomainConnection::AsyncConnect(DomainConnectCallback&& connectCb, const std::string& name)
 	{
 		boost::asio::local::stream_protocol::endpoint remoteEp{ name };
 		_connectCallback = std::move(connectCb);
@@ -93,7 +93,7 @@ namespace AsyncIo
 
 	void TcpDomainConnection::BeginChainedRead(
 		IoNotifyAvailableCallback&& available,
-		AsyncIo::ErrorCallback&& errorCallback,
+		DomainErrorCallback&& errorCallback,
 		int chunkSize)
 	{
 		_errorCallback = std::move(errorCallback);

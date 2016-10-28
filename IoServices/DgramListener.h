@@ -2,6 +2,8 @@
 #ifndef __HelloAsio__DgramListener__
 #define __HelloAsio__DgramListener__
 
+#include "IoEndPoint.h"
+
 #include <iostream>
 #include <ostream>
 #include <string>
@@ -24,39 +26,6 @@ namespace AsyncIo
 	using DgramConnectCallback = std::function<void(std::shared_ptr<DgramListener> listener)>;
 
 	using DgramReceiveCallback = std::function<void(std::shared_ptr<DgramListener>, int bytesAvailable)>;
-
-	struct IoEndPoint
-	{
-		std::string IpAddress;
-		int Port;
-		bool AsyncConnected;
-	};
-
-	/// <summary>
-	/// For logging and error reporting.
-	/// </summary>
-	/// <param name="os">Output stream.</param>
-	/// <param name="groupType">The end point.</param>
-	/// <returns>End point as readable text stream.</returns>
-	inline std::ostream& operator<<(std::ostream &os, const IoEndPoint &endPoint)
-	{
-		os << endPoint.IpAddress << ":" << endPoint.Port;
-
-		return os;
-	}
-
-	/// <summary>
-	/// For logging and error reporting.
-	/// </summary>
-	/// <param name="os">Output stream.</param>
-	/// <param name="groupType">The end point.</param>
-	/// <returns>End point as readable text stream.</returns>
-	inline std::wostream& operator<<(std::wostream &os, const IoEndPoint &endPoint)
-	{
-		os << std::wstring(endPoint.IpAddress.begin(), endPoint.IpAddress.end()) << ":" << endPoint.Port;
-
-		return os;
-	}
 
 	/// <summary>
 	/// Hides the boost implementation of the UDP Listener from the application.
@@ -81,12 +50,32 @@ namespace AsyncIo
 		void AsyncConnect(DgramConnectCallback&& connectCb, const std::string& destIp, int port);
 
 		/// <summary>
+		/// Allows an already bound Listener to join a multicast group for receiving multicast messages.
+		/// </summary>
+		/// <param name="multicastAddr">The multicast IP address in dot notation.</param>
+		void JoinMulticastGroup(const std::string& multicastAddr);
+
+		/// <summary>
+		/// Allows an already bound Listener to send on the broadcast address.
+		/// </summary>
+		void EnableBroadcast();
+
+		/// <summary>
 		/// Asynchronous write of a string message.
 		/// NB if the length of the message is greater than MTU it will be split across datagrams.
 		/// </summary>
 		/// <param name="msg">The string message to send.</param>
 		/// <param name="nullTerminate">Whether to null terminate the string or not.</param>
 		void AsyncWrite(std::string&& msg, bool nullTerminate);
+
+		/// <summary>
+		/// Datagram send for unconnected socket.
+		/// </summary>
+		/// <param name="msg">The message to send.</param>
+		/// <param name="destIp">The destination IP address in dot format.</param>
+		/// <param name="port">The destination port.</param>
+		/// <param name="nullTerminate">Whether to null terminate the string or not.</param>
+		void AsyncSendTo(std::string&& msg, const std::string& destIp, int port, bool nullTerminate);
 
 		/// <summary>
 		/// Asynchronous write of a string message.
@@ -131,6 +120,11 @@ namespace AsyncIo
 		IoEndPoint GetPeerEndPoint() const;
 
 		bool HasAsyncConnected() const;
+
+		/// <summary>
+		/// For Unbound, unconnected listeners.
+		/// </summary>
+		void LaunchRead();
 
 		/// <summary>
 		/// Checks whether the listener is valid or not.

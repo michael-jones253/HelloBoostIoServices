@@ -33,14 +33,18 @@ namespace AsyncIo
 
 	IoLog::IoLog(IoLog&& rhs)
 	{
-		mStrStr = move(rhs.mStrStr);
+        // Compiler bug fixed by gcc 5.0
+		// mStrStr = move(rhs.mStrStr);
+        mStrStr << rhs.mStrStr.str();
 		mAvailable = rhs.mAvailable;
 		rhs.mAvailable = false;
 	}
 
 	IoLog& IoLog::operator=(IoLog&& rhs)
 	{
-		mStrStr = move(rhs.mStrStr);
+        // Compiler bug fixed by gcc 5.0
+		// mStrStr = move(rhs.mStrStr);
+        mStrStr << rhs.mStrStr.str();
 		mAvailable = rhs.mAvailable;
 		rhs.mAvailable = false;
 
@@ -52,8 +56,17 @@ namespace AsyncIo
 	/// </summary>
 	IoLog::~IoLog()
 	{
-		if (mAvailable)
-			IoLogConsumer::Consume(move(*this));
+        try
+        {
+            if (mAvailable)
+            {
+                IoLogConsumer::Consume(move(*this));
+            }
+        }
+        catch(const exception&)
+        {
+        }
+
 		mAvailable = false;
 	}
 

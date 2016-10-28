@@ -57,6 +57,36 @@ namespace AsyncIo {
 	}
 
 	/// <summary>
+	/// Allows an already bound Listener to join a multicast group for receiving multicast messages.
+	/// </summary>
+	/// <param name="multicastAddr">The multicast IP address in dot notation.</param>
+	void DgramListener::JoinMulticastGroup(const std::string& multicastAddr)
+	{
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		auto boostIp = boost::asio::ip::address::from_string(multicastAddr);
+		listener->JoinMulticastGroup(boostIp);
+	}
+
+    /// <summary>
+    /// Allows an already bound Listener to send on the broadcast address.
+    /// </summary>
+    void DgramListener::EnableBroadcast()
+    {
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+        listener->EnableBroadcast();
+    }
+
+	/// <summary>
 	/// Asynchronous write of a string message.
 	/// NB if the length of the message is greater than MTU it will be split across datagrams.
 	/// </summary>
@@ -71,6 +101,24 @@ namespace AsyncIo {
 		}
 
 		listener->AsyncWrite(std::move(msg), nullTerminate);
+	}
+
+	/// <summary>
+	/// Datagram send for unconnected socket.
+	/// </summary>
+	/// <param name="msg">The message to send.</param>
+	/// <param name="destIp">The destination IP address in dot format.</param>
+	/// <param name="port">The destination port.</param>
+	/// <param name="nullTerminate">Whether to null terminate the string or not.</param>
+	void DgramListener::AsyncSendTo(std::string&& msg, const std::string& destIp, int port, bool nullTerminate)
+	{
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		listener->AsyncSendTo(std::move(msg), destIp, port, nullTerminate);
 	}
 
 	/// <summary>
@@ -206,6 +254,21 @@ namespace AsyncIo {
 
 		return listener->HasAsyncConnected();
 	}
+
+	/// <summary>
+	/// For Unbound, unconnected listeners.
+	/// </summary>
+	void DgramListener::LaunchRead()
+	{
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("Connection expired.");
+		}
+
+		listener->LaunchRead();
+	}
+
 
 	/// <summary>
 	/// Checks whether the listener is valid or not.
