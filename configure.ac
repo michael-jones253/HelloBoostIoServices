@@ -35,5 +35,6 @@ AC_TYPE_UINT8_T
 AC_CHECK_FUNCS([socket])
 
 AC_CONFIG_FILES([Makefile
-                IoServices/Makefile])
+                IoServices/Makefile
+                UnixDomainClient/Makefile])
 AC_OUTPUT
