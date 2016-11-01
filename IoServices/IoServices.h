@@ -108,6 +108,21 @@ namespace AsyncIo
 		void AsyncConnect(UnixConnectStreamCallback&& connectCb, UnixReadStreamCallback&& readCb, UnixStreamConnectionErrorCallback&& connErrCb, UnixStreamIoErrorCallback&& ioErrCb, std::string path);
         
 		/// <summary>
+		/// Add a Unix domain server to listen on the specified path.
+		/// </summary>
+		/// <param name="path">The path to listen on.</param>
+		/// <param name="acceptsStream">Client connection accepted callback.</param>
+		/// <param name="readStream">Client connection data received callback.</param>
+		void AddUnixServer(const std::string& path, UnixAcceptStreamCallback&& acceptsStream, UnixReadStreamCallback&& readStream);
+
+		/// <summary>
+		/// Starts the Unix server.
+		/// NB all servers must be added first due to move issues.
+		/// </summary>
+		/// <param name="path">Identifies the server to start.</param>
+		void StartUnixServer(const std::string& path);
+
+		/// <summary>
 		/// Binds a datagram listener for asynchronous UDP receive.
 		/// NB. This will start receiving straight away.
 		/// </summary>

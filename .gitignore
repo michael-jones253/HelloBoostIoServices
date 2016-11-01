@@ -39,6 +39,7 @@ IoServices/Makefile
 *.nogit
 *.out
 
+UnixDomainClient/unix_domain_client/
 IoServices/Debug/
 IoServices/Release/
 IoServices/.deps/

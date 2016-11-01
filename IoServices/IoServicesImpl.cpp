@@ -174,6 +174,35 @@ namespace AsyncIo {
 		}
     }
     
+	void IoServicesImpl::AddUnixServer(const std::string& path, UnixAcceptStreamCallback&& acceptsStream, UnixReadStreamCallback&& readSome) {
+        auto predicate = [this,path](const UnixServer& it) {
+            return it.GetPath() == path;
+        };
+        
+        if (std::find_if(_unixServers.begin(), _unixServers.end(), predicate) != _unixServers.end()) {
+            
+            throw std::runtime_error("Server already on port");
+        }
+        
+        _unixServers.emplace_back(&_ioService, path, std::move(acceptsStream), std::move(readSome));        
+    }
+
+	void IoServicesImpl::StartUnixServer(const std::string& path)
+	{
+		auto predicate = [this, path](const UnixServer& it) {
+			return it.GetPath() == path;
+		};
+
+		auto server = std::find_if(_unixServers.begin(), _unixServers.end(), predicate);
+		if (server == _unixServers.end()) {
+			std::stringstream errStr;
+			errStr << "No server for path: " << path;
+			throw std::runtime_error(errStr.str());
+		}
+
+		server->Start();
+	}
+
 	std::shared_ptr<UdpListener> IoServicesImpl::BindDgramListener(std::string ipAddress, int port) {
 		// Bind to specific ip interface address for receiving on that interface only.
 		boost::asio::ip::address boostAddress = boost::asio::ip::address::from_string(ipAddress);

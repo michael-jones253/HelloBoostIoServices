@@ -12,6 +12,7 @@
 #include "Timer.h"
 #include "PeriodicTimer.h"
 #include "TcpServer.h"
+#include "UnixServer.h"
 #include "UdpListener.h"
 
 #include <boost/asio.hpp>
@@ -33,6 +34,7 @@ namespace AsyncIo {
 		std::promise<bool> _started{};
 		boost::asio::io_service _ioService{};
 		std::vector<TcpServer> _tcpServers{};
+		std::vector<UnixServer> _unixServers{};
 		std::future<bool> _serviceRunHandle{};
 		boost::thread_group _threadPool{};
 		std::vector<boost::thread*> _workerHandles{};
@@ -59,6 +61,10 @@ namespace AsyncIo {
 		void AsyncConnect(ConnectCallback&& connectCb, ErrorCallback&& errCb, std::string ipAddress, int port);
         
 		void SendToAllServerConnections(const std::string& msg, bool nullTerminate);
+
+		void AddUnixServer(const std::string& path, UnixAcceptStreamCallback&& acceptsStream, UnixReadStreamCallback&& readSome);
+
+		void StartUnixServer(const std::string& path);
 
 		std::shared_ptr<UdpListener> BindDgramListener(std::string ipAddress, int port);
         
