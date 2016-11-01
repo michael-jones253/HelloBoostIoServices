@@ -1,19 +1,17 @@
 //
-//  TcpServer.h
+//  UnixServer.h
 //  AsyncIo
 //
-//  Created by Michael Jones on 29/07/2015.
+//  Created by Michael Jones on 01/11/2016.
 //  https://github.com/michael-jones253/HelloBoostIoServices
 //
 
-#ifndef __HelloAsio__TcpServer__
-#define __HelloAsio__TcpServer__
+#ifndef __HelloAsio__UnixServer__
+#define __HelloAsio__UnixServer__
 
-#include "StreamConnection.h"
-#include "TcpPeerConnection.h"
+#include "UnixStreamConnection.h"
 #include "TcpDomainConnection.h"
-#include "TcpSslConnection.hpp"
-#include "SecurityOptions.h"
+#include "TcpDomainConnection.h"
 
 #include <boost/asio.hpp>
 #include <memory>
@@ -30,54 +28,48 @@ namespace AsyncIo
 	/// For async IO with client connections.
 	/// NB this class is managed internally by the IO services and not to be instantiated by application code.
 	/// </summary>
-    class TcpServer final
+    class UnixServer final
 	{
     private:
 		boost::asio::io_service* _ioService{};
 		std::mutex _mutex{};
-		int _port{};
-		std::unique_ptr<boost::asio::ip::tcp::acceptor> _acceptor{};
-		std::vector<std::shared_ptr<TcpPeerConnection>> _peerConnections{};
-		AcceptStreamCallback _acceptStreamCb{};
-		ReadStreamCallback _readSomeCb{};
-        SecurityOptions _securityOptions{};
+		std::string _path{};
+		std::unique_ptr<boost::asio::local::stream_protocol::acceptor> _acceptor{};
+		std::vector<std::shared_ptr<TcpDomainConnection>> _domainConnections{};
+		UnixAcceptStreamCallback _acceptStreamCb{};
+		UnixReadStreamCallback _readSomeCb{};
     public:
-		TcpServer() = delete;
+		UnixServer() = delete;
 
 		/// <summary>
 		/// For async IO with client connections.
 		/// NB this class is managed internally by the IO services and not to be instantiated by application code.
 		/// </summary>
 		/// <param name="ioService">The boost IO service.</param>
-		/// <param name="port">The port to listen on.</param>
+		/// <param name="path">The path to listen on.</param>
 		/// <param name="acceptsStream">Client connection accepted callback.</param>
 		/// <param name="readSomeCb">Client read some data callback.</param>
-		TcpServer(boost::asio::io_service* ioService, int port, AcceptStreamCallback&& acceptsStream, ReadStreamCallback&& readSomeCb);
-        TcpServer(TcpServer&& rhs);
-		TcpServer& operator=(TcpServer&& rhs);
-		TcpServer(const TcpServer&) = delete;
-		TcpServer& operator=(const TcpServer&) = delete;
+		UnixServer(boost::asio::io_service* ioService, const std::string& path, UnixAcceptStreamCallback&& acceptsStream, UnixReadStreamCallback&& readSomeCb);
+        UnixServer(UnixServer&& rhs);
+		UnixServer& operator=(UnixServer&& rhs);
+		UnixServer(const UnixServer&) = delete;
+		UnixServer& operator=(const UnixServer&) = delete;
 
-		~TcpServer();
+		~UnixServer();
         void Start();
-        void Start(SecurityOptions&& security);
         void Stop();
-        void SendMessageToAllPeers(const std::string& msg, bool nullTerminate);
-        int GetPort() const { return _port; }
+        void SendMessageToAllClients(const std::string& msg, bool nullTerminate);
+        std::string GetPath() const { return _path; }
     private:
-        void OnAccept(std::shared_ptr<TcpPeerConnection> acceptedConn);
-        void AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec);
+        void OnAccept(std::shared_ptr<TcpDomainConnection> acceptedConn);
+        void AcceptHandler(std::shared_ptr<TcpDomainConnection> acceptedConn, const boost::system::error_code& ec);
         void AsyncAccept();
-        void HandleSslHandshake(std::shared_ptr<TcpSslConnection>acceptedConn, const boost::system::error_code& error);
-        void SecureAcceptHandler(std::shared_ptr<TcpSslConnection>acceptedConn, const boost::system::error_code& ec);
-        void AsyncSecureAccept();
-        void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
-        void CloseAllPeerConnections();
-        std::string GetPassword() const;
+        void ErrorHandler(std::shared_ptr<TcpDomainConnection> conn, boost::system::error_code ec);
+        void CloseAllUnixConnections();
     };
 }
 #if defined(__GNUC__)
 #pragma GCC visibility pop
 #endif
 
-#endif /* defined(__HelloAsio__TcpServer__) */
+#endif /* defined(__HelloAsio__UnixServer__) */

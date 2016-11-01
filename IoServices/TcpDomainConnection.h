@@ -97,7 +97,6 @@ namespace AsyncIo {
                           std::size_t written);
         
         void AsyncReadSome(uint8_t* bufPtr, size_t len, BoostIoHandler&& handler);
-        
     };
 }
 #if defined(__GNUC__)

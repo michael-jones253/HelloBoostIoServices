@@ -1,5 +1,5 @@
 //
-//  TcpServer.cpp
+//  UnixServer.cpp
 //  AsyncIo
 //
 //  Created by Michael Jones on 29/07/2015.
@@ -7,9 +7,8 @@
 //
 
 #include "stdafx.h"
-#include "TcpServer.h"
-#include "TcpConnection.hpp"
-#include "TcpSslConnection.hpp"
+#include "UnixServer.h"
+#include "TcpDomainConnection.h"
 #include "IoLogConsumer.h"
 
 #include <iostream>
@@ -28,42 +27,40 @@ namespace AsyncIo
     /// NB this class is managed internally by the IO services and not to be instantiated by application code.
     /// </summary>
     /// <param name="ioService">The boost IO service.</param>
-    /// <param name="port">The port to listen on.</param>
+    /// <param name="path">The path to listen on.</param>
     /// <param name="acceptsStream">Client connection accepted callback.</param>
     /// <param name="readSomeCb">Client read some data callback.</param>
-    TcpServer::TcpServer(boost::asio::io_service* ioService, int port, AcceptStreamCallback&& acceptsStream, ReadStreamCallback&& readSomeCb) :
+    UnixServer::UnixServer(boost::asio::io_service* ioService, const std::string& path, UnixAcceptStreamCallback&& acceptsStream, UnixReadStreamCallback&& readSomeCb) :
     _ioService{ioService},
-    _port{port},
+    _path{path},
     _acceptStreamCb{ std::move(acceptsStream) },
     _readSomeCb{ std::move(readSomeCb) }
     {
     }
     
-    TcpServer::TcpServer(TcpServer&& rhs) : _mutex{}
+    UnixServer::UnixServer(UnixServer&& rhs) : _mutex{}
     {
         _ioService = rhs._ioService;
-        _port = rhs._port;
+        _path = rhs._path;
         _acceptor = std::move(rhs._acceptor);
-        _peerConnections = std::move(rhs._peerConnections);
+        _domainConnections = std::move(rhs._domainConnections);
         _acceptStreamCb = std::move(rhs._acceptStreamCb);
         _readSomeCb = std::move(rhs._readSomeCb);
-        _securityOptions = std::move(rhs._securityOptions);
     }
     
-    TcpServer& TcpServer::operator=(TcpServer&& rhs)
+    UnixServer& UnixServer::operator=(UnixServer&& rhs)
     {
         _ioService = rhs._ioService;
-        _port = rhs._port;
+        _path = rhs._path;
         _acceptor = std::move(rhs._acceptor);
-        _peerConnections = std::move(rhs._peerConnections);
+        _domainConnections = std::move(rhs._domainConnections);
         _acceptStreamCb = std::move(rhs._acceptStreamCb);
         _readSomeCb = std::move(rhs._readSomeCb);
-        _securityOptions = std::move(rhs._securityOptions);
         
         return *this;
     }
     
-    TcpServer::~TcpServer()
+    UnixServer::~UnixServer()
     {
         if (!_readSomeCb)
         {
@@ -74,27 +71,16 @@ namespace AsyncIo
         Stop();
     }
     
-    void TcpServer::Start()
+    void UnixServer::Start()
     {
-        _acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(
+        _acceptor = std::make_unique<boost::asio::local::stream_protocol::acceptor>(
                                                                      *_ioService,
-                                                                     boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), _port));
+                                                                     boost::asio::local::stream_protocol::endpoint(_path));
         AsyncAccept();
     }
     
-    void TcpServer::Start(SecurityOptions&& security) {
-        _securityOptions = std::move(security);
-        _acceptor = std::make_unique<boost::asio::ip::tcp::acceptor>(
-                                                                     *_ioService,
-                                                                     boost::asio::ip::tcp::endpoint(boost::asio::ip::tcp::v4(), _port));
-        AsyncSecureAccept();
-    }
     
-    std::string TcpServer::GetPassword() const {
-        return _securityOptions.GetPasswordCallback();
-    }
-    
-    void TcpServer::Stop()
+    void UnixServer::Stop()
     {
         if (!_acceptor)
         {
@@ -102,30 +88,30 @@ namespace AsyncIo
         }
         
         _acceptor->close();
-        CloseAllPeerConnections();
+        CloseAllUnixConnections();
     }
     
-    void TcpServer::OnAccept(std::shared_ptr<TcpPeerConnection> acceptedConn) {
-        auto streamConn = std::make_shared<StreamConnection>(acceptedConn, false /* is server side */);
+    void UnixServer::OnAccept(std::shared_ptr<TcpDomainConnection> acceptedConn) {
+        auto streamConn = std::make_shared<UnixStreamConnection>(acceptedConn, false /* is server side */);
         auto available = [this, streamConn](size_t available) {
-            // std::cout << "Got stuff available: " << acceptedConn->PeerEndPoint << available << std::endl;
+            // std::cout << "Got stuff available: " << acceptedConn->DomainEndPoint << available << std::endl;
             _readSomeCb(streamConn, static_cast<int>(available));
         };
         
         // Review: opportunity to have the error handler take a stream connection parameter.
-        auto errorHandler = std::bind(&TcpServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
+        auto errorHandler = std::bind(&UnixServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
         
         acceptedConn->BeginChainedRead(std::move(available), std::move(errorHandler), ChunkSize);
         
         std::lock_guard<std::mutex> connGuard(_mutex);
-        _peerConnections.push_back(acceptedConn);
-        LOG() << "Accepted: " << _peerConnections.size() << std::endl;
+        _domainConnections.push_back(acceptedConn);
+        LOG() << "Accepted: " << _domainConnections.size() << std::endl;
         
         // Notify the application that a client has connected.
         _acceptStreamCb(streamConn);
     }
     
-    void TcpServer::AcceptHandler(std::shared_ptr<TcpPeerConnection> acceptedConn, const boost::system::error_code& ec)
+    void UnixServer::AcceptHandler(std::shared_ptr<TcpDomainConnection> acceptedConn, const boost::system::error_code& ec)
     {
         if (ec != 0)
         {
@@ -140,107 +126,25 @@ namespace AsyncIo
         AsyncAccept();
     }
     
-    void TcpServer::AsyncAccept()
+    void UnixServer::AsyncAccept()
     {
-        auto errorHandler = std::bind(&TcpServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
+        auto errorHandler = std::bind(&UnixServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
         
-        auto conn = std::make_shared<TcpConnection>(_ioService, std::move(errorHandler));
+        auto conn = std::make_shared<TcpDomainConnection>(_ioService, std::move(errorHandler));
         
-        auto acceptor = std::bind(&TcpServer::AcceptHandler, this, conn, std::placeholders::_1);
-        
-        // Async accept does not block and takes references to the socket and end point of the connection.
-        // The connection smart pointer is kept alive by being bound to the acceptor callback.
-        _acceptor->async_accept(conn->PeerSocket, conn->PeerEndPoint, std::move(acceptor));
-    }
-    
-    void TcpServer::SecureAcceptHandler(std::shared_ptr<TcpSslConnection>acceptedConn, const boost::system::error_code& ec) {
-        
-        if (!ec) {
-            acceptedConn->SslSocket.async_handshake(boost::asio::ssl::stream_base::server,
-                                                    boost::bind(&TcpServer::HandleSslHandshake, this, acceptedConn,
-                                                                boost::asio::placeholders::error));
-        }
-        else {
-			LOG() << "Accept error: " << ec << std::endl;
-            // Review: call an error callback.            
-        }
-        
-        AsyncSecureAccept();
-    }
-    
-    void TcpServer::HandleSslHandshake(std::shared_ptr<TcpSslConnection>acceptedConn, const boost::system::error_code& error) {
-        if (!error)
-        {
-            LOG() << "handle handshake" << std::endl;
-            OnAccept(acceptedConn);
-        }
-        else
-        {
-            SSL_load_error_strings();
-            unsigned long n = ERR_get_error();
-            char buf[1024];
-			auto err = ERR_error_string(n, buf);
-			LOG() << "Handle SSL handshake error: " << err << std::endl;
-        }
-        
-    }
-    
-    void TcpServer::AsyncSecureAccept() {
-        auto errorHandler = std::bind(&TcpServer::ErrorHandler, this, std::placeholders::_1, std::placeholders::_2);
-        
-        auto context = boost::asio::ssl::context(boost::asio::ssl::context::sslv23);
-
-		auto optionsMask = 
-			boost::asio::ssl::context::default_workarounds
-			| boost::asio::ssl::context::no_sslv2
-			| boost::asio::ssl::context::single_dh_use;
-
-		if (_securityOptions.VerifyClient)
-		{
-			auto verifyCallback = [](bool preverified,
-				boost::asio::ssl::verify_context& ctx) {
-
-				std::cout << "Verifying certificate, pre-verified: " << std::string(preverified ? "true" : "false");
-				char subject_name[256];
-				X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
-				X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-				LOG() << "Verifying, subject: " << subject_name << "\n";
-
-				char issuer_name[256];
-				X509_NAME_oneline(X509_get_issuer_name(cert), issuer_name, 256);
-				LOG() << "Verifying, issuer: " << issuer_name << "\n";
-
-				return preverified;
-			};
-
-			context.set_verify_mode(boost::asio::ssl::context::verify_fail_if_no_peer_cert | boost::asio::ssl::verify_peer);
-			context.set_verify_callback(verifyCallback);
-			context.load_verify_file(_securityOptions.ClientVerifyFile);
-		}
-
-		context.set_options(optionsMask);
-        
-        context.set_password_callback(std::bind(&TcpServer::GetPassword, this));
-        context.use_certificate_chain_file(_securityOptions.CertificateFilename);
-        context.use_rsa_private_key_file(_securityOptions.PrivKeyFilename, boost::asio::ssl::context::pem);
-        context.use_tmp_dh_file(_securityOptions.DHExchangeFilename);
-        
-        auto conn = std::make_shared<TcpSslConnection>(_ioService, std::move(context), std::move(errorHandler));
-        
-        auto acceptor = std::bind(&TcpServer::SecureAcceptHandler, this, conn, std::placeholders::_1);
+        auto acceptor = std::bind(&UnixServer::AcceptHandler, this, conn, std::placeholders::_1);
         
         // Async accept does not block and takes references to the socket and end point of the connection.
         // The connection smart pointer is kept alive by being bound to the acceptor callback.
-        _acceptor->async_accept(conn->PeerSocket, conn->PeerEndPoint, std::move(acceptor));
-        
+        _acceptor->async_accept(conn->DomainSocket, conn->DomainEndPoint, std::move(acceptor));
     }
     
-    void TcpServer::CloseAllPeerConnections()
+    void UnixServer::CloseAllUnixConnections()
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        for (auto& conn : _peerConnections)
+        for (auto& conn : _domainConnections)
         {
-            conn->PeerSocket.close();
+            conn->DomainSocket.close();
         }
     }
     
@@ -250,30 +154,30 @@ namespace AsyncIo
     /// </summary>
     /// <param name="conn">The TCP connection in error state.</param>
     /// <param name="ec">The boost error code.</param>
-    void TcpServer::ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec)
+    void UnixServer::ErrorHandler(std::shared_ptr<TcpDomainConnection> conn, boost::system::error_code ec)
     {
         if (ec != 0) {
             std::lock_guard<std::mutex> guard(_mutex);
-            conn->PeerSocket.close();
+            conn->DomainSocket.close();
             
-            auto SocketClosedPredicate = [](std::shared_ptr<TcpPeerConnection> conn) {
-                auto shouldErase = !(conn->PeerSocket.is_open());
+            auto SocketClosedPredicate = [](std::shared_ptr<TcpDomainConnection> conn) {
+                auto shouldErase = !(conn->DomainSocket.is_open());
                 if (shouldErase)
                 {
-					LOG() << "TCP server ERASING peer: " << conn->PeerEndPoint.address() << std::endl;
+					LOG() << "Unix server ERASING peer: " << conn->DomainEndPoint.path() << std::endl;
                 }
                 
                 return shouldErase;
             };
             
-            _peerConnections.erase(std::remove_if(_peerConnections.begin(), _peerConnections.end(), SocketClosedPredicate), _peerConnections.end());
+            _domainConnections.erase(std::remove_if(_domainConnections.begin(), _domainConnections.end(), SocketClosedPredicate), _domainConnections.end());
         }
     }
     
-    void TcpServer::SendMessageToAllPeers(const std::string& msg, bool nullTerminate)
+    void UnixServer::SendMessageToAllClients(const std::string& msg, bool nullTerminate)
     {
         std::lock_guard<std::mutex> guard(_mutex);
-        for (auto& conn : _peerConnections)
+        for (auto& conn : _domainConnections)
         {
             
             // Allocate message for move.
