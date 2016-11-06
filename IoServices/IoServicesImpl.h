@@ -42,6 +42,7 @@ namespace AsyncIo {
 		std::unordered_map<Timer, boost::asio::deadline_timer, TimerHasher> _oneShotTimers{};
 		std::unordered_map<PeriodicTimer, boost::asio::deadline_timer, PeriodicTimerHasher> _periodicTimers{};
 		std::map<std::shared_ptr<TcpPeerConnection>, std::shared_ptr<TcpPeerConnection>> _clientConnections{};
+		std::map<std::shared_ptr<TcpDomainConnection>, std::shared_ptr<TcpDomainConnection>> _domainConnections{};
 		std::map<std::shared_ptr<UdpListener>, std::shared_ptr<UdpListener>> _listeners{};
 		std::mutex _mutex{};
         
@@ -65,6 +66,8 @@ namespace AsyncIo {
 		void AddUnixServer(const std::string& path, UnixAcceptStreamCallback&& acceptsStream, UnixReadStreamCallback&& readSome);
 
 		void StartUnixServer(const std::string& path);
+
+		void AsyncConnect(DomainConnectCallback&& connectCb, DomainErrorCallback&& errCb, const std::string& path);
 
 		std::shared_ptr<UdpListener> BindDgramListener(std::string ipAddress, int port);
         
@@ -94,6 +97,7 @@ namespace AsyncIo {
         void RemoveWorker();
         void WorkerThread(boost::asio::io_service& ioService);
 		void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
+		void ErrorHandler(std::shared_ptr<TcpDomainConnection> conn, boost::system::error_code ec);
 	};
 }
 

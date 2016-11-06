@@ -1,4 +1,4 @@
-SUBDIRS = IoServices UnixDomainClient
+SUBDIRS = IoServices UnixDomainClient UnixDomainServer
 #AM_RECURSIVE_TARGETS = foo
 
 #pkglibexec_SCRIPTS = RunCrossConfigure.sh

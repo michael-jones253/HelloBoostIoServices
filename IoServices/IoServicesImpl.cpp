@@ -156,6 +156,16 @@ namespace AsyncIo {
 		_clientConnections.erase(conn);
 	}
 
+	void IoServicesImpl::ErrorHandler(std::shared_ptr<TcpDomainConnection> conn, boost::system::error_code ec) {
+		// All access is from the context of the IO service so should not need mutexing.
+		if (_domainConnections.find(conn) == _domainConnections.end())
+		{
+			// Not expecting this to happen, but if it does the main loop will catch it and log.
+			throw std::runtime_error("Connection not found");
+		}
+
+		_domainConnections.erase(conn);
+	}
 	void IoServicesImpl::ErrorHandler(std::shared_ptr<UdpListener> listener, boost::system::error_code ec) {
 		std::lock_guard<std::mutex> listenerGuard(_mutex);
 		if (_listeners.find(listener) == _listeners.end())
@@ -202,6 +212,24 @@ namespace AsyncIo {
 
 		server->Start();
 	}
+
+    void IoServicesImpl::AsyncConnect(DomainConnectCallback&& connectCb, DomainErrorCallback&& errCb, const std::string& path) {
+		auto errCbCopy = std::move(errCb);
+		auto errHandler = [this, errCbCopy](std::shared_ptr<TcpDomainConnection> conn, const boost::system::error_code& ec) {
+			// Call the application error handler first.
+			errCbCopy(conn, ec);
+
+			// Then call our cleanup handler.
+			ErrorHandler(conn, ec);
+		};
+
+		auto conn = std::make_shared<TcpDomainConnection>(&_ioService, std::move(errHandler));
+
+		// All access is from the context of the IO service so should not need mutexing.
+		_domainConnections[conn] = conn;
+
+		conn->AsyncConnect(std::move(connectCb), path);
+    }
 
 	std::shared_ptr<UdpListener> IoServicesImpl::BindDgramListener(std::string ipAddress, int port) {
 		// Bind to specific ip interface address for receiving on that interface only.

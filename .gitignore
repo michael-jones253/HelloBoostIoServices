@@ -25,6 +25,7 @@
 *.in
 *.la
 *.swp
+*.Po
 Makefile
 IoServices/Makefile
 
@@ -40,6 +41,7 @@ IoServices/Makefile
 *.out
 
 UnixDomainClient/unix_domain_client/
+UnixDomainClient/.deps
 IoServices/Debug/
 IoServices/Release/
 IoServices/.deps/

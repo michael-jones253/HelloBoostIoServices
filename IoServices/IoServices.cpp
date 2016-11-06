@@ -174,7 +174,7 @@ namespace AsyncIo
 	/// <param name="readCb">Read stream callback passed in by value to get a copy.</param>
 	/// <param name="errCb">Stream error callback passed in by value to get a copy.</param>
 	/// <param name="peerConn">The peer connection generated during the connection.</param>
-	void ConnectHandler(UnixConnectStreamCallback connectCb, UnixReadStreamCallback readCb, UnixStreamIoErrorCallback errCb, std::shared_ptr<TcpDomainConnection> domainConn)
+	void UnixConnectHandler(UnixConnectStreamCallback connectCb, UnixReadStreamCallback readCb, UnixStreamIoErrorCallback errCb, std::shared_ptr<TcpDomainConnection> domainConn)
 	{
 		auto streamConnection = make_shared<UnixStreamConnection>(domainConn, true /* is client side */);
 
@@ -221,6 +221,15 @@ namespace AsyncIo
     /// <param name="path">The destination unix domain path.</param>
     void IoServices::AsyncConnect(UnixConnectStreamCallback&& connectCb, UnixReadStreamCallback&& readCb, UnixStreamConnectionErrorCallback&& connErrCb, UnixStreamIoErrorCallback&& ioErrCb, std::string path)
     {
+		auto connect = bind(UnixConnectHandler, std::move(connectCb), std::move(readCb), std::move(ioErrCb), std::placeholders::_1);
+
+		auto error = [connErrCb, path](std::shared_ptr<TcpDomainConnection> conn, const boost::system::error_code& ec) {
+			stringstream errStr;
+			errStr << "Client domain connection error on: " << path << " " << ec.message();
+			connErrCb(errStr.str());
+		};
+
+		_impl->AsyncConnect(std::move(connect), std::move(error), path);
     }
 
 
