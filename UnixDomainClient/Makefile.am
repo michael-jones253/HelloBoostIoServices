@@ -9,7 +9,7 @@ AM_LDFLAGS = -lioservices -lboost_system -lboost_thread -lboost_program_options 
 # Make a program called unix_domain_client
 bin_PROGRAMS = unix_domain_client
 
-unix_domain_client_SOURCES = main.cpp
+unix_domain_client_SOURCES = main.cpp ClientUnixConnection.cpp ClientUnixConnection.h UnixConnectionManager.cpp UnixConnectionManager.h
 # We only want to link ioservices static so we specify the flag in IoServices
 #unix_domain_client_LDFLAGS = -static
 

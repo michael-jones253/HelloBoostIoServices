@@ -1,6 +1,7 @@
 // UDP to USB server
 
-#include <IoServices/IoServices.h>
+#include "UnixConnectionManager.h"
+
 #include <IoServices/IoLogConsumer.h>
 #include <boost/program_options.hpp>
 
@@ -14,13 +15,11 @@
 #include <thread>
 #include <chrono>
 #include <vector>
-#include <future>
-#include <mutex>
-#include <condition_variable>
 #include <stdexcept>
 #include <errno.h>
 #include <syslog.h>
 
+using namespace UnixClient;
 using namespace AsyncIo;
 using namespace std;
 using namespace std::chrono;
@@ -32,87 +31,6 @@ void term(int signum)
 	::exit(0);
 }
 
-
-class Impl {
-private:
-    bool mShouldRun{};
-    condition_variable mCondition{};
-    mutex mMutex{};
-    shared_ptr<UnixStreamConnection> mClientConn{};
-    future<bool> mTaskHandle{};
-    IoServices& mIoService;
-    string mDomainPath;
-    seconds mTimeout;
-public:
-    Impl(IoServices& service, const string& path, seconds timeout) :
-        mIoService(service),
-        mDomainPath(path),
-        mTimeout{ timeout }
-    {
-    }
-
-    void Start() {
-        mShouldRun = true;
-        auto run = [this]() ->bool {
-            WorkLoop();
-            return true;
-        };
-
-        mTaskHandle = async(launch::async, move(run));
-    }
-
-private:
-    void RunOnce() {
-        promise<shared_ptr<UnixStreamConnection>> connPromise{};
-        auto connFuture = connPromise.get_future();
-
-        auto connector = [&connPromise](shared_ptr<UnixStreamConnection> conn) {
-            syslog(LOG_NOTICE, "Connection accepted");
-            connPromise.set_value(conn);
-        };
-
-        auto clientReader = [](shared_ptr<UnixStreamConnection> conn, int avail) {
-            syslog(LOG_NOTICE, "Bytes available`%d", avail);
-        };
-
-        // NB do not pass in non statics to this callback
-        auto connError = [](const string& msg) {
-            syslog(LOG_NOTICE, "connect failed: `%s", msg.c_str());
-        };
-
-        auto ioError = [](shared_ptr<UnixStreamConnection> conn, const string& msg) {
-            syslog(LOG_NOTICE, "client IO error: `%s", msg.c_str());
-        };
-
-        syslog(LOG_NOTICE, "client connecting : `%s", mDomainPath.c_str());
-        mIoService.AsyncConnect(move(connector), move(clientReader), move(connError), move(ioError), mDomainPath);
-
-        auto connStatus =connFuture.wait_for(mTimeout);
-        if (connStatus == future_status::timeout)
-        {
-            throw runtime_error("Connection timed out to " + mDomainPath);
-        }
-
-        mClientConn = connFuture.get();
-
-        auto predicate = [this]() {
-            return !mShouldRun;
-        };
-
-        unique_lock<mutex> lk(mMutex);
-        mCondition.wait(lk, move(predicate));
-    }
-
-    void WorkLoop() {
-        while (mShouldRun) {
-            try {
-                RunOnce();
-            } catch (const exception& ex) {
-                this_thread::sleep_for(seconds(3));
-            }
-        }
-    }
-};
 
 int main(int argc, char *argv[])
 {
@@ -174,9 +92,11 @@ int main(int argc, char *argv[])
         IoServices serviceInstance(move(exReporter));
         serviceInstance.Start();
 
-        Impl impl(serviceInstance, domainPath, connectTimeout);
+        UnixConnectionManager impl(serviceInstance, connectTimeout);
 
         impl.Start();
+
+        impl.TryAddConnection(domainPath);
 
 		// process status messages
 		while (true)

@@ -11,6 +11,7 @@
 #include "TcpDomainConnection.h"
 #include "IoLogConsumer.h"
 
+#include <cstdio>
 #include <iostream>
 #include <thread>
 #include <boost/bind.hpp>
@@ -73,6 +74,8 @@ namespace AsyncIo
     
     void UnixServer::Start()
     {
+        std::remove(_path.c_str());
+
         _acceptor = std::make_unique<boost::asio::local::stream_protocol::acceptor>(
                                                                      *_ioService,
                                                                      boost::asio::local::stream_protocol::endpoint(_path));
