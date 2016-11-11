@@ -1,5 +1,5 @@
 //
-//  UnixConnectionManager.cpp
+//  UnixConnectionManager.h
 //  AsyncIo
 //
 //  Created by Michael Jones on 08/11/2016.
@@ -8,29 +8,24 @@
 
 #include "UnixConnectionManager.h"
 #include "ClientUnixConnection.h"
-#include <map>
+
+#include <unordered_map>
 #include <mutex>
+#include <future>
 #include <syslog.h>
 
-using namespace AsyncIo;
 using namespace std;
 using namespace std::chrono;
+using namespace AsyncIo;
 
 namespace UnixClient
 {
-    class UnixConnectionManagerImpl;
-
-	/// <summary>
-	/// For async IO with client connections.
-	/// NB this class is managed internally by the IO services and not to be instantiated by application code.
-	/// </summary>
-    class UnixConnectionManagerImpl final
-	{
+    class UnixConnectionManagerImpl {
     private:
-        mutex _mutex;
-        IoServices& _ioService;
+        mutex _mutex{};
+        unordered_map<string, ClientUnixConnection> _connections{};
+        IoServices& _services;
         seconds _timeout;
-		map<string, ClientUnixConnection> _connections;
 
     public:
 		UnixConnectionManagerImpl() = delete;
@@ -40,17 +35,14 @@ namespace UnixClient
 		/// NB this class is managed internally by the IO services and not to be instantiated by application code.
 		/// </summary>
 		/// <param name="ioService">The boost IO service.</param>
-		/// <param name="timeout">Client IO timeout.</param>
+		/// <param name="path">The path to listen on.</param>
+		/// <param name="acceptsStream">Client connection accepted callback.</param>
+		/// <param name="readSomeCb">Client read some data callback.</param>
 		UnixConnectionManagerImpl(IoServices& ioService, seconds timeout) :
-            _ioService{ ioService },
+            _services{ ioService },
             _timeout{ timeout }
         {
         }
-
-        UnixConnectionManagerImpl(UnixConnectionManager&& rhs);
-		UnixConnectionManagerImpl& operator=(UnixConnectionManagerImpl&& rhs);
-		UnixConnectionManagerImpl(const UnixConnectionManagerImpl&) = delete;
-		UnixConnectionManagerImpl& operator=(const UnixConnectionManagerImpl&) = delete;
 
 		~UnixConnectionManagerImpl() {
         }
@@ -63,34 +55,23 @@ namespace UnixClient
 
         bool TryAddConnection(const string& path) {
             lock_guard<mutex> guard(_mutex);
-            auto found = _connections.find(path);
-            if (found != _connections.end()) {
+            auto con = _connections.find(path);
+            if (con != _connections.end()) {
+                syslog(LOG_INFO, "Already have a client for this path %s", path.c_str());
                 return false;
             }
 
-            auto connect = [this](const string& path, shared_ptr<UnixStreamConnection> conn) {
-                lock_guard<mutex> guard(_mutex);
-                auto found = _connections.find(path);
-                if (found == _connections.end()) {
-                    syslog(LOG_NOTICE, "connect for expired client");
-                    return false;
-                }
-
-                found->second.SetConnection(path, conn);
+            auto connCb = [this](const string& path, shared_ptr<UnixStreamConnection> conn) {
+                HandleConnectCallback(path, conn);
             };
 
-            auto error = [this](const string& path, shared_ptr<UnixStreamConnection> conn, const string& msg) {
-                lock_guard<mutex> guard(_mutex);
-                auto found = _connections.find(path);
-                if (found == _connections.end()) {
-                    syslog(LOG_NOTICE, "error for expired client");
-                    return false;
-                }
-
-                found->second.SetError(path, conn, msg);
+            auto errCb = [this](const string& path, shared_ptr<UnixStreamConnection> conn, const string& msg) {
+                HandleErrorCallback(path, conn, msg);
             };
 
-            auto client = _connections.emplace(piecewise_construct, forward_as_tuple(path), forward_as_tuple(_ioService, path, _timeout, move(connect), move(error)));
+            auto  client = _connections.emplace(piecewise_construct,
+                forward_as_tuple(path),
+                forward_as_tuple(_services, path, _timeout, move(connCb), move(errCb)));
 
             if (client.second) {
                 client.first->second.Start();
@@ -98,12 +79,38 @@ namespace UnixClient
 
             return true;
         }
-    };
 
-    UnixConnectionManager::UnixConnectionManager(IoServices& ioService, seconds timeout) : _impl{ make_unique<UnixConnectionManagerImpl>(ioService, timeout) } {
+    private:
+    void HandleConnectCallback(const string& path, shared_ptr<UnixStreamConnection> newConn) {
+        lock_guard<mutex> guard(_mutex);
+        auto client = _connections.find(path);
+        if (client == _connections.end()) {
+            syslog(LOG_INFO, "connect for expired client");
+            return;
+        }
+
+        client->second.SetConnection(path, newConn);
     }
 
-	UnixConnectionManager::~UnixConnectionManager() {
+    void HandleErrorCallback(const string& path, shared_ptr<UnixStreamConnection> conn, const string& msg) {
+        lock_guard<mutex> guard(_mutex);
+        auto client = _connections.find(path);
+        if (client == _connections.end()) {
+            syslog(LOG_INFO, "error for expired client");
+            return;
+        }
+
+        client->second.SetError(path, conn, msg);
+    }
+
+    };
+
+    UnixConnectionManager::UnixConnectionManager(IoServices& ioService, seconds timeout) :
+        _impl{ make_unique<UnixConnectionManagerImpl>(ioService, timeout) }
+    {
+    }
+
+    UnixConnectionManager::~UnixConnectionManager() {
     }
 
     void UnixConnectionManager::Start() {
@@ -115,7 +122,6 @@ namespace UnixClient
     }
 
     bool UnixConnectionManager::TryAddConnection(const string& path) {
-        _impl->TryAddConnection(path);
+        return _impl->TryAddConnection(path);
     }
 }
-

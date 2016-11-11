@@ -986,6 +986,13 @@ main.o: main.cpp /usr/arm-linux-gnueabihf/include/stdc-predef.h \
  /usr/arm-linux-gnueabihf/include/bits/sigstack.h \
  /usr/arm-linux-gnueabihf/include/sys/ucontext.h \
  /usr/arm-linux-gnueabihf/include/bits/sigthread.h \
+ /usr/arm-linux-gnueabihf/include/sys/fcntl.h \
+ /usr/arm-linux-gnueabihf/include/fcntl.h \
+ /usr/arm-linux-gnueabihf/include/bits/fcntl.h \
+ /usr/arm-linux-gnueabihf/include/bits/fcntl-linux.h \
+ /usr/arm-linux-gnueabihf/include/bits/uio.h \
+ /usr/arm-linux-gnueabihf/include/bits/stat.h \
+ /usr/arm-linux-gnueabihf/include/bits/fcntl2.h \
  /usr/arm-linux-gnueabihf/include/sys/ioctl.h \
  /usr/arm-linux-gnueabihf/include/bits/ioctls.h \
  /usr/arm-linux-gnueabihf/include/asm/ioctls.h \
@@ -1005,11 +1012,16 @@ main.o: main.cpp /usr/arm-linux-gnueabihf/include/stdc-predef.h \
  /usr/arm-linux-gnueabihf/include/linux/stddef.h \
  /usr/arm-linux-gnueabihf/include/asm/posix_types.h \
  /usr/arm-linux-gnueabihf/include/asm-generic/posix_types.h \
+ /usr/arm-linux-gnueabihf/include/c++/5/atomic \
+ /usr/arm-linux-gnueabihf/include/c++/5/future \
+ /usr/arm-linux-gnueabihf/include/c++/5/mutex \
+ /usr/arm-linux-gnueabihf/include/c++/5/thread \
+ /usr/arm-linux-gnueabihf/include/c++/5/condition_variable \
+ /usr/arm-linux-gnueabihf/include/c++/5/bits/atomic_futex.h \
  /usr/arm-linux-gnueabihf/include/c++/5/fstream \
  /usr/arm-linux-gnueabihf/include/c++/5/arm-linux-gnueabihf/bits/basic_file.h \
  /usr/arm-linux-gnueabihf/include/c++/5/arm-linux-gnueabihf/bits/c++io.h \
  /usr/arm-linux-gnueabihf/include/c++/5/bits/fstream.tcc \
- /usr/arm-linux-gnueabihf/include/c++/5/thread \
  /usr/arm-linux-gnueabihf/include/syslog.h \
  /usr/arm-linux-gnueabihf/include/sys/syslog.h \
  /usr/arm-linux-gnueabihf/include/bits/syslog-path.h \
@@ -3001,6 +3013,20 @@ UnixConnectionManager.h:
 
 /usr/arm-linux-gnueabihf/include/bits/sigthread.h:
 
+/usr/arm-linux-gnueabihf/include/sys/fcntl.h:
+
+/usr/arm-linux-gnueabihf/include/fcntl.h:
+
+/usr/arm-linux-gnueabihf/include/bits/fcntl.h:
+
+/usr/arm-linux-gnueabihf/include/bits/fcntl-linux.h:
+
+/usr/arm-linux-gnueabihf/include/bits/uio.h:
+
+/usr/arm-linux-gnueabihf/include/bits/stat.h:
+
+/usr/arm-linux-gnueabihf/include/bits/fcntl2.h:
+
 /usr/arm-linux-gnueabihf/include/sys/ioctl.h:
 
 /usr/arm-linux-gnueabihf/include/bits/ioctls.h:
@@ -3039,6 +3065,18 @@ UnixConnectionManager.h:
 
 /usr/arm-linux-gnueabihf/include/asm-generic/posix_types.h:
 
+/usr/arm-linux-gnueabihf/include/c++/5/atomic:
+
+/usr/arm-linux-gnueabihf/include/c++/5/future:
+
+/usr/arm-linux-gnueabihf/include/c++/5/mutex:
+
+/usr/arm-linux-gnueabihf/include/c++/5/thread:
+
+/usr/arm-linux-gnueabihf/include/c++/5/condition_variable:
+
+/usr/arm-linux-gnueabihf/include/c++/5/bits/atomic_futex.h:
+
 /usr/arm-linux-gnueabihf/include/c++/5/fstream:
 
 /usr/arm-linux-gnueabihf/include/c++/5/arm-linux-gnueabihf/bits/basic_file.h:
@@ -3046,8 +3084,6 @@ UnixConnectionManager.h:
 /usr/arm-linux-gnueabihf/include/c++/5/arm-linux-gnueabihf/bits/c++io.h:
 
 /usr/arm-linux-gnueabihf/include/c++/5/bits/fstream.tcc:
-
-/usr/arm-linux-gnueabihf/include/c++/5/thread:
 
 /usr/arm-linux-gnueabihf/include/syslog.h:
 

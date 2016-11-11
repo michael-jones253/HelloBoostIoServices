@@ -19,8 +19,8 @@ namespace UnixClient
         // predicate
         bool _shouldRun{};
         bool _ioError{};
-        condition_variable mCondition{};
-        mutex mMutex{};
+        condition_variable _condition{};
+        mutex _mutex{};
 
         // non predicate
         atomic<bool> mExpired{};
@@ -48,14 +48,19 @@ namespace UnixClient
         void Start() {
             _shouldRun = true;
             auto run = [this]() ->bool {
-                return WorkLoop();
+                return Work();
             };
     
             mTaskHandle = async(launch::async, move(run));
         }
 
         void Stop() {
-            _shouldRun = false;
+            {
+                lock_guard<mutex> gd(_mutex);
+                _shouldRun = false;
+            }
+
+            _condition.notify_one();
 
             auto ok = mTaskHandle.get();
 
@@ -105,6 +110,12 @@ namespace UnixClient
 
             syslog(LOG_NOTICE, "setting error promise %s", msg.c_str());
             mErrPromise.set_value(true);
+            {
+                lock_guard<mutex> gd(_mutex);
+                _ioError = true;
+            }
+
+            _condition.notify_one();
         }
     private:
         bool RunOnce() {
@@ -126,6 +137,7 @@ namespace UnixClient
     
             // No member capture
             auto connError = [](const string& msg) {
+                syslog(LOG_NOTICE, "client async connect error : `%s", msg.c_str());
             };
     
             auto domainPath = mDomainPath;
@@ -134,23 +146,24 @@ namespace UnixClient
                 cb(path, conn, msg);
             };
     
-            syslog(LOG_NOTICE, "client connecting : `%s", mDomainPath.c_str());
+            syslog(LOG_NOTICE, "client async connecting : `%s", mDomainPath.c_str());
             mIoService.AsyncConnect(move(connector), move(clientReader), move(connError), move(ioError), mDomainPath);
     
             auto connStatus = connFuture.wait_for(mTimeout);
             if (connStatus == future_status::timeout)
             {
+                // No connection handle to close, can throw.
                 throw runtime_error("Connection timed out to " + mDomainPath);
             }
     
             atomic_store(&_clientConn, connFuture.get());
     
             auto predicate = [this]() {
-                return !_shouldRun && !_ioError;
+                return !_shouldRun || _ioError;
             };
     
-            unique_lock<mutex> lk(mMutex);
-            mCondition.wait(lk, move(predicate));
+            unique_lock<mutex> lk(_mutex);
+            _condition.wait(lk, move(predicate));
 
             if (!_ioError) {
                 auto conn = atomic_load(&_clientConn);
@@ -163,14 +176,15 @@ namespace UnixClient
             return errStatus != future_status::timeout;
         }
     
-        bool WorkLoop() {
+        bool Work() {
             bool ok{};
             try {
                 ok = RunOnce();
             } catch (const exception& ex) {
-                this_thread::sleep_for(seconds(3));
+                syslog(LOG_NOTICE, "client run error: %s", ex.what());
             }
 
+            syslog(LOG_NOTICE, "Client stopped %s", (ok ? "normally": "with error"));
             mExpired.store(true);
 
             return ok;

@@ -7,9 +7,12 @@
 
 #include <unistd.h>
 #include <signal.h>
+#include <sys/fcntl.h>
 #include <sys/ioctl.h>
 #include <linux/watchdog.h>
 #include <sstream>
+#include <atomic>
+#include <future>
 #include <fstream>
 #include <iostream>
 #include <thread>
@@ -26,9 +29,69 @@ using namespace std::chrono;
 
 namespace argopt = boost::program_options;
 
-void term(int signum)
+class SigHandler {
+private:
+    atomic<bool> _shouldRun{};
+    int _watchdogHandle{};
+    bool _magicClose{};
+    future<void> _watchdog;
+    IoServices& _services;
+    UnixConnectionManager& _mgr;
+    int _watchdogTimeout;
+
+public:
+    SigHandler(IoServices& services, UnixConnectionManager& mgr, int timeout) :
+        _services{ services },
+        _mgr{ mgr },
+        _watchdogTimeout{ timeout }
+    {
+        _watchdogHandle = open("/dev/watchdog", O_RDWR);
+        int interval{ _watchdogTimeout };
+        ioctl(_watchdogHandle, WDIOC_SETTIMEOUT, &interval);
+
+        watchdog_info info{};
+        ioctl(_watchdogHandle, WDIOC_GETSUPPORT, &info);
+        if (info.options & WDIOF_MAGICCLOSE) {
+            _magicClose = true;
+        }
+
+        _shouldRun.store(true);
+        auto task = [this]() {
+            while(_shouldRun.load()) {
+                ioctl(_watchdogHandle, WDIOC_KEEPALIVE, 0);
+                this_thread::sleep_for(seconds(1));
+            }
+        };
+
+        _watchdog = async(launch::async, (move(task)));
+    }
+
+    ~SigHandler() {
+        _shouldRun.store(false);
+        _mgr.Stop();
+        _services.Stop();
+
+        if (true || _magicClose) {
+            vector<char> magic{ 'V' };
+            auto count = write(_watchdogHandle, magic.data(), 1);
+            syslog(LOG_INFO, "magic close wrote %d", count);
+        }
+
+        close(_watchdogHandle);
+
+        _watchdog.get();
+    }
+};
+
+shared_ptr<SigHandler> sigHandlerHandle;
+
+void sig_handler(int signum)
 {
-	::exit(0);
+
+	auto handle = atomic_load(&sigHandlerHandle);
+    if (handle) {
+        sigHandlerHandle.reset();
+    }
 }
 
 
@@ -37,15 +100,17 @@ int main(int argc, char *argv[])
 	setlogmask(LOG_UPTO(LOG_DEBUG));
 	// set up signal action
 	struct sigaction action{};
-	action.sa_handler = term;
+	action.sa_handler = sig_handler;
 	sigaction(SIGHUP, &action, 0);
+	sigaction(SIGTERM, &action, 0);
 
     try
 	{
         argopt::options_description theOptions("Allowed args");
         theOptions.add_options()
         ("path", argopt::value<string>()->default_value("/var/run/domain"), "domain socket path")
-        ("connect-timeout", argopt::value<int>()->default_value(5), "connect timeout");
+        ("connect-timeout", argopt::value<int>()->default_value(5), "connect timeout")
+        ("watchdog-timeout", argopt::value<int>()->default_value(5), "connect timeout");
 
         argopt::variables_map args;
         auto parsed = argopt::command_line_parser(argc, argv).options(theOptions).run();
@@ -54,6 +119,7 @@ int main(int argc, char *argv[])
 
         string domainPath;
         seconds connectTimeout;
+        int watchdogTimeout;
 
         if (args.count("path") > 0)
         {
@@ -64,6 +130,12 @@ int main(int argc, char *argv[])
         {
             auto timeout  = args["connect-timeout"].as<int>();
             connectTimeout = seconds(timeout);
+        }
+
+        if (args.count("watchdog-timeout") > 0)
+        {
+            auto timeout  = args["watchdog-timeout"].as<int>();
+            watchdogTimeout = timeout;
         }
 
         openlog("unix-optimeye-client", LOG_NDELAY | LOG_PID, LOG_LOCAL1);
@@ -94,12 +166,13 @@ int main(int argc, char *argv[])
 
         UnixConnectionManager impl(serviceInstance, connectTimeout);
 
+        atomic_store(&sigHandlerHandle, make_shared<SigHandler>(serviceInstance, impl, watchdogTimeout));
         impl.Start();
 
         impl.TryAddConnection(domainPath);
 
 		// process status messages
-		while (true)
+		while (atomic_load(&sigHandlerHandle))
 		{
             this_thread::sleep_for(seconds(5));
 		}
