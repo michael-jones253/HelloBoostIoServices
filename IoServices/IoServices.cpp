@@ -358,11 +358,11 @@ namespace AsyncIo
 	void IoServices::SetPeriodicTimer(
 		PeriodicTimer id,
 		std::chrono::duration<long long>  du,
-		const std::function<void(PeriodicTimer id)>& handler)
+		const std::function<void(PeriodicTimer id)>&& handler)
 	{
 		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(du);
 		auto ptimeFromNow = boost::posix_time::milliseconds(ms.count());
-		_impl->SetPeriodicTimer(id, ptimeFromNow, handler);
+		_impl->SetPeriodicTimer(id, ptimeFromNow, move(handler));
 	}
 
 	/// <summary>

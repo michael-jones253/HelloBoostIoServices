@@ -151,7 +151,7 @@ namespace AsyncIo
 		/// <param name="handler">The handler that is called when the timer expires.</param>
         void SetPeriodicTimer(PeriodicTimer id,
                               std::chrono::duration<long long>  du,
-                              const std::function<void(PeriodicTimer id)>& handler);
+                              const std::function<void(PeriodicTimer id)>&& handler);
 
 		/// <summary>
 		/// Cancel the periodic timer. Cannot guarantee that we will get there just before it goes off.

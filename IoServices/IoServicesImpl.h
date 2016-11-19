@@ -85,7 +85,7 @@ namespace AsyncIo {
 
 		void SetPeriodicTimer(PeriodicTimer id,
                               boost::posix_time::time_duration durationFromNow,
-                              const std::function<void(PeriodicTimer id)>& handler);
+                              const std::function<void(PeriodicTimer id)>&& handler);
 
 		void CancelPeriodicTimer(PeriodicTimer id);
 

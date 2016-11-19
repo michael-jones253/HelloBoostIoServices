@@ -163,7 +163,7 @@ namespace AsyncIo
             std::lock_guard<std::mutex> guard(_mutex);
             conn->DomainSocket.close();
             
-            auto SocketClosedPredicate = [](std::shared_ptr<TcpDomainConnection> conn) {
+            auto socketClosedPredicate = [](std::shared_ptr<TcpDomainConnection> conn) {
                 auto shouldErase = !(conn->DomainSocket.is_open());
                 if (shouldErase)
                 {
@@ -173,7 +173,7 @@ namespace AsyncIo
                 return shouldErase;
             };
             
-            _domainConnections.erase(std::remove_if(_domainConnections.begin(), _domainConnections.end(), SocketClosedPredicate), _domainConnections.end());
+            _domainConnections.erase(std::remove_if(_domainConnections.begin(), _domainConnections.end(), socketClosedPredicate), _domainConnections.end());
         }
     }
     

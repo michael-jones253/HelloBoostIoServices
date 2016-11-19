@@ -67,6 +67,7 @@ public:
     }
 
     ~SigHandler() {
+        syslog(LOG_INFO, "handling signal");
         _shouldRun.store(false);
         _mgr.Stop();
         _services.Stop();

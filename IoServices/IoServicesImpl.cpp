@@ -164,6 +164,7 @@ namespace AsyncIo {
 			throw std::runtime_error("Connection not found");
 		}
 
+		conn->Close();
 		_domainConnections.erase(conn);
 	}
 	void IoServicesImpl::ErrorHandler(std::shared_ptr<UdpListener> listener, boost::system::error_code ec) {
@@ -320,18 +321,19 @@ namespace AsyncIo {
     void IoServicesImpl::SetPeriodicTimer(
                                           PeriodicTimer id,
                                           boost::posix_time::time_duration durationFromNow,
-                                          const std::function<void(PeriodicTimer id)>& handler) {
-        auto resetHandler = [this, id, durationFromNow, handler](boost::system::error_code ec) {
+                                          const std::function<void(PeriodicTimer id)>&& handler) {
+        auto handlerCopy = std::move(handler);
+        auto resetHandler = [this, id, durationFromNow, handlerCopy](boost::system::error_code ec) {
 			if (ec == boost::asio::error::operation_aborted)
 			{
 				// User cancelled.
 				return;
 			}
 
-			// Chain the next periodic timeout.
-			this->SetPeriodicTimer(id, durationFromNow, handler);
+			handlerCopy(id);
 
-			handler(id);
+			// Chain the next periodic timeout.
+			this->SetPeriodicTimer(id, durationFromNow, std::move(handlerCopy));
         };
         
         auto timer = _periodicTimers.find(id);
