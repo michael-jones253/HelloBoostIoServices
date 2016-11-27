@@ -4,6 +4,8 @@
 
 #include <IoServices/IoLogConsumer.h>
 #include <boost/program_options.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
 
 #include <unistd.h>
 #include <signal.h>
@@ -28,6 +30,7 @@ using namespace std;
 using namespace std::chrono;
 
 namespace argopt = boost::program_options;
+namespace etc = boost::property_tree;
 
 class SigHandler {
 private:
@@ -40,7 +43,8 @@ private:
     int _watchdogTimeout;
 
 public:
-    SigHandler(IoServices& services, UnixConnectionManager& mgr, int timeout) :
+    SigHandler(IoServices& services, UnixConnectionManager& mgr, int timeout, bool magicClose) :
+        _magicClose{ magicClose },
         _services{ services },
         _mgr{ mgr },
         _watchdogTimeout{ timeout }
@@ -52,7 +56,7 @@ public:
         watchdog_info info{};
         ioctl(_watchdogHandle, WDIOC_GETSUPPORT, &info);
         if (info.options & WDIOF_MAGICCLOSE) {
-            _magicClose = true;
+            syslog(LOG_INFO, "magic close supported");
         }
 
         _shouldRun.store(true);
@@ -72,7 +76,7 @@ public:
         _mgr.Stop();
         _services.Stop();
 
-        if (true || _magicClose) {
+        if (_magicClose) {
             vector<char> magic{ 'V' };
             auto count = write(_watchdogHandle, magic.data(), 1);
             syslog(LOG_INFO, "magic close wrote %d", count);
@@ -111,7 +115,8 @@ int main(int argc, char *argv[])
         theOptions.add_options()
         ("path", argopt::value<string>()->default_value("/var/run/domain"), "domain socket path")
         ("connect-timeout", argopt::value<int>()->default_value(5), "connect timeout")
-        ("watchdog-timeout", argopt::value<int>()->default_value(5), "connect timeout");
+        ("watchdog-timeout", argopt::value<int>()->default_value(5), "connect timeout")
+        ("magic-close", "watchdog magic close");
 
         argopt::variables_map args;
         auto parsed = argopt::command_line_parser(argc, argv).options(theOptions).run();
@@ -139,6 +144,13 @@ int main(int argc, char *argv[])
             watchdogTimeout = timeout;
         }
 
+        bool magicClose{};
+        if (args.count("magic-close") > 0)
+        {
+            magicClose = true;
+        }
+
+
         openlog("unix-optimeye-client", LOG_NDELAY | LOG_PID, LOG_LOCAL1);
 
         auto path = "/etc/catapult/optimeye.ini";
@@ -147,6 +159,15 @@ int main(int argc, char *argv[])
         {
             throw runtime_error(string("Master service failed to load: ") + path);
         }
+
+        etc::ptree pt;
+        etc::ini_parser::read_ini(configFile, pt);
+
+        domainPath = pt.get<string>("common.path", domainPath);
+        magicClose = pt.get<bool>("client.magic-close", magicClose);
+        watchdogTimeout = pt.get<int>("client.watchdog-timeout", watchdogTimeout);
+        auto timeout = pt.get<int>("client.connect-timeout", connectTimeout.count());
+        connectTimeout = seconds{ timeout };
 
         auto exReporter = [](const string& msg, const exception& ex) {
             stringstream logstr;
@@ -167,7 +188,7 @@ int main(int argc, char *argv[])
 
         UnixConnectionManager impl(serviceInstance, connectTimeout);
 
-        atomic_store(&sigHandlerHandle, make_shared<SigHandler>(serviceInstance, impl, watchdogTimeout));
+        atomic_store(&sigHandlerHandle, make_shared<SigHandler>(serviceInstance, impl, watchdogTimeout, magicClose));
         impl.Start();
 
         impl.TryAddConnection(domainPath);

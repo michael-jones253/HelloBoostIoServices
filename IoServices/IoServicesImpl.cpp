@@ -322,14 +322,15 @@ namespace AsyncIo {
                                           PeriodicTimer id,
                                           boost::posix_time::time_duration durationFromNow,
                                           const std::function<void(PeriodicTimer id)>&& handler) {
-        auto handlerCopy = std::move(handler);
-        auto resetHandler = [this, id, durationFromNow, handlerCopy](boost::system::error_code ec) {
+        // move fn directly into lambda capture - c14
+        auto resetHandler = [this, id, durationFromNow, handlerCopy{ std::move(handler) }](boost::system::error_code ec) {
 			if (ec == boost::asio::error::operation_aborted)
 			{
 				// User cancelled.
 				return;
 			}
 
+            // invoke it before moving
 			handlerCopy(id);
 
 			// Chain the next periodic timeout.
