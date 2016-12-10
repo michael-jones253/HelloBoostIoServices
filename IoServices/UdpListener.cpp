@@ -57,7 +57,11 @@ namespace AsyncIo
 
 	UdpListener::~UdpListener()
 	{
-		PeerSocket.close();
+        boost::system::error_code ec{};
+		PeerSocket.close(ec);
+        if (ec) {
+			LOG() << "UdpListener close: " << ec.message() << std::endl;
+        }
 	}
 
 
@@ -201,7 +205,11 @@ namespace AsyncIo
 		// FIX ME if we close the socket, the error handler is called and removes the listener. This is good, but there may be thread contention for the listener map.
 
 		//_readBuffer.EndReadSome();
-		PeerSocket.close();
+        boost::system::error_code ec{};
+		PeerSocket.close(ec);
+        if (ec) {
+			LOG() << "UdpListener close: " << ec.message() << std::endl;
+        }
 	}
     
 	// For unbound unconnected listeners.
@@ -246,7 +254,11 @@ namespace AsyncIo
             LOG() << "Incomplete write, buffer: " << bufWrapper->BoostSize() << " written: " << written << std::endl;
 			// Boost method to stop an async read is to close the socket.
 			// The async read callback will then call the error callback to cleanup the connection and inform the application.
-			conn->PeerSocket.close();
+            boost::system::error_code ec{};
+			conn->PeerSocket.close(ec);
+            if (ec) {
+                LOG() << "UdpListener close: " << ec.message() << std::endl;
+            }
             return;
         }
         

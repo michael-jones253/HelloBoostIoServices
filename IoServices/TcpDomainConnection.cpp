@@ -124,7 +124,11 @@ namespace AsyncIo
 
 	void TcpDomainConnection::Close()
 	{
-		DomainSocket.close();
+        boost::system::error_code ec{};
+		DomainSocket.close(ec);
+        if (ec) {
+			LOG() << "UdpListener close: " << ec.message() << std::endl;
+        }
 	}
     
 	void TcpDomainConnection::ConnectHandler(std::shared_ptr<TcpDomainConnection> conn, boost::system::error_code ec)
@@ -150,7 +154,11 @@ namespace AsyncIo
 			LOG() << "Incomplete write, buffer: " << bufWrapper->BoostSize() << " written: " << written << std::endl;
 			// Boost method to stop an async read is to close the socket.
 			// The async read callback will then call the error callback to cleanup the connection and inform the application.
-			conn->DomainSocket.close();
+            boost::system::error_code ec{};
+			conn->DomainSocket.close(ec);
+            if (ec) {
+                LOG() << "UdpListener close: " << ec.message() << std::endl;
+            }
 
             return;
         }

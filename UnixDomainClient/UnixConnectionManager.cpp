@@ -48,6 +48,20 @@ namespace UnixClient
         }
 
         void Start() {
+        auto timeout = [this](PeriodicTimer id) {
+            syslog(LOG_NOTICE, "timeout");
+            auto timeNow = system_clock::now();
+            for (auto& conn : _connections) {
+                if (timeNow - conn.second.GetTimeLastHeartbeat() > seconds(10) ) {
+                    syslog(LOG_NOTICE, "heartbeat lost");
+                }
+            }
+        };
+
+        _services.InitialisePeriodicTimer(PeriodicTimer{99, "Heartbeat"});
+        _services.SetPeriodicTimer(PeriodicTimer{99, "Heartbeat"},
+                                    seconds(5),
+                                    move(timeout));
         }
 
         void Stop() {

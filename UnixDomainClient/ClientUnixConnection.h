@@ -61,6 +61,8 @@ namespace UnixClient
 
         void SetError(const std::string& path, std::shared_ptr<AsyncIo::UnixStreamConnection> conn, const std::string& msg);
         bool Expired() const;
+
+        std::chrono::system_clock::time_point GetTimeLastHeartbeat() const;
     };
 }
 #if defined(__GNUC__)

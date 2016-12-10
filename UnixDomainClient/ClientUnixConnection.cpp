@@ -45,6 +45,15 @@ namespace UnixClient
         {
         }
     
+		~ClientUnixConnectionImpl() {
+            try {
+                Stop();
+            }
+            catch(const exception& ex) {
+                syslog(LOG_NOTICE, "Client shutdown exception%s", ex.what());
+            }
+        }
+
         void Start() {
             _shouldRun = true;
             auto run = [this]() ->bool {
@@ -116,6 +125,10 @@ namespace UnixClient
             }
 
             _condition.notify_one();
+        }
+
+        system_clock::time_point GetTimeLastHeartbeat() const {
+            return _lastHeartbeat;
         }
     private:
         bool RunOnce() {
@@ -217,5 +230,9 @@ namespace UnixClient
 
     void ClientUnixConnection::SetError(const std::string& path, std::shared_ptr<AsyncIo::UnixStreamConnection> conn, const std::string& msg) {
         _impl->SetError(path, conn, msg);
+    }
+
+    system_clock::time_point ClientUnixConnection::GetTimeLastHeartbeat() const {
+        return _impl->GetTimeLastHeartbeat();
     }
 }

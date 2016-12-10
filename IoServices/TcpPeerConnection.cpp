@@ -126,7 +126,11 @@ namespace AsyncIo
 
 	void TcpPeerConnection::Close()
 	{
-		PeerSocket.close();
+        boost::system::error_code ec{};
+		PeerSocket.close(ec);
+        if (ec) {
+			LOG() << "TcpPeerConnection close: " << ec.message() << std::endl;
+        }
 	}
     
 	void TcpPeerConnection::ConnectHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec)
@@ -152,7 +156,11 @@ namespace AsyncIo
 			LOG() << "Incomplete write, buffer: " << bufWrapper->BoostSize() << " written: " << written << std::endl;
 			// Boost method to stop an async read is to close the socket.
 			// The async read callback will then call the error callback to cleanup the connection and inform the application.
-			conn->PeerSocket.close();
+            boost::system::error_code ec{};
+			conn->PeerSocket.close(ec);
+            if (ec) {
+                LOG() << "TcpPeerConnection close: " << ec.message() << std::endl;
+            }
 
             return;
         }

@@ -113,9 +113,10 @@ int main(int argc, char *argv[])
 	{
         argopt::options_description theOptions("Allowed args");
         theOptions.add_options()
-        ("path", argopt::value<string>()->default_value("/var/run/domain"), "domain socket path")
+        ("path", argopt::value<std::string>()->required(), "domain socket path")
         ("connect-timeout", argopt::value<int>()->default_value(5), "connect timeout")
         ("watchdog-timeout", argopt::value<int>()->default_value(5), "connect timeout")
+        ("startup-sleep", argopt::value<int>()->default_value(0), "sleep at startup for gdb attach")
         ("magic-close", "watchdog magic close");
 
         argopt::variables_map args;
@@ -123,13 +124,14 @@ int main(int argc, char *argv[])
 
         argopt:store(parsed, args);
 
-        string domainPath;
+        string domainPath("/var/run/domain");
         seconds connectTimeout;
+        seconds startupSleep;
         int watchdogTimeout;
 
         if (args.count("path") > 0)
         {
-            domainPath = args["path"].as<string>();
+            domainPath = args["path"].as<std::string>();
         }
 
         if (args.count("connect-timeout") > 0)
@@ -144,14 +146,21 @@ int main(int argc, char *argv[])
             watchdogTimeout = timeout;
         }
 
+        if (args.count("startup-sleep") > 0)
+        {
+            auto sleepTime  = args["startup-sleep"].as<int>();
+            startupSleep = seconds{ sleepTime };
+        }
+
         bool magicClose{};
         if (args.count("magic-close") > 0)
         {
             magicClose = true;
         }
 
-
         openlog("unix-optimeye-client", LOG_NDELAY | LOG_PID, LOG_LOCAL1);
+
+        this_thread::sleep_for(startupSleep);
 
         auto path = "/etc/catapult/optimeye.ini";
         ifstream configFile(path);
@@ -160,14 +169,22 @@ int main(int argc, char *argv[])
             throw runtime_error(string("Master service failed to load: ") + path);
         }
 
-        etc::ptree pt;
-        etc::ini_parser::read_ini(configFile, pt);
-
-        domainPath = pt.get<string>("common.path", domainPath);
-        magicClose = pt.get<bool>("client.magic-close", magicClose);
-        watchdogTimeout = pt.get<int>("client.watchdog-timeout", watchdogTimeout);
-        auto timeout = pt.get<int>("client.connect-timeout", connectTimeout.count());
-        connectTimeout = seconds{ timeout };
+        try {
+            etc::ptree pt;
+            syslog(LOG_INFO, "reading ini");
+            etc::ini_parser::read_ini(configFile, pt);
+            syslog(LOG_INFO, "read ini");
+    
+            domainPath = pt.get<string>("common.domain-path", domainPath);
+            syslog(LOG_INFO, "got path");
+            magicClose = pt.get<bool>("client.magic-close", magicClose);
+            watchdogTimeout = pt.get<int>("client.watchdog-timeout", watchdogTimeout);
+            auto timeout = pt.get<int>("client.connect-timeout", connectTimeout.count());
+            connectTimeout = seconds{ timeout };
+        }
+        catch(const exception& ex) {
+            throw runtime_error(string{"ini parse error: "} + ex.what());
+        }
 
         auto exReporter = [](const string& msg, const exception& ex) {
             stringstream logstr;
