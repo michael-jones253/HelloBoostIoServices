@@ -56,6 +56,7 @@ namespace UnixClient
 
         void Start() {
             _shouldRun = true;
+            _lastHeartbeat = system_clock::now();
             auto run = [this]() ->bool {
                 return Work();
             };
@@ -143,7 +144,7 @@ namespace UnixClient
             };
     
             auto clientReader = [this](shared_ptr<UnixStreamConnection> conn, int avail) {
-                syslog(LOG_NOTICE, "Bytes available`%d", avail);
+                syslog(LOG_NOTICE, "Bytes available %d", avail);
                 _lastHeartbeat = system_clock::now();
                 conn->Consume(avail);
             };

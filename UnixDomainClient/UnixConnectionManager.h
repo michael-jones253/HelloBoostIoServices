@@ -40,7 +40,7 @@ namespace UnixClient
 		/// <param name="path">The path to listen on.</param>
 		/// <param name="acceptsStream">Client connection accepted callback.</param>
 		/// <param name="readSomeCb">Client read some data callback.</param>
-		UnixConnectionManager(AsyncIo::IoServices& ioService, std::chrono::seconds timeout);
+		UnixConnectionManager(AsyncIo::IoServices& ioService, std::chrono::seconds connectTimeout, std::chrono::seconds heartbeatTimeout);
 
         UnixConnectionManager(UnixConnectionManager&& rhs);
 		UnixConnectionManager& operator=(UnixConnectionManager&& rhs);

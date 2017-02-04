@@ -25,7 +25,8 @@ namespace UnixClient
         mutex _mutex{};
         unordered_map<string, ClientUnixConnection> _connections{};
         IoServices& _services;
-        seconds _timeout;
+        seconds _connectTimeout;
+        seconds _heartbeatTimeout;
 
     public:
 		UnixConnectionManagerImpl() = delete;
@@ -38,9 +39,10 @@ namespace UnixClient
 		/// <param name="path">The path to listen on.</param>
 		/// <param name="acceptsStream">Client connection accepted callback.</param>
 		/// <param name="readSomeCb">Client read some data callback.</param>
-		UnixConnectionManagerImpl(IoServices& ioService, seconds timeout) :
+		UnixConnectionManagerImpl(IoServices& ioService, seconds connectTimeout, seconds heartbeatTimeout) :
             _services{ ioService },
-            _timeout{ timeout }
+            _connectTimeout{ connectTimeout },
+            _heartbeatTimeout{ heartbeatTimeout }
         {
         }
 
@@ -48,11 +50,11 @@ namespace UnixClient
         }
 
         void Start() {
-        auto timeout = [this](PeriodicTimer id) {
+        auto handler = [this](PeriodicTimer id) {
             syslog(LOG_NOTICE, "timeout");
             auto timeNow = system_clock::now();
             for (auto& conn : _connections) {
-                if (timeNow - conn.second.GetTimeLastHeartbeat() > seconds(10) ) {
+                if (timeNow - conn.second.GetTimeLastHeartbeat() > _heartbeatTimeout) {
                     syslog(LOG_NOTICE, "heartbeat lost");
                 }
             }
@@ -61,7 +63,7 @@ namespace UnixClient
         _services.InitialisePeriodicTimer(PeriodicTimer{99, "Heartbeat"});
         _services.SetPeriodicTimer(PeriodicTimer{99, "Heartbeat"},
                                     seconds(5),
-                                    move(timeout));
+                                    move(handler));
         }
 
         void Stop() {
@@ -85,7 +87,7 @@ namespace UnixClient
 
             auto  client = _connections.emplace(piecewise_construct,
                 forward_as_tuple(path),
-                forward_as_tuple(_services, path, _timeout, move(connCb), move(errCb)));
+                forward_as_tuple(_services, path, _connectTimeout, move(connCb), move(errCb)));
 
             if (client.second) {
                 client.first->second.Start();
@@ -119,8 +121,8 @@ namespace UnixClient
 
     };
 
-    UnixConnectionManager::UnixConnectionManager(IoServices& ioService, seconds timeout) :
-        _impl{ make_unique<UnixConnectionManagerImpl>(ioService, timeout) }
+    UnixConnectionManager::UnixConnectionManager(IoServices& ioService, seconds connectTimeout, seconds heartbeatTimeout) :
+        _impl{ make_unique<UnixConnectionManagerImpl>(ioService, connectTimeout, heartbeatTimeout) }
     {
     }
 

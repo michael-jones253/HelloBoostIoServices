@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
         theOptions.add_options()
         ("path", argopt::value<std::string>()->required(), "domain socket path")
         ("connect-timeout", argopt::value<int>()->default_value(5), "connect timeout")
-        ("watchdog-timeout", argopt::value<int>()->default_value(5), "connect timeout")
+        ("watchdog-timeout", argopt::value<int>()->default_value(5), "watchdog timeout")
         ("startup-sleep", argopt::value<int>()->default_value(0), "sleep at startup for gdb attach")
         ("magic-close", "watchdog magic close");
 
@@ -126,6 +126,7 @@ int main(int argc, char *argv[])
 
         string domainPath("/var/run/domain");
         seconds connectTimeout;
+        seconds heartbeatTimeout;
         seconds startupSleep;
         int watchdogTimeout;
 
@@ -181,6 +182,9 @@ int main(int argc, char *argv[])
             watchdogTimeout = pt.get<int>("client.watchdog-timeout", watchdogTimeout);
             auto timeout = pt.get<int>("client.connect-timeout", connectTimeout.count());
             connectTimeout = seconds{ timeout };
+
+            timeout = pt.get<int>("client.heartbeat-timeout", heartbeatTimeout.count());
+            heartbeatTimeout = seconds{ timeout };
         }
         catch(const exception& ex) {
             throw runtime_error(string{"ini parse error: "} + ex.what());
@@ -203,7 +207,7 @@ int main(int argc, char *argv[])
         IoServices serviceInstance(move(exReporter));
         serviceInstance.Start();
 
-        UnixConnectionManager impl(serviceInstance, connectTimeout);
+        UnixConnectionManager impl(serviceInstance, connectTimeout, heartbeatTimeout);
 
         atomic_store(&sigHandlerHandle, make_shared<SigHandler>(serviceInstance, impl, watchdogTimeout, magicClose));
         impl.Start();
