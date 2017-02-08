@@ -1,4 +1,6 @@
-SUBDIRS = IoServices UnixDomainClient UnixDomainServer
+#SUBDIRS = IoServices UnixDomainClient UnixDomainServer
+# Need to add UnixDomainServer to repo
+SUBDIRS = IoServices UnixDomainClient
 #AM_RECURSIVE_TARGETS = foo
 
 #pkglibexec_SCRIPTS = RunCrossConfigure.sh

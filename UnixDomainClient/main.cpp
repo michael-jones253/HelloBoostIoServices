@@ -92,11 +92,18 @@ shared_ptr<SigHandler> sigHandlerHandle;
 
 void sig_handler(int signum)
 {
-
+#if __GNUC__>4
+    // Ubuntu xenial has atomic_load
 	auto handle = atomic_load(&sigHandlerHandle);
     if (handle) {
         sigHandlerHandle.reset();
     }
+#else
+    // Debian jessie is on GCC 4.9
+    if (sigHandlerHandle) {
+        sigHandlerHandle.reset();
+    }
+#endif
 }
 
 
@@ -209,13 +216,21 @@ int main(int argc, char *argv[])
 
         UnixConnectionManager impl(serviceInstance, connectTimeout, heartbeatTimeout);
 
+#if __GNUC__>4
         atomic_store(&sigHandlerHandle, make_shared<SigHandler>(serviceInstance, impl, watchdogTimeout, magicClose));
+#else
+        sigHandlerHandle = make_shared<SigHandler>(serviceInstance, impl, watchdogTimeout, magicClose);
+#endif
         impl.Start();
 
         impl.TryAddConnection(domainPath);
 
 		// process status messages
+#if __GNUC__>4
 		while (atomic_load(&sigHandlerHandle))
+#else
+		while (sigHandlerHandle)
+#endif
 		{
             this_thread::sleep_for(seconds(5));
 		}

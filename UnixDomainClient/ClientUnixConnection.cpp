@@ -85,7 +85,11 @@ namespace UnixClient
     
 
         void SetConnection(const std::string& path, std::shared_ptr<AsyncIo::UnixStreamConnection> conn) {
+#if __GNUC__>4
             auto myConn = atomic_load(&_clientConn);
+#else
+            auto myConn = _clientConn;
+#endif
             if (myConn) {
                 syslog(LOG_NOTICE, "ignoring connect for connected");
                 return;
@@ -101,7 +105,11 @@ namespace UnixClient
         }
 
         void SetError(const std::string& path, std::shared_ptr<AsyncIo::UnixStreamConnection> conn, const std::string& msg) {
+#if __GNUC__>4
             auto myCon = atomic_load(&_clientConn);
+#else
+            auto myCon = _clientConn;
+#endif
             if (!myCon) {
                 syslog(LOG_NOTICE, "ignoring error for not connected %s", msg.c_str());
                 return;
@@ -139,7 +147,7 @@ namespace UnixClient
             auto path = mDomainPath;
             auto connCb = _ConnectCallback;
             // No member capture - take copies
-            auto connector = [cb{ move(connCb) }, domain(move(path))](shared_ptr<UnixStreamConnection> conn) {
+            auto connector = [cb( move(connCb) ), domain(move(path))](shared_ptr<UnixStreamConnection> conn) {
                 cb(domain, conn);
             };
     
@@ -156,7 +164,7 @@ namespace UnixClient
     
             auto domainPath = mDomainPath;
             auto errCb = mErrorCallback;
-            auto ioError = [cb{ move(errCb) }, path{ move(domainPath) }](shared_ptr<UnixStreamConnection> conn, const string& msg) {
+            auto ioError = [cb(move(errCb) ), path( move(domainPath) )](shared_ptr<UnixStreamConnection> conn, const string& msg) {
                 cb(path, conn, msg);
             };
     
@@ -170,7 +178,11 @@ namespace UnixClient
                 throw runtime_error("Connection timed out to " + mDomainPath);
             }
     
+#if __GNUC__>4
             atomic_store(&_clientConn, connFuture.get());
+#else
+            _clientConn = connFuture.get();
+#endif
     
             auto predicate = [this]() {
                 return !_shouldRun || _ioError;
@@ -180,7 +192,11 @@ namespace UnixClient
             _condition.wait(lk, move(predicate));
 
             if (!_ioError) {
+#if __GNUC__>4
                 auto conn = atomic_load(&_clientConn);
+#else
+                auto conn = _clientConn;
+#endif
                 if (conn) {
                     conn->Close();
                 }

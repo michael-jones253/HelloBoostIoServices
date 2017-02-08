@@ -36,6 +36,6 @@ AC_CHECK_FUNCS([socket])
 
 AC_CONFIG_FILES([Makefile
                 IoServices/Makefile
-                UnixDomainClient/Makefile
-                UnixDomainServer/Makefile])
+                UnixDomainClient/Makefile])
+#                UnixDomainServer/Makefile])
 AC_OUTPUT
