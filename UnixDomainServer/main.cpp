@@ -52,7 +52,7 @@ public:
         };
 
         auto clientReader = [](shared_ptr<UnixStreamConnection> conn, int avail) {
-            syslog(LOG_NOTICE, "Bytes available`%d", avail);
+            syslog(LOG_NOTICE, "Unexpected Bytes available`%d", avail);
         };
 
         auto connError = [](const string& msg) {
@@ -68,10 +68,19 @@ public:
         _services.StartUnixServer(_path);
 
         auto timeout = [this](PeriodicTimer id) {
-            syslog(LOG_NOTICE, "timeout");
+            syslog(LOG_NOTICE, "heartbeat timer");
             for (auto& conn : _connections) {
                 string heartbeat{"heartbeat"};
-                conn.second->AsyncWrite(move(heartbeat), true);
+                try {
+                    conn.second->AsyncWrite(move(heartbeat), true);
+                }
+                catch (const exception& ex) {
+                    // If the exception is not caught the IoServicesImpl
+                    // run loop catches it, however the timer seems to
+                    // disappear. I suspect boost removes deadline timers
+                    // that throw an exception in their handler.
+                    syslog(LOG_NOTICE, "exception heartbeat timer write: %s", ex.what());
+                }
             }
         };
 
