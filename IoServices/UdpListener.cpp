@@ -173,20 +173,10 @@ namespace AsyncIo
 				PeerSocket.open(udp::v4());
 			}
 
-            auto doBroadcast = mOutQueue.front()->DestEp()->IpAddress == "255.255.255.255";
             
-            if (doBroadcast)
-            {
-                auto boostIp = boost::asio::ip::address_v4::broadcast();
-                boost::asio::ip::udp::endpoint destEp(boostIp, mOutQueue.front()->DestEp()->Port);
-                PeerSocket.async_send_to(mOutQueue.front()->ToBoost(), destEp, std::move(handler));
-            }
-            else
-            {
-                auto boostIp = boost::asio::ip::address::from_string(mOutQueue.front()->DestEp()->IpAddress);
-                boost::asio::ip::udp::endpoint destEp(boostIp, mOutQueue.front()->DestEp()->Port);
-                PeerSocket.async_send_to(mOutQueue.front()->ToBoost(), destEp, std::move(handler));
-            }
+            const auto& boostEp = mOutQueue.front()->DestEp()->ToBoost();
+            PeerSocket.async_send_to(mOutQueue.front()->ToBoost(), boostEp, std::move(handler));
+
 		}
 		else
 		{

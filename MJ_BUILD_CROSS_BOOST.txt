@@ -1,0 +1,50 @@
+  127  ls /media/sf_Downloads/boost_1_61_0.tar.bz2 
+  128  cp /media/sf_Downloads/boost_1_61_0.tar.bz2 ~
+  129  pwd
+  130  ls
+  131  tar xjf boost_1_61_0.tar.bz2 
+  132  cd boost_1_61_0/
+  133  ls
+  134  ls tools/
+  135  vi INSTALL 
+  136  ls boost
+  
+# NB this is important cd tools/build directory to bootstrap.
+  138  cd tools/
+  139  ls
+  140  cd build/
+  141  ls
+  142  ls v2
+  143  ls ../../v2
+  144  ls
+
+# bootstrap to get a b2 exe here.
+  145  ./bootstrap.sh 2>&1 | tee bootstrap_out.txt
+  146  mkdir /opt/boost_build
+  147  sudo mkdir /opt/boost_build
+# run the bootstrapped b2 to build and install an operating b2
+  148  sudo ./b2 install /opt/boost_build
+  149  sudo ./b2 install --prefix=/opt/boost_build 2>&1 | tee b2_install_out.txt
+  150  which b2
+  151  ls /opt/boost_build/
+
+# now set path in .bashrc to use operating b2 like:
+PATH=/opt/boost_build/bin:$PATH
+
+  152  . ~/.bashrc 
+  153  which b2
+  154  cd ../..
+  155  ls
+# comment out the gcc line from example user-config.jam and replace as follows:
+# using gcc : 3.2 : g++-3.2 ;
+using gcc : arm : arm-linux-gnueabihf-g++ ;
+
+
+# This is important otherwise it won't be picked up. See boost build docs for
+# search order of jam files.
+  158  cp user-config.jam ~
+  159  which b2
+
+# Now cross compile into the stage directory.
+  160  b2 toolset=gcc-arm stage 2>&1 | tee b2_toolset_gcc_arm_out.txt
+  161  h > MJ_BUILD_CROSS_BOOST.txt

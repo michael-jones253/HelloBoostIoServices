@@ -2,6 +2,7 @@
 
 #include <IoServices/IoServices.h>
 #include <IoServices/IoLogConsumer.h>
+#include <boost/program_options.hpp>
 
 #include <unistd.h>
 #include <signal.h>
@@ -23,6 +24,7 @@ using namespace AsyncIo;
 using namespace std;
 using namespace std::chrono;
 
+namespace argopt = boost::program_options;
 
 void term(int signum)
 {
@@ -101,12 +103,28 @@ int main(int argc, char *argv[])
 
     try
 	{
-        if (argc < 2)
+        argopt::options_description theOptions("Allowed args");
+        theOptions.add_options()
+        ("path", argopt::value<std::string>()->required(), "domain socket path")
+        ("dest-udp", argopt::value<std::string>(), "domain socket path");
+
+        argopt::variables_map args;
+        auto parsed = argopt::command_line_parser(argc, argv).options(theOptions).run();
+
+        argopt:store(parsed, args);
+
+        string domainPath("/var/run/domain");
+        string destUdp("255.255.255.255");
+
+        if (args.count("path") > 0)
         {
-            throw runtime_error("usage <program> <domain path>");
+            domainPath = args["path"].as<std::string>();
         }
 
-        string domainPath = argv[1];
+        if (args.count("dest-udp") > 0)
+        {
+            destUdp = args["dest-udp"].as<std::string>();
+        }
 
         openlog("unix-optimeye-server", LOG_NDELAY | LOG_PID, LOG_LOCAL1);
 
@@ -138,8 +156,23 @@ int main(int argc, char *argv[])
         app.Start();
 
 		// process status messages
+        auto udpRx = [](shared_ptr<DgramListener> listener, int available) {
+            syslog(LOG_NOTICE, "unexpectedUDP bytes: %d", available);
+        };
+
+        auto udpErr = [](shared_ptr<DgramListener> listner, const string& msg) {
+            syslog(LOG_NOTICE, "UDP err: %s", msg.c_str());
+        };
+
+        auto listener = serviceInstance.UnboundDgramListener(move(udpRx), move(udpErr));
+        listener->EnableBroadcast();
+        listener->LaunchRead();
 		while (true)
 		{
+            string hello("hello world");
+            cout << hello << endl;
+            listener->AsyncSendTo(move(hello), destUdp, 4343, false);
+
             this_thread::sleep_for(seconds(5));
 		}
 	}

@@ -21,7 +21,7 @@ namespace AsyncIo
 
 	UdpBufferWrapper::UdpBufferWrapper(std::string&& msg, const std::string& destIp, int port, bool nullTerminate) :
 		_bufferWrapper(move(msg), nullTerminate),
-		_destEndPoint{ make_unique<IoEndPoint>( destIp, port, false ) }
+		_destEndPoint{ make_unique<IoEndPoint>(destIp, port) }
 	{
 
 	}

@@ -11,31 +11,44 @@
 
 #include <ostream>
 #include <string>
+#include <memory>
+
+namespace boost {
+    namespace asio {
+        namespace ip {
+            class udp;
+            template <typename T>
+            class basic_endpoint;
+            typedef basic_endpoint<udp> endpoint;
+        }
+    }
+}
 
 namespace AsyncIo
 {
+	class IoEndPointImpl;
+
 	/// <summary>
 	/// For UDP use only. I should rename this accordingly.
 	/// </summary>
 	struct IoEndPoint
 	{
-		std::string IpAddress;
-		int Port;
-		bool AsyncConnected;
+        std::unique_ptr<IoEndPointImpl> _impl;
 
-		IoEndPoint() :
-			IpAddress(),
-			Port{},
-			AsyncConnected{}
-		{
-		}
+		std::string IpAddress() const;
+		int Port() const;
+        bool IsBroadcast() const;
 
-		IoEndPoint(const std::string ipAddress, int port, bool asyncConnected) :
-			IpAddress(ipAddress),
-			Port{ port },
-			AsyncConnected{ asyncConnected }
-		{
-		}
+		IoEndPoint();
+		IoEndPoint(const IoEndPoint& rhs);
+		IoEndPoint(IoEndPoint&& rhs);
+
+		IoEndPoint(const std::string& ipAddress, int port);
+
+        ~IoEndPoint();
+
+        // For use by low level Ioservices only.
+        const boost::asio::ip::endpoint& ToBoost() const;
 	};
 
 	/// <summary>
@@ -46,7 +59,7 @@ namespace AsyncIo
 	/// <returns>End point as readable text stream.</returns>
 	inline std::ostream& operator<<(std::ostream &os, const IoEndPoint &endPoint)
 	{
-		os << endPoint.IpAddress << ":" << endPoint.Port;
+		os << endPoint.IpAddress() << ":" << endPoint.Port();
 
 		return os;
 	}
@@ -59,7 +72,8 @@ namespace AsyncIo
 	/// <returns>End point as readable text stream.</returns>
 	inline std::wostream& operator<<(std::wostream &os, const IoEndPoint &endPoint)
 	{
-		os << std::wstring(endPoint.IpAddress.begin(), endPoint.IpAddress.end()) << ":" << endPoint.Port;
+        auto addrStr = endPoint.IpAddress();
+		os << std::wstring(addrStr.begin(), addrStr.end()) << ":" << endPoint.Port();
 
 		return os;
 	}
