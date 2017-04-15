@@ -167,11 +167,15 @@ int main(int argc, char *argv[])
         auto listener = serviceInstance.UnboundDgramListener(move(udpRx), move(udpErr));
         listener->EnableBroadcast();
         listener->LaunchRead();
+        IoEndPoint dest{ destUdp, 4343 };
 		while (true)
 		{
             string hello("hello world");
             cout << hello << endl;
             listener->AsyncSendTo(move(hello), destUdp, 4343, false);
+
+            vector<uint8_t> msg{ 0x23, 0x4d, 0x4a };
+            listener->AsyncSendTo(move(msg), dest);
 
             this_thread::sleep_for(seconds(5));
 		}

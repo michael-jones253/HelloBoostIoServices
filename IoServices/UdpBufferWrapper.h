@@ -26,6 +26,7 @@ namespace AsyncIo
 		UdpBufferWrapper(std::string&& msg, bool nullTerminate);
 		UdpBufferWrapper(std::string&& msg, const std::string& destIp, int port, bool nullTerminate);
 		UdpBufferWrapper(std::vector<uint8_t>&& rhs);
+		UdpBufferWrapper(std::vector<uint8_t>&& rhs, const IoEndPoint& dest);
 
 		UdpBufferWrapper(UdpBufferWrapper&& rhs);
 		UdpBufferWrapper& operator=(AsyncIo::UdpBufferWrapper&& rhs);

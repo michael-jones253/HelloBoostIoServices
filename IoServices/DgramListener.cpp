@@ -121,6 +121,25 @@ namespace AsyncIo {
 		listener->AsyncSendTo(std::move(msg), destIp, port, nullTerminate);
 	}
 
+    /// <summary>
+    /// Datagram send for unconnected socket.
+    /// More efficient than the methods that take string dot notation
+    /// destinations for repeated sends to the same end point because
+    /// it avoids repeatedly parsing a string into IP address.
+    /// </summary>
+    /// <param name="msg">The message to send.</param>
+    /// <param name="dest">The destination end point.</param>
+    void DgramListener::AsyncSendTo(std::vector<uint8_t>&& msg, const IoEndPoint& dest) {
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("DGRAM Async Send To End Point Connection expired.");
+		}
+
+		listener->AsyncSendTo(std::move(msg), dest);
+    }
+
+
 	/// <summary>
 	/// Asynchronous write of a string message.
 	/// NB if the length of the message is greater than MTU it will be split across datagrams.

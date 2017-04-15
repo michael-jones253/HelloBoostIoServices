@@ -64,6 +64,8 @@ namespace AsyncIo
 
 		void AsyncSendTo(std::string&& msg, const std::string& destIp, int port, bool nullTerminate);
 
+        void AsyncSendTo(std::vector<uint8_t>&& msg, const IoEndPoint& dest);
+
 		void AsyncWrite(std::vector<uint8_t>&& msg);
 
 		void SetupChainedRead(IoNotifyAvailableCallback&& available, AsyncIo::UdpErrorCallback&& errCb, int datagramSize, bool immediate = true);

@@ -78,6 +78,16 @@ namespace AsyncIo
 		void AsyncSendTo(std::string&& msg, const std::string& destIp, int port, bool nullTerminate);
 
 		/// <summary>
+		/// Datagram send for unconnected socket.
+        /// More efficient than the methods that take string dot notation
+        /// destinations for repeated sends to the same end point because
+        /// it avoids repeatedly parsing a string into IP address.
+		/// </summary>
+		/// <param name="msg">The message to send.</param>
+		/// <param name="dest">The destination end point.</param>
+        void AsyncSendTo(std::vector<uint8_t>&& msg, const IoEndPoint& dest);
+
+		/// <summary>
 		/// Asynchronous write of a string message.
 		/// NB if the length of the message is greater than MTU it will be split across datagrams.
 		/// </summary>

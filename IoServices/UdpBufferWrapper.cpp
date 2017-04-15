@@ -33,6 +33,12 @@ namespace AsyncIo
 
 	}
 
+    UdpBufferWrapper::UdpBufferWrapper(std::vector<uint8_t>&& rhs, const IoEndPoint& dest) :
+		_bufferWrapper(move(rhs)),
+		_destEndPoint{ make_unique<IoEndPoint>(dest) }
+    {
+    }
+
 	UdpBufferWrapper::UdpBufferWrapper(UdpBufferWrapper&& rhs) :
 		_bufferWrapper(move(rhs._bufferWrapper)),
 		_destEndPoint{}

@@ -139,6 +139,13 @@ namespace AsyncIo
 		QueueOrWriteBuffer(bufWrapper);
 	}
 
+	void UdpListener::AsyncSendTo(std::vector<uint8_t>&& msg, const IoEndPoint& dest)
+	{
+		auto bufWrapper = std::make_shared<UdpBufferWrapper>(std::move(msg), dest);
+
+		QueueOrWriteBuffer(bufWrapper);
+	}
+
 	void UdpListener::AsyncWrite(std::vector<uint8_t>&& msg)
 	{
 		auto bufWrapper = std::make_shared<UdpBufferWrapper>(move(msg));
