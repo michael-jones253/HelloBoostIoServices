@@ -31,9 +31,12 @@ namespace AsyncIo
 	/// <summary>
 	/// For UDP use only. I should rename this accordingly.
 	/// </summary>
-	struct IoEndPoint
+	class IoEndPoint
 	{
+    private:
         std::unique_ptr<IoEndPointImpl> _impl;
+
+    public:
 
 		std::string IpAddress() const;
 		int Port() const;
@@ -42,12 +45,14 @@ namespace AsyncIo
 		IoEndPoint();
 		IoEndPoint(const IoEndPoint& rhs);
 		IoEndPoint(IoEndPoint&& rhs);
+		IoEndPoint& operator=(IoEndPoint&& rhs);
 
 		IoEndPoint(const std::string& ipAddress, int port);
 
         ~IoEndPoint();
 
         // For use by low level Ioservices only.
+		IoEndPoint(const boost::asio::ip::endpoint& boostEp);
         const boost::asio::ip::endpoint& ToBoost() const;
 	};
 

@@ -158,6 +158,12 @@ int main(int argc, char *argv[])
 		// process status messages
         auto udpRx = [](shared_ptr<DgramListener> listener, int available) {
             syslog(LOG_NOTICE, "unexpectedUDP bytes: %d", available);
+
+            try {
+                auto ep = listener->GetPeerEndPoint();
+            }
+            catch(const exception& ex) {
+            }
         };
 
         auto udpErr = [](shared_ptr<DgramListener> listner, const string& msg) {

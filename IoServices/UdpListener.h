@@ -43,7 +43,7 @@ namespace AsyncIo
 		IoCircularBuffer _readBuffer;
     public:
         boost::asio::ip::udp::socket PeerSocket;
-        boost::asio::ip::udp::endpoint PeerEndPoint;
+        boost::asio::ip::udp::endpoint PeerEndPoint; // For recv from only
 
 		UdpListener(boost::asio::io_service* ioService, const boost::asio::ip::address& address, int port);
 

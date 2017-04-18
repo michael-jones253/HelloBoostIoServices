@@ -255,10 +255,7 @@ namespace AsyncIo {
 			throw runtime_error("DGRAM Get Peer End Point Connection expired.");
 		}
 
-		stringstream addressStr;
-		addressStr << listener->PeerEndPoint.address();
-
-		IoEndPoint ep{ addressStr.str(), listener->PeerEndPoint.port() };
+		IoEndPoint ep{ listener->PeerEndPoint };
 
 		return ep;
 	}
