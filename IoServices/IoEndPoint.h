@@ -11,6 +11,7 @@
 
 #include <ostream>
 #include <string>
+#include <array>
 #include <memory>
 
 namespace boost {
@@ -33,6 +34,9 @@ namespace AsyncIo
 	/// </summary>
 	class IoEndPoint
 	{
+	friend std::ostream& operator<<(std::ostream &os, const IoEndPoint &endPoint);
+	friend std::wostream& operator<<(std::wostream &os, const IoEndPoint &endPoint);
+
     private:
         std::unique_ptr<IoEndPointImpl> _impl;
 
@@ -40,6 +44,8 @@ namespace AsyncIo
 
 		std::string IpAddress() const;
 		int Port() const;
+        std::array<uint8_t, 4> IpV4NetworkBytes() const;
+        uint32_t IpV4HostBytes() const;
         bool IsBroadcast() const;
 
 		IoEndPoint();
@@ -52,8 +58,12 @@ namespace AsyncIo
         ~IoEndPoint();
 
         // For use by low level Ioservices only.
-		IoEndPoint(const boost::asio::ip::endpoint& boostEp);
+		IoEndPoint(const boost::asio::ip::endpoint& boostEp, bool asyncConnected, bool asyncReceivedFrom);
         const boost::asio::ip::endpoint& ToBoost() const;
+
+    private:
+        bool HasAsyncConnected() const;
+        bool HasAsyncReceivedFrom() const;
 	};
 
 	/// <summary>
@@ -64,7 +74,9 @@ namespace AsyncIo
 	/// <returns>End point as readable text stream.</returns>
 	inline std::ostream& operator<<(std::ostream &os, const IoEndPoint &endPoint)
 	{
-		os << endPoint.IpAddress() << ":" << endPoint.Port();
+		os << endPoint.IpAddress() << ":" << endPoint.Port()
+        << " connected: " << (endPoint.HasAsyncConnected() ? "true" : "false")
+        << " received from: " << (endPoint.HasAsyncReceivedFrom() ? "true" : "false");
 
 		return os;
 	}
@@ -78,7 +90,9 @@ namespace AsyncIo
 	inline std::wostream& operator<<(std::wostream &os, const IoEndPoint &endPoint)
 	{
         auto addrStr = endPoint.IpAddress();
-		os << std::wstring(addrStr.begin(), addrStr.end()) << ":" << endPoint.Port();
+		os << std::wstring(addrStr.begin(), addrStr.end()) << ":" << endPoint.Port()
+        << " connected: " << (endPoint.HasAsyncConnected() ? "true" : "false")
+        << " received from: " << (endPoint.HasAsyncReceivedFrom() ? "true" : "false");
 
 		return os;
 	}

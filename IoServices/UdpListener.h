@@ -40,6 +40,7 @@ namespace AsyncIo
         UdpErrorCallback _errorCallback;
 		std::function<void()> _connectCallback;
 		std::atomic<bool> _asyncConnected;
+		std::atomic<bool> _asyncReceivedFrom;
 		IoCircularBuffer _readBuffer;
     public:
         boost::asio::ip::udp::socket PeerSocket;
@@ -86,6 +87,10 @@ namespace AsyncIo
 			return _asyncConnected.load();
 		}
 
+		bool HasAsyncReceivedFrom() const {
+            return _asyncReceivedFrom.load();
+        }
+
 		// For unbound unconnected listeners.
 		void LaunchRead();
 
@@ -96,7 +101,9 @@ namespace AsyncIo
 
 		void LaunchWrite();
 
-		void ConnectHandler(std::shared_ptr<UdpListener> conn, boost::system::error_code ec);
+		void ConnectHandler(std::shared_ptr<UdpListener> conn,
+            const boost::asio::ip::address& destIp, int port,
+            boost::system::error_code ec);
 
 		void WriteHandler(
 			std::shared_ptr<UdpListener> conn,

@@ -225,6 +225,35 @@ int main(int argc, char *argv[])
 
         impl.TryAddConnection(domainPath);
 
+        atomic<bool> isConnected{};
+        atomic<bool> isInError{};
+
+        auto udpRx = [](shared_ptr<DgramListener> listener, int available) {
+            syslog(LOG_NOTICE, "unexpectedUDP bytes: %d", available);
+
+            try {
+                auto ep = listener->GetPeerEndPoint();
+            }
+            catch(const exception& ex) {
+            }
+        };
+
+        auto udpErr = [&isInError](shared_ptr<DgramListener> listner, const string& msg) {
+            isInError.store(true);
+            syslog(LOG_NOTICE, "UDP err: %s", msg.c_str());
+        };
+
+        auto sender = serviceInstance.UnboundDgramListener(move(udpRx), move(udpErr));
+
+        auto connectCb = [&isConnected](shared_ptr<DgramListener> listener) {
+            isConnected.store(true);
+            stringstream epStr;
+            auto ep = listener->GetPeerEndPoint();
+            epStr << ep;
+            syslog(LOG_NOTICE, "UDP connected: %s", epStr.str().c_str());
+        };
+
+        sender->AsyncConnect(move(connectCb), "192.168.7.1", 8784);
 		// process status messages
 #if __GNUC__>4
 		while (atomic_load(&sigHandlerHandle))
@@ -232,6 +261,11 @@ int main(int argc, char *argv[])
 		while (sigHandlerHandle)
 #endif
 		{
+            if (isConnected.load()) {
+                string hello("hello world");
+                sender->AsyncWrite(move(hello), false);
+            }
+
             this_thread::sleep_for(seconds(5));
 		}
 	}

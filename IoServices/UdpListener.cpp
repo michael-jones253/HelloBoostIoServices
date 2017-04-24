@@ -24,6 +24,8 @@ namespace AsyncIo
         mOutQueue{},
 		_errorCallback{},
 		_connectCallback{},
+		_asyncConnected{},
+		_asyncReceivedFrom{},
         _readBuffer{}
 	{
 		SetupCircularBufferCallbacks();
@@ -37,6 +39,7 @@ namespace AsyncIo
 		_errorCallback{},
 		_connectCallback{},
 		_asyncConnected{},
+		_asyncReceivedFrom{},
 		_readBuffer{}
 	{
 		SetupCircularBufferCallbacks();
@@ -50,6 +53,7 @@ namespace AsyncIo
 		_errorCallback{},
 		_connectCallback{},
 		_asyncConnected{},
+		_asyncReceivedFrom{},
 		_readBuffer{}
 	{
 		SetupCircularBufferCallbacks();
@@ -89,6 +93,7 @@ namespace AsyncIo
 			else
 			{
 				PeerSocket.async_receive_from(boostBuf, PeerEndPoint, std::move(boostHandler));
+                _asyncReceivedFrom.store(true);
 			}
 		};
 
@@ -105,6 +110,8 @@ namespace AsyncIo
 			&UdpListener::ConnectHandler,
 			this,
 			shared_from_this(),
+            destIp,
+            port,
 			std::placeholders::_1);
 		
 		PeerSocket.async_connect(udp::endpoint(destIp, static_cast<unsigned short>(port)), handler);
@@ -220,7 +227,9 @@ namespace AsyncIo
 		handle.get();
 	}
 
-	void UdpListener::ConnectHandler(std::shared_ptr<UdpListener> conn, boost::system::error_code ec)
+	void UdpListener::ConnectHandler(std::shared_ptr<UdpListener> conn,
+        const boost::asio::ip::address& destIp, int port,
+        boost::system::error_code ec)
 	{
 		auto launchRead = [this]() {
 			_readBuffer.BeginReadSome();
@@ -233,6 +242,11 @@ namespace AsyncIo
 		else {
 			// If this is a connect of an un-bound socket then launch the chained read.
 			_asyncConnected.store(true);
+
+            // Store where we are connected to.
+            // When performing a recv from the end point is used to store
+            // where datagram came from.
+            conn->PeerEndPoint = udp::endpoint(destIp, static_cast<unsigned short>(port));
 			auto handle = std::async(std::launch::async, std::move(launchRead));
 			handle.get();
 			_connectCallback();

@@ -255,7 +255,7 @@ namespace AsyncIo {
 			throw runtime_error("DGRAM Get Peer End Point Connection expired.");
 		}
 
-		IoEndPoint ep{ listener->PeerEndPoint };
+		IoEndPoint ep{ listener->PeerEndPoint, listener->HasAsyncConnected(), listener->HasAsyncReceivedFrom() };
 
 		return ep;
 	}
