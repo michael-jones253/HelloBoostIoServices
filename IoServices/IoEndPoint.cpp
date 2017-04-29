@@ -5,7 +5,7 @@
 //  Created by Michael Jones on 08/04/2017.
 //  https://github.com/michael-jones253/HelloBoostIoServices
 //
-
+#include "stdafx.h"
 #include "IoEndPoint.h"
 
 #include <boost/asio.hpp>

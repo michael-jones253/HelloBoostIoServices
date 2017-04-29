@@ -13,7 +13,9 @@
 #include "PeriodicTimer.h"
 #include "Timer.h"
 #include "StreamConnection.h"
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
 #include "UnixStreamConnection.h"
+#endif
 #include "DgramListener.h"
 #include "SecurityOptions.h"
 #include <memory>
@@ -97,6 +99,7 @@ namespace AsyncIo
 		/// <param name="port">The destination port.</param>
 		void AsyncConnect(ConnectStreamCallback&& connectCb, ReadStreamCallback&& readCb, StreamConnectionErrorCallback&& connErrCb, StreamIoErrorCallback&& ioErrCb, std::string ipAddress, int port);
         
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
 		/// <summary>
 		///  Asynchronous connect handler. Once connected the stream will begin asynchronous reading straight away.
 		/// </summary>
@@ -106,7 +109,7 @@ namespace AsyncIo
 		/// <param name="ioErrCb">Error callback if socket I/O errors encountered.</param>
 		/// <param name="path">The destination unix domain path.</param>
 		void AsyncConnect(UnixConnectStreamCallback&& connectCb, UnixReadStreamCallback&& readCb, UnixStreamConnectionErrorCallback&& connErrCb, UnixStreamIoErrorCallback&& ioErrCb, std::string path);
-        
+
 		/// <summary>
 		/// Add a Unix domain server to listen on the specified path.
 		/// </summary>
@@ -121,7 +124,7 @@ namespace AsyncIo
 		/// </summary>
 		/// <param name="path">Identifies the server to start.</param>
 		void StartUnixServer(const std::string& path);
-
+#endif
 		/// <summary>
 		/// Binds a datagram listener for asynchronous UDP receive.
 		/// NB. This will start receiving straight away.
