@@ -1,0 +1,6 @@
+Used to have home built ssl libraries:
+Linker Additional Dependencies libeay32.lib;ssleay32.lib;%(AdditionalDependencies)
+Additional Library Directories D:\MJ-Install\OpenSsl\lib;%(AdditionalLibraryDirectories)
+
+# now using nuget for 64 bit build - NB unless version specified it will not install.
+Install-Package openssl -Version 1.0.2
