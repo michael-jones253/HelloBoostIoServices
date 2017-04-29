@@ -11,9 +11,7 @@
 
 #include "StreamConnection.h"
 #include "TcpPeerConnection.h"
-#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
 #include "TcpDomainConnection.h"
-#endif
 #include "TcpSslConnection.hpp"
 #include "SecurityOptions.h"
 

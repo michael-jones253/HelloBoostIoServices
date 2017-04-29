@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -19,13 +19,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v120</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -39,7 +39,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup>
+    <NuGetPackageImportStamp>9e1a27cf</NuGetPackageImportStamp>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <PrecompiledHeader>Create</PrecompiledHeader>
@@ -79,7 +81,6 @@
     <ClCompile Include="DgramListener.cpp" />
     <ClCompile Include="IoBufferWrapper.cpp" />
     <ClCompile Include="IoCircularBuffer.cpp" />
-    <ClCompile Include="IoEndPoint.cpp" />
     <ClCompile Include="IoLog.cpp" />
     <ClCompile Include="IoLogConsumer.cpp" />
     <ClCompile Include="IoServices.cpp" />
@@ -90,7 +91,6 @@
     <ClCompile Include="TcpPeerConnection.cpp" />
     <ClCompile Include="TcpServer.cpp" />
     <ClCompile Include="TcpSslConnection.cpp" />
-    <ClCompile Include="UdpBufferWrapper.cpp" />
     <ClCompile Include="UdpListener.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -98,7 +98,6 @@
     <ClInclude Include="EgSslServer.hpp" />
     <ClInclude Include="IoBufferWrapper.h" />
     <ClInclude Include="IoCircularBuffer.h" />
-    <ClInclude Include="IoEndPoint.h" />
     <ClInclude Include="IoLog.h" />
     <ClInclude Include="IoLogConsumer.h" />
     <ClInclude Include="IoServices.h" />
@@ -113,7 +112,6 @@
     <ClInclude Include="TcpServer.h" />
     <ClInclude Include="TcpSslConnection.hpp" />
     <ClInclude Include="Timer.h" />
-    <ClInclude Include="UdpBufferWrapper.h" />
     <ClInclude Include="UdpListener.h" />
   </ItemGroup>
   <ItemGroup>
@@ -121,12 +119,12 @@
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\HelloBoostIoServices\packages\boost.1.63.0.0\build\native\boost.targets" Condition="Exists('..\HelloBoostIoServices\packages\boost.1.63.0.0\build\native\boost.targets')" />
+    <Import Project="..\HelloBoostIoServices\packages\boost.1.59.0.0\build\native\boost.targets" Condition="Exists('..\HelloBoostIoServices\packages\boost.1.59.0.0\build\native\boost.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Enable NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
-    <Error Condition="!Exists('..\HelloBoostIoServices\packages\boost.1.63.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\HelloBoostIoServices\packages\boost.1.63.0.0\build\native\boost.targets'))" />
+    <Error Condition="!Exists('..\HelloBoostIoServices\packages\boost.1.59.0.0\build\native\boost.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\HelloBoostIoServices\packages\boost.1.59.0.0\build\native\boost.targets'))" />
   </Target>
 </Project>

@@ -167,8 +167,6 @@ namespace AsyncIo
 		_impl->AsyncConnect(std::move(connect), std::move(error), ipAddress, port);
 	}
 
-#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
-
 	/// <summary>
 	/// NB private Asynchronous connect handler.
 	/// </summary>
@@ -257,7 +255,6 @@ namespace AsyncIo
 		_impl->StartUnixServer(path);
 	}
 
-#endif
 	void SetupReadCallbacks(shared_ptr<DgramListener> sharedListener, DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, IoServicesImpl* impl, std::shared_ptr<UdpListener> udpListener, bool immediate = true)
 	{
 

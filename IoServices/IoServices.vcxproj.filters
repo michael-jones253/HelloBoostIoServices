@@ -60,12 +60,6 @@
     <ClCompile Include="IoLogConsumer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="IoEndPoint.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="UdpBufferWrapper.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DgramListener.h">
@@ -123,12 +117,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="IoLogConsumer.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="IoEndPoint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="UdpBufferWrapper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
