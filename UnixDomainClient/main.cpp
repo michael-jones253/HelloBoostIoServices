@@ -232,9 +232,12 @@ int main(int argc, char *argv[])
             syslog(LOG_NOTICE, "unexpectedUDP bytes: %d", available);
 
             try {
+                stringstream epStr;
                 auto ep = listener->GetPeerEndPoint();
+                epStr << ":
             }
             catch(const exception& ex) {
+                syslog(LOG_NOTICE, "RX err get end point: %s", ex.what());
             }
         };
 
