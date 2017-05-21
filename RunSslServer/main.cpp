@@ -5,7 +5,10 @@
 //  Created by Michael Jones on 15/11/2015.
 //  Copyright � 2015 Michael Jones. All rights reserved.
 //
+
+#if defined(_WIN32_)
 #include "stdafx.h"
+#endif
 
 #include "StreamConnection.h"
 #include "IoServices.h"
@@ -30,7 +33,7 @@ using namespace AsyncIo;
 
 namespace po = boost::program_options;
 
-#if defined(__clang__)
+#if defined(__clang__) || defined(__GNUC__)
 int main(int argc, char* argv[]) {
 	auto wideargs = vector<wchar_t*>(argc);
 

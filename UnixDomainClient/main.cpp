@@ -229,16 +229,17 @@ int main(int argc, char *argv[])
         atomic<bool> isInError{};
 
         auto udpRx = [](shared_ptr<DgramListener> listener, int available) {
-            syslog(LOG_NOTICE, "unexpectedUDP bytes: %d", available);
 
+            stringstream epStr;
             try {
-                stringstream epStr;
                 auto ep = listener->GetPeerEndPoint();
-                epStr << ":
+                epStr << "sender is: " << ep;
             }
             catch(const exception& ex) {
-                syslog(LOG_NOTICE, "RX err get end point: %s", ex.what());
+                epStr <<  "RX err get end point: " << ex.what();
             }
+
+            syslog(LOG_NOTICE, "unexpectedUDP bytes: %d %s", available, epStr.str().c_str());
         };
 
         auto udpErr = [&isInError](shared_ptr<DgramListener> listner, const string& msg) {

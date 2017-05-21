@@ -34,8 +34,10 @@ AC_TYPE_UINT8_T
 # Checks for library functions.
 AC_CHECK_FUNCS([socket])
 
+AC_DEFINE([IO_SERVICES_HAS_LOCAL_SOCKETS], [], [supports Unix sockets])
 AC_CONFIG_FILES([Makefile
                 IoServices/Makefile
                 UnixDomainClient/Makefile
+                RunSslServer/Makefile
                 UnixDomainServer/Makefile])
 AC_OUTPUT
