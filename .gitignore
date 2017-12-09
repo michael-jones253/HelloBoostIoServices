@@ -18,6 +18,18 @@
 *.opensdf
 *.dll
 *.user
+*.VC.db
+*.VC.VC.opendb
+
+# Linux stuff
+*.lo
+*.o
+*.in
+*.la
+*.swp
+*.Po
+Makefile
+IoServices/Makefile
 
 # Do not publish secret SSL stuff!
 *.pem
@@ -28,7 +40,14 @@
 
 # general gitignore documents
 *.nogit
+*.out
 
+UnixDomainClient/unix_domain_client/
+UnixDomainClient/.deps
 IoServices/Debug/
 IoServices/Release/
-HelloBoostIoServices/packages/boost.1.59.0.0/
+IoServices/.deps/
+IoServices/.libs/
+m4
+HelloBoostIoServices/packages/
+HelloBoostIoServices/x64/

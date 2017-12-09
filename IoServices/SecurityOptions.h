@@ -23,6 +23,8 @@ namespace AsyncIo {
         std::string PrivKeyFilename{};
         std::string DHExchangeFilename{};
         std::function<std::string()> GetPasswordCallback{};
+		bool VerifyClient{};
+		std::string ClientVerifyFile{};
     };
 }
 

@@ -10,6 +10,7 @@
 #include "TcpServer.h"
 #include "TcpConnection.hpp"
 #include "TcpSslConnection.hpp"
+#include "IoLogConsumer.h"
 
 #include <iostream>
 #include <thread>
@@ -118,7 +119,7 @@ namespace AsyncIo
         
         std::lock_guard<std::mutex> connGuard(_mutex);
         _peerConnections.push_back(acceptedConn);
-        std::cout << "Accepted: " << _peerConnections.size() << std::endl;
+        LOG() << "Accepted: " << _peerConnections.size() << std::endl;
         
         // Notify the application that a client has connected.
         _acceptStreamCb(streamConn);
@@ -128,7 +129,7 @@ namespace AsyncIo
     {
         if (ec != 0)
         {
-            std::cerr << "Accept error: " << ec << std::endl;
+            LOG() << "Accept error: " << ec << std::endl;
             // Review: call an error callback.
         }
         else {
@@ -160,9 +161,8 @@ namespace AsyncIo
                                                                 boost::asio::placeholders::error));
         }
         else {
-            std::cerr << "Accept error: " << ec << std::endl;
-            // Review: call an error callback.
-            
+			LOG() << "Accept error: " << ec << std::endl;
+            // Review: call an error callback.            
         }
         
         AsyncSecureAccept();
@@ -171,7 +171,7 @@ namespace AsyncIo
     void TcpServer::HandleSslHandshake(std::shared_ptr<TcpSslConnection>acceptedConn, const boost::system::error_code& error) {
         if (!error)
         {
-            std::cout << "handle handshake" << std::endl;
+            LOG() << "handle handshake" << std::endl;
             OnAccept(acceptedConn);
         }
         else
@@ -179,7 +179,8 @@ namespace AsyncIo
             SSL_load_error_strings();
             unsigned long n = ERR_get_error();
             char buf[1024];
-            printf("%s\n", ERR_error_string(n, buf));
+			auto err = ERR_error_string(n, buf);
+			LOG() << "Handle SSL handshake error: " << err << std::endl;
         }
         
     }
@@ -194,11 +195,8 @@ namespace AsyncIo
 			| boost::asio::ssl::context::no_sslv2
 			| boost::asio::ssl::context::single_dh_use;
 
-		bool FIXMEValidateClient = true;
-		if (FIXMEValidateClient)
+		if (_securityOptions.VerifyClient)
 		{
-//			optionsMask |= boost::asio::ssl::context::verify_fail_if_no_peer_cert | boost::asio::ssl::verify_peer;
-
 			auto verifyCallback = [](bool preverified,
 				boost::asio::ssl::verify_context& ctx) {
 
@@ -206,19 +204,18 @@ namespace AsyncIo
 				char subject_name[256];
 				X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
 				X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-				std::cout << "Verifying, subject: " << subject_name << "\n";
+				LOG() << "Verifying, subject: " << subject_name << "\n";
 
 				char issuer_name[256];
 				X509_NAME_oneline(X509_get_issuer_name(cert), issuer_name, 256);
-				std::cout << "Verifying, issuer: " << issuer_name << "\n";
+				LOG() << "Verifying, issuer: " << issuer_name << "\n";
 
 				return preverified;
 			};
 
 			context.set_verify_mode(boost::asio::ssl::context::verify_fail_if_no_peer_cert | boost::asio::ssl::verify_peer);
 			context.set_verify_callback(verifyCallback);
-			// context.load_verify_file("client.pem");
-			context.load_verify_file("CARoot.pem");
+			context.load_verify_file(_securityOptions.ClientVerifyFile);
 		}
 
 		context.set_options(optionsMask);
@@ -263,7 +260,7 @@ namespace AsyncIo
                 auto shouldErase = !(conn->PeerSocket.is_open());
                 if (shouldErase)
                 {
-                    std::cout << "TCP server ERASING peer: " << conn->PeerEndPoint.address() << std::endl;
+					LOG() << "TCP server ERASING peer: " << conn->PeerEndPoint.address() << std::endl;
                 }
                 
                 return shouldErase;

@@ -5,7 +5,7 @@
 // FIX ME - probably need a later version of boost.
 #define _WINSOCK_DEPRECATED_NO_WARNINGS
 
-#include "IoBufferWrapper.h"
+#include "UdpBufferWrapper.h"
 #include "IoCircularBuffer.h"
 #include <memory>
 #include <mutex>
@@ -36,14 +36,15 @@ namespace AsyncIo
 	{
     private:
         std::mutex Mutex;
-        std::deque<std::shared_ptr<IoBufferWrapper>> mOutQueue;
+        std::deque<std::shared_ptr<UdpBufferWrapper>> mOutQueue;
         UdpErrorCallback _errorCallback;
 		std::function<void()> _connectCallback;
 		std::atomic<bool> _asyncConnected;
+		std::atomic<bool> _asyncReceivedFrom;
 		IoCircularBuffer _readBuffer;
     public:
         boost::asio::ip::udp::socket PeerSocket;
-        boost::asio::ip::udp::endpoint PeerEndPoint;
+        boost::asio::ip::udp::endpoint PeerEndPoint; // For recv from only
 
 		UdpListener(boost::asio::io_service* ioService, const boost::asio::ip::address& address, int port);
 
@@ -51,15 +52,20 @@ namespace AsyncIo
 
 		UdpListener(boost::asio::io_service* ioService);
 
-		~UdpListener()
-		{
-			std::cout << "Closing UDP listener: " << PeerEndPoint << std::endl;
-		}
+		~UdpListener();
         
 		// For already bound listeners.
 		void AsyncConnect(const boost::asio::ip::address& destIp, int port, std::function<void()>&& connectHandler);
 
+		void JoinMulticastGroup(const boost::asio::ip::address& multicastAddr);
+
+        void EnableBroadcast();
+
         void AsyncWrite(std::string&& msg, bool nullTerminate);
+
+		void AsyncSendTo(std::string&& msg, const std::string& destIp, int port, bool nullTerminate);
+
+        void AsyncSendTo(std::vector<uint8_t>&& msg, const IoEndPoint& dest);
 
 		void AsyncWrite(std::vector<uint8_t>&& msg);
 
@@ -80,19 +86,28 @@ namespace AsyncIo
 		bool HasAsyncConnected() const {
 			return _asyncConnected.load();
 		}
-        
+
+		bool HasAsyncReceivedFrom() const {
+            return _asyncReceivedFrom.load();
+        }
+
+		// For unbound unconnected listeners.
+		void LaunchRead();
+
     private:
 		void SetupCircularBufferCallbacks();
 
-		void QueueOrWriteBuffer(std::shared_ptr<IoBufferWrapper> bufWrapper);
+		void QueueOrWriteBuffer(std::shared_ptr<UdpBufferWrapper> bufWrapper);
 
 		void LaunchWrite();
 
-		void ConnectHandler(std::shared_ptr<UdpListener> conn, boost::system::error_code ec);
+		void ConnectHandler(std::shared_ptr<UdpListener> conn,
+            const boost::asio::ip::address& destIp, int port,
+            boost::system::error_code ec);
 
 		void WriteHandler(
 			std::shared_ptr<UdpListener> conn,
-			std::shared_ptr<IoBufferWrapper> bufWrapper,
+			std::shared_ptr<UdpBufferWrapper> bufWrapper,
 			boost::system::error_code ec,
 			std::size_t written);
     };

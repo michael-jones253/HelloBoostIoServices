@@ -92,6 +92,16 @@ namespace AsyncIo
 	}
 
 	/// <summary>
+	/// Starts the TCP server to accept SSL/TLS connections.
+	/// </summary>
+	/// <param name="port">Identifies the server to start.</param>
+	/// <param name="security">The SSL/TLS options.</param>
+	void IoServices::StartTcpServer(int port, SecurityOptions&& security)
+	{
+		_impl->StartTcpServer(port, std::move(security));
+	}
+
+	/// <summary>
 	/// NB private Asynchronous connect handler.
 	/// </summary>
 	/// <param name="connectCb">Connect stream callback passed in by value to get a copy.</param>
@@ -108,7 +118,7 @@ namespace AsyncIo
 		// The weak pointer can be used to give a guaranteed handle to the parent stream connection and avoid circular ownership
 		// destruction problems.
 		auto weakStreamConn = weak_ptr<StreamConnection>(streamConnection);
-		auto available = [weakStreamConn, readCb, peerConn](size_t available) {
+		auto notifAvailable = [weakStreamConn, readCb, peerConn](size_t available) {
 			auto lockedConn = weakStreamConn.lock();
 			if (lockedConn)
 			{
@@ -130,7 +140,7 @@ namespace AsyncIo
 			errCb(lockedConn, errStr.str());
 		};
 
-		peerConn->BeginChainedRead(std::move(available), std::move(errorHandler), ReadSomeChunkSize);
+		peerConn->BeginChainedRead(std::move(notifAvailable), std::move(errorHandler), ReadSomeChunkSize);
 
 		connectCb(streamConnection);
 	}
@@ -157,7 +167,97 @@ namespace AsyncIo
 		_impl->AsyncConnect(std::move(connect), std::move(error), ipAddress, port);
 	}
 
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
 
+	/// <summary>
+	/// NB private Asynchronous connect handler.
+	/// </summary>
+	/// <param name="connectCb">Connect stream callback passed in by value to get a copy.</param>
+	/// <param name="readCb">Read stream callback passed in by value to get a copy.</param>
+	/// <param name="errCb">Stream error callback passed in by value to get a copy.</param>
+	/// <param name="peerConn">The peer connection generated during the connection.</param>
+	void UnixConnectHandler(UnixConnectStreamCallback connectCb, UnixReadStreamCallback readCb, UnixStreamIoErrorCallback errCb, std::shared_ptr<TcpDomainConnection> domainConn)
+	{
+		auto streamConnection = make_shared<UnixStreamConnection>(domainConn, true /* is client side */);
+
+		// Take a weak pointer to the stream connection and a copy of the callback to bind them to lambda.
+		// The lambda then gets moved into the peer connection which ensures that the callback will be
+		// associated with this peer connection and last the lifetime of the peer connection.
+		// The weak pointer can be used to give a guaranteed handle to the parent stream connection and avoid circular ownership
+		// destruction problems.
+		auto weakStreamConn = weak_ptr<UnixStreamConnection>(streamConnection);
+		auto notifAvailable = [weakStreamConn, readCb, domainConn](size_t available) {
+			auto lockedConn = weakStreamConn.lock();
+			if (lockedConn)
+			{
+				readCb(lockedConn, static_cast<int>(available));
+			}
+			else
+			{
+				// If this happens examine the application code for any destruction order design issues.
+				std::cout << "Client side received data with no handler available: " << domainConn->DomainEndPoint << available << std::endl;
+			}
+		};
+
+		auto errorHandler = [weakStreamConn, errCb](std::shared_ptr<TcpDomainConnection> conn, const boost::system::error_code& ec) {
+			stringstream errStr;
+			errStr << "Stream connection error: " << ec.message();
+
+			// NB this may be null, caller of connect must test for this in error callback.
+			auto lockedConn = weakStreamConn.lock();
+			errCb(lockedConn, errStr.str());
+		};
+
+		domainConn->BeginChainedRead(std::move(notifAvailable), std::move(errorHandler), ReadSomeChunkSize);
+
+		connectCb(streamConnection);
+	}
+
+    /// <summary>
+    ///  Asynchronous connect handler. Once connected the stream will begin asynchronous reading straight away.
+    /// </summary>
+    /// <param name="connectCb">The connected callback.</param>
+    /// <param name="readCb">Asynchronous data read callback.</param>
+    /// <param name="connErrCb">Error callback if socket connect errors encountered.</param>
+    /// <param name="ioErrCb">Error callback if socket I/O errors encountered.</param>
+    /// <param name="path">The destination unix domain path.</param>
+    void IoServices::AsyncConnect(UnixConnectStreamCallback&& connectCb, UnixReadStreamCallback&& readCb, UnixStreamConnectionErrorCallback&& connErrCb, UnixStreamIoErrorCallback&& ioErrCb, std::string path)
+    {
+		auto connect = bind(UnixConnectHandler, std::move(connectCb), std::move(readCb), std::move(ioErrCb), std::placeholders::_1);
+
+		auto error = [connErrCb, path](std::shared_ptr<TcpDomainConnection> conn, const boost::system::error_code& ec) {
+			stringstream errStr;
+			errStr << "Client domain connection error on: " << path << " " << ec.message();
+			connErrCb(errStr.str());
+		};
+
+		_impl->AsyncConnect(std::move(connect), std::move(error), path);
+    }
+
+
+	/// <summary>
+	/// Add a Unix server to listen on the specified port.
+	/// </summary>
+	/// <param name="path">The path to listen on.</param>
+	/// <param name="acceptsStream">Client connection accepted callback.</param>
+	/// <param name="readStream">Client connection data received callback.</param>
+	void IoServices::AddUnixServer(const std::string& path, UnixAcceptStreamCallback&& acceptsStream, UnixReadStreamCallback&& readStream)
+	{
+		// take a copy to bind it to each server's read stream callback.
+		_impl->AddUnixServer(path, std::move(acceptsStream), std::move(readStream));
+	}
+
+	/// <summary>
+	/// Starts the Unix server.
+	/// NB all servers must be added first due to move issues.
+	/// </summary>
+	/// <param name="path">Identifies the server to start.</param>
+	void IoServices::StartUnixServer(const std::string& path)
+	{
+		_impl->StartUnixServer(path);
+	}
+
+#endif
 	void SetupReadCallbacks(shared_ptr<DgramListener> sharedListener, DgramReceiveCallback&& receiveCb, DgramErrorCallback&& errCb, IoServicesImpl* impl, std::shared_ptr<UdpListener> udpListener, bool immediate = true)
 	{
 
@@ -261,11 +361,11 @@ namespace AsyncIo
 	void IoServices::SetPeriodicTimer(
 		PeriodicTimer id,
 		std::chrono::duration<long long>  du,
-		const std::function<void(PeriodicTimer id)>& handler)
+		const std::function<void(PeriodicTimer id)>&& handler)
 	{
 		auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(du);
 		auto ptimeFromNow = boost::posix_time::milliseconds(ms.count());
-		_impl->SetPeriodicTimer(id, ptimeFromNow, handler);
+		_impl->SetPeriodicTimer(id, ptimeFromNow, move(handler));
 	}
 
 	/// <summary>

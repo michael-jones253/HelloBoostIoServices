@@ -7,6 +7,7 @@
 //
 #include "stdafx.h"
 #include "TcpSslConnection.hpp"
+#include "IoLogConsumer.h"
 
 #include <iostream>
 
@@ -38,7 +39,7 @@ namespace AsyncIo {
                                       std::bind(&TcpSslConnection::VerifyCertificate, this,
                                                 std::placeholders::_1, std::placeholders::_2));
 
-        std::cout << "tcp connected" << std::endl;
+        LOG() << "tcp connected" << std::endl;
         SslSocket.async_handshake(boost::asio::ssl::stream_base::client,
                                   std::bind(&TcpSslConnection::HandleHandshake, this,
                                             std::placeholders::_1));
@@ -55,11 +56,11 @@ namespace AsyncIo {
         // If what the client loaded matches, then the preverified arg will be true.
         X509* cert = X509_STORE_CTX_get_current_cert(ctx.native_handle());
         X509_NAME_oneline(X509_get_subject_name(cert), subject_name, 256);
-        std::cout << "Verifying, subject: " << subject_name << "\n";
+        LOG() << "Verifying, subject: " << subject_name << "\n";
         
         char issuer_name[256];
         X509_NAME_oneline(X509_get_issuer_name(cert), issuer_name, 256);
-        std::cout << "Verifying, issuer: " << issuer_name << "\n";
+        LOG() << "Verifying, issuer: " << issuer_name << "\n";
         
         return preverified;
     }
@@ -72,7 +73,7 @@ namespace AsyncIo {
             return;
         }
         
-        std::cout << "SSL handle handshake" << std::endl;
+        LOG() << "SSL handle handshake" << std::endl;
         _connectCallback(shared_from_this());
 
     }

@@ -1,5 +1,9 @@
 # HelloBoostIoServices
-Boost asio based thread pool, timer and async IO services. Hello world usage in main program, but potentially useful.
+Boost asio based thread pool, timer and async IO services. This code has had extensive unit testing on windows and is currently in industrial use. The thread pool is interesting, but the network functionality has proved to be the most useful. This project achieves:
+1. Hides all boost headers from application code using hidden implementations (pointer to impl).
+2. Is platform independent - being maintained on both Windows and OS X (therefore should port to Linux).
+3. Allows applications to rapidly put together TCP client and server network connections and UDP sending/receiving with all object lifetime taken care of.
+4. Completely non-blocking API leveraging off Boost's async IO.
 
 ## Aim of project
 I am maintaining some code which needs these things. It is based on boost, but has two problems:

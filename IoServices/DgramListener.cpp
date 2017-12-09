@@ -44,7 +44,7 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Async Connect Connection expired.");
 		}
 
 		auto connectCbCopy = move(connectCb);
@@ -57,6 +57,36 @@ namespace AsyncIo {
 	}
 
 	/// <summary>
+	/// Allows an already bound Listener to join a multicast group for receiving multicast messages.
+	/// </summary>
+	/// <param name="multicastAddr">The multicast IP address in dot notation.</param>
+	void DgramListener::JoinMulticastGroup(const std::string& multicastAddr)
+	{
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("DGRAM Join Multi Cast Connection expired.");
+		}
+
+		auto boostIp = boost::asio::ip::address::from_string(multicastAddr);
+		listener->JoinMulticastGroup(boostIp);
+	}
+
+    /// <summary>
+    /// Allows an already bound Listener to send on the broadcast address.
+    /// </summary>
+    void DgramListener::EnableBroadcast()
+    {
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("DGRAM Enable Broadcast Connection expired.");
+		}
+
+        listener->EnableBroadcast();
+    }
+
+	/// <summary>
 	/// Asynchronous write of a string message.
 	/// NB if the length of the message is greater than MTU it will be split across datagrams.
 	/// </summary>
@@ -67,11 +97,48 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Async Write Connection expired.");
 		}
 
 		listener->AsyncWrite(std::move(msg), nullTerminate);
 	}
+
+	/// <summary>
+	/// Datagram send for unconnected socket.
+	/// </summary>
+	/// <param name="msg">The message to send.</param>
+	/// <param name="destIp">The destination IP address in dot format.</param>
+	/// <param name="port">The destination port.</param>
+	/// <param name="nullTerminate">Whether to null terminate the string or not.</param>
+	void DgramListener::AsyncSendTo(std::string&& msg, const std::string& destIp, int port, bool nullTerminate)
+	{
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("DGRAM Async Send To Connection expired.");
+		}
+
+		listener->AsyncSendTo(std::move(msg), destIp, port, nullTerminate);
+	}
+
+    /// <summary>
+    /// Datagram send for unconnected socket.
+    /// More efficient than the methods that take string dot notation
+    /// destinations for repeated sends to the same end point because
+    /// it avoids repeatedly parsing a string into IP address.
+    /// </summary>
+    /// <param name="msg">The message to send.</param>
+    /// <param name="dest">The destination end point.</param>
+    void DgramListener::AsyncSendTo(std::vector<uint8_t>&& msg, const IoEndPoint& dest) {
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("DGRAM Async Send To End Point Connection expired.");
+		}
+
+		listener->AsyncSendTo(std::move(msg), dest);
+    }
+
 
 	/// <summary>
 	/// Asynchronous write of a string message.
@@ -83,7 +150,7 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Async Write Connection expired.");
 		}
 
 		listener->AsyncWrite(std::move(msg));
@@ -99,7 +166,7 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Consume Into Connection expired.");
 		}
 
 		memcpy(buf, listener->Data(), len);
@@ -116,7 +183,7 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Consume To Connection expired.");
 		}
 
 		assert(len <= static_cast<int>(listener->Size()) && "Must extract within limit of available.");
@@ -133,7 +200,7 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Data Connection expired.");
 		}
 
 		return listener->Data();
@@ -148,7 +215,7 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Size Connection expired.");
 		}
 
 		return listener->Size();
@@ -159,7 +226,7 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Consume Connection expired.");
 		}
 
 		listener->Consume(len);
@@ -185,13 +252,10 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Get Peer End Point Connection expired.");
 		}
 
-		stringstream addressStr;
-		addressStr << listener->PeerEndPoint.address();
-
-		IoEndPoint ep{ addressStr.str(), listener->PeerEndPoint.port(), listener->HasAsyncConnected() };
+		IoEndPoint ep{ listener->PeerEndPoint, listener->HasAsyncConnected(), listener->HasAsyncReceivedFrom() };
 
 		return ep;
 	}
@@ -201,11 +265,26 @@ namespace AsyncIo {
 		auto listener = _udpListener.lock();
 		if (!listener)
 		{
-			throw runtime_error("Connection expired.");
+			throw runtime_error("DGRAM Has Async Connected Connection expired.");
 		}
 
 		return listener->HasAsyncConnected();
 	}
+
+	/// <summary>
+	/// For Unbound, unconnected listeners.
+	/// </summary>
+	void DgramListener::LaunchRead()
+	{
+		auto listener = _udpListener.lock();
+		if (!listener)
+		{
+			throw runtime_error("DGRAM Launch Read Connection expired.");
+		}
+
+		listener->LaunchRead();
+	}
+
 
 	/// <summary>
 	/// Checks whether the listener is valid or not.

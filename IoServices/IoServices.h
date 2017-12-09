@@ -10,10 +10,16 @@
 #ifndef IoServices_
 #define IoServices_
 
+#include "../config.h"
+
 #include "PeriodicTimer.h"
 #include "Timer.h"
 #include "StreamConnection.h"
+#if defined(IO_SERVICES_HAS_LOCAL_SOCKETS)
+#include "UnixStreamConnection.h"
+#endif
 #include "DgramListener.h"
+#include "SecurityOptions.h"
 #include <memory>
 #include <functional>
 #include <chrono>
@@ -78,6 +84,13 @@ namespace AsyncIo
 		void StartTcpServer(int port);
 
 		/// <summary>
+		/// Starts the TCP server to accept SSL/TLS connections.
+		/// </summary>
+		/// <param name="port">Identifies the server to start.</param>
+		/// <param name="security">The SSL/TLS options.</param>
+		void StartTcpServer(int port, SecurityOptions&& security);
+
+		/// <summary>
 		///  Asynchronous connect handler. Once connected the stream will begin asynchronous reading straight away.
 		/// </summary>
 		/// <param name="connectCb">The connected callback.</param>
@@ -88,6 +101,32 @@ namespace AsyncIo
 		/// <param name="port">The destination port.</param>
 		void AsyncConnect(ConnectStreamCallback&& connectCb, ReadStreamCallback&& readCb, StreamConnectionErrorCallback&& connErrCb, StreamIoErrorCallback&& ioErrCb, std::string ipAddress, int port);
         
+#if defined(IO_SERVICES_HAS_LOCAL_SOCKETS)
+		/// <summary>
+		///  Asynchronous connect handler. Once connected the stream will begin asynchronous reading straight away.
+		/// </summary>
+		/// <param name="connectCb">The connected callback.</param>
+		/// <param name="readCb">Asynchronous data read callback.</param>
+		/// <param name="connErrCb">Error callback if socket connect errors encountered.</param>
+		/// <param name="ioErrCb">Error callback if socket I/O errors encountered.</param>
+		/// <param name="path">The destination unix domain path.</param>
+		void AsyncConnect(UnixConnectStreamCallback&& connectCb, UnixReadStreamCallback&& readCb, UnixStreamConnectionErrorCallback&& connErrCb, UnixStreamIoErrorCallback&& ioErrCb, std::string path);
+
+		/// <summary>
+		/// Add a Unix domain server to listen on the specified path.
+		/// </summary>
+		/// <param name="path">The path to listen on.</param>
+		/// <param name="acceptsStream">Client connection accepted callback.</param>
+		/// <param name="readStream">Client connection data received callback.</param>
+		void AddUnixServer(const std::string& path, UnixAcceptStreamCallback&& acceptsStream, UnixReadStreamCallback&& readStream);
+
+		/// <summary>
+		/// Starts the Unix server.
+		/// NB all servers must be added first due to move issues.
+		/// </summary>
+		/// <param name="path">Identifies the server to start.</param>
+		void StartUnixServer(const std::string& path);
+#endif
 		/// <summary>
 		/// Binds a datagram listener for asynchronous UDP receive.
 		/// NB. This will start receiving straight away.
@@ -117,7 +156,7 @@ namespace AsyncIo
 		/// <param name="handler">The handler that is called when the timer expires.</param>
         void SetPeriodicTimer(PeriodicTimer id,
                               std::chrono::duration<long long>  du,
-                              const std::function<void(PeriodicTimer id)>& handler);
+                              const std::function<void(PeriodicTimer id)>&& handler);
 
 		/// <summary>
 		/// Cancel the periodic timer. Cannot guarantee that we will get there just before it goes off.

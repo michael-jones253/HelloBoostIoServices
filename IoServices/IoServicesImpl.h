@@ -12,6 +12,9 @@
 #include "Timer.h"
 #include "PeriodicTimer.h"
 #include "TcpServer.h"
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
+#include "UnixServer.h"
+#endif
 #include "UdpListener.h"
 
 #include <boost/asio.hpp>
@@ -33,6 +36,9 @@ namespace AsyncIo {
 		std::promise<bool> _started{};
 		boost::asio::io_service _ioService{};
 		std::vector<TcpServer> _tcpServers{};
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
+		std::vector<UnixServer> _unixServers{};
+#endif
 		std::future<bool> _serviceRunHandle{};
 		boost::thread_group _threadPool{};
 		std::vector<boost::thread*> _workerHandles{};
@@ -40,6 +46,9 @@ namespace AsyncIo {
 		std::unordered_map<Timer, boost::asio::deadline_timer, TimerHasher> _oneShotTimers{};
 		std::unordered_map<PeriodicTimer, boost::asio::deadline_timer, PeriodicTimerHasher> _periodicTimers{};
 		std::map<std::shared_ptr<TcpPeerConnection>, std::shared_ptr<TcpPeerConnection>> _clientConnections{};
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
+		std::map<std::shared_ptr<TcpDomainConnection>, std::shared_ptr<TcpDomainConnection>> _domainConnections{};
+#endif
 		std::map<std::shared_ptr<UdpListener>, std::shared_ptr<UdpListener>> _listeners{};
 		std::mutex _mutex{};
         
@@ -54,9 +63,19 @@ namespace AsyncIo {
 
 		void StartTcpServer(int port);
 
+		void StartTcpServer(int port, SecurityOptions&& security);
+
 		void AsyncConnect(ConnectCallback&& connectCb, ErrorCallback&& errCb, std::string ipAddress, int port);
         
 		void SendToAllServerConnections(const std::string& msg, bool nullTerminate);
+
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
+		void AddUnixServer(const std::string& path, UnixAcceptStreamCallback&& acceptsStream, UnixReadStreamCallback&& readSome);
+
+		void StartUnixServer(const std::string& path);
+
+		void AsyncConnect(DomainConnectCallback&& connectCb, DomainErrorCallback&& errCb, const std::string& path);
+#endif
 
 		std::shared_ptr<UdpListener> BindDgramListener(std::string ipAddress, int port);
         
@@ -74,7 +93,7 @@ namespace AsyncIo {
 
 		void SetPeriodicTimer(PeriodicTimer id,
                               boost::posix_time::time_duration durationFromNow,
-                              const std::function<void(PeriodicTimer id)>& handler);
+                              const std::function<void(PeriodicTimer id)>&& handler);
 
 		void CancelPeriodicTimer(PeriodicTimer id);
 
@@ -86,6 +105,9 @@ namespace AsyncIo {
         void RemoveWorker();
         void WorkerThread(boost::asio::io_service& ioService);
 		void ErrorHandler(std::shared_ptr<TcpPeerConnection> conn, boost::system::error_code ec);
+#if defined(BOOST_ASIO_HAS_LOCAL_SOCKETS)
+		void ErrorHandler(std::shared_ptr<TcpDomainConnection> conn, boost::system::error_code ec);
+#endif
 	};
 }
 
