@@ -7,13 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B202B4AC1C018B2F006F6F9B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B275D6831BFDB6730061D372 /* main.cpp */; settings = {ASSET_TAGS = (); }; };
+		B202B4AC1C018B2F006F6F9B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B275D6831BFDB6730061D372 /* main.cpp */; };
 		B21153BD1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */; };
 		B21153BF1BF9C109006C0723 /* libssl.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */; };
 		B21153C01BF9C1CA006C0723 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B216B1A31B87E57100CE0DE9 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B216B1A21B87E57100CE0DE9 /* main.cpp */; };
-		B21E69341BF819EA00532135 /* EgSslServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21E69321BF819EA00532135 /* EgSslServer.cpp */; settings = {ASSET_TAGS = (); }; };
-		B21E69351BF819EA00532135 /* EgSslServer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B21E69331BF819EA00532135 /* EgSslServer.hpp */; settings = {ASSET_TAGS = (); }; };
+		B21E69341BF819EA00532135 /* EgSslServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21E69321BF819EA00532135 /* EgSslServer.cpp */; };
+		B21E69351BF819EA00532135 /* EgSslServer.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B21E69331BF819EA00532135 /* EgSslServer.hpp */; };
 		B21F0B3B1B68875E00D1FE09 /* TcpServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B21F0B391B68875E00D1FE09 /* TcpServer.cpp */; };
 		B21F0B3C1B68875E00D1FE09 /* TcpServer.h in Headers */ = {isa = PBXBuildFile; fileRef = B21F0B3A1B68875E00D1FE09 /* TcpServer.h */; };
 		B21F0B401B68914700D1FE09 /* TcpPeerConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = B21F0B3E1B68914700D1FE09 /* TcpPeerConnection.h */; };
@@ -26,8 +26,8 @@
 		B22AA07B1BA3B158006E58F5 /* IoServices.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B22AA07A1BA3B158006E58F5 /* IoServices.cpp */; };
 		B22AA07E1BA3B19D006E58F5 /* stdafx.h in Headers */ = {isa = PBXBuildFile; fileRef = B22AA07C1BA3B19D006E58F5 /* stdafx.h */; };
 		B22AA07F1BA3B19D006E58F5 /* targetver.h in Headers */ = {isa = PBXBuildFile; fileRef = B22AA07D1BA3B19D006E58F5 /* targetver.h */; };
-		B23325551BF6FE5700D63355 /* TcpSslConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23325531BF6FE5700D63355 /* TcpSslConnection.cpp */; settings = {ASSET_TAGS = (); }; };
-		B23325561BF6FE5700D63355 /* TcpSslConnection.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B23325541BF6FE5700D63355 /* TcpSslConnection.hpp */; settings = {ASSET_TAGS = (); }; };
+		B23325551BF6FE5700D63355 /* TcpSslConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B23325531BF6FE5700D63355 /* TcpSslConnection.cpp */; };
+		B23325561BF6FE5700D63355 /* TcpSslConnection.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B23325541BF6FE5700D63355 /* TcpSslConnection.hpp */; };
 		B23325581BF7053E00D63355 /* libssl.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B23325571BF7053E00D63355 /* libssl.tbd */; };
 		B233255A1BF7057A00D63355 /* libcrypto.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B23325591BF7057A00D63355 /* libcrypto.tbd */; };
 		B248B60D1B6488A700ABD4A5 /* libboost_system.dylib in Resources */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
@@ -37,7 +37,6 @@
 		B275D6881BFDB9F60061D372 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
 		B275D6891BFDBA1D0061D372 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
 		B275D68A1BFDBA3B0061D372 /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
-		B275D68B1BFDBA5C0061D372 /* libcrypto.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */; };
 		B275D68E1BFDBAC50061D372 /* libssl.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */; };
 		B2A192041CC32F3400A93DF4 /* libboost_program_options.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2A192031CC32F3400A93DF4 /* libboost_program_options.dylib */; };
 		B2A9E43D1B917DA0003B6FB3 /* StreamConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */; };
@@ -53,10 +52,11 @@
 		B2DB88951C045240004AD336 /* libboost_thread.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */; };
 		B2DFE9AB1B6B3B3600CED951 /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2DFE9AA1B6B3B3600CED951 /* main.cpp */; };
 		B2DFE9AF1B6B3B4C00CED951 /* libIoServices.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B2AADA981B64460400688FC5 /* libIoServices.dylib */; };
+		B2EDBB541D17769B007C920F /* libcrypto.tbd in Frameworks */ = {isa = PBXBuildFile; fileRef = B23325591BF7057A00D63355 /* libcrypto.tbd */; };
 		B2F65EA11B677B5200035D30 /* Timer.h in Headers */ = {isa = PBXBuildFile; fileRef = B2036AFC1B6759880037C5B2 /* Timer.h */; };
 		B2F65EA21B677B5F00035D30 /* PeriodicTimer.h in Headers */ = {isa = PBXBuildFile; fileRef = B2036AFD1B67599E0037C5B2 /* PeriodicTimer.h */; };
-		B2F6E8751CB36F53006719FA /* TcpConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F6E8731CB36F53006719FA /* TcpConnection.cpp */; settings = {ASSET_TAGS = (); }; };
-		B2F6E8761CB36F53006719FA /* TcpConnection.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B2F6E8741CB36F53006719FA /* TcpConnection.hpp */; settings = {ASSET_TAGS = (); }; };
+		B2F6E8751CB36F53006719FA /* TcpConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F6E8731CB36F53006719FA /* TcpConnection.cpp */; };
+		B2F6E8761CB36F53006719FA /* TcpConnection.hpp in Headers */ = {isa = PBXBuildFile; fileRef = B2F6E8741CB36F53006719FA /* TcpConnection.hpp */; };
 		B2F813C31B6AF66A00018DE7 /* IoBufferWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F813C11B6AF66A00018DE7 /* IoBufferWrapper.cpp */; };
 		B2F813C41B6AF66A00018DE7 /* IoBufferWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = B2F813C21B6AF66A00018DE7 /* IoBufferWrapper.h */; };
 		B2F9DED71B6D858C00FC02B2 /* IoCircularBuffer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B2F9DED51B6D858C00FC02B2 /* IoCircularBuffer.cpp */; };
@@ -139,7 +139,7 @@
 		B2036AFC1B6759880037C5B2 /* Timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
 		B2036AFD1B67599E0037C5B2 /* PeriodicTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PeriodicTimer.h; sourceTree = "<group>"; };
 		B20BF4EA1CB88D630008B372 /* SecurityOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SecurityOptions.h; sourceTree = "<group>"; };
-		B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.1.0.0.dylib; path = ../../../../../../opt/local/lib/libcrypto.1.0.0.dylib; sourceTree = "<group>"; };
+		B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.1.0.0.dylib; path = /Users/michaeljones/Documents/xcodestuff/CommandLineStuff/HelloAsio/../../../../../../opt/local/lib/libcrypto.1.0.0.dylib; sourceTree = "<absolute>"; };
 		B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.1.0.0.dylib; path = ../../../../../../opt/local/lib/libssl.1.0.0.dylib; sourceTree = "<group>"; };
 		B216B1A01B87E57100CE0DE9 /* TestCircularAsio */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = TestCircularAsio; sourceTree = BUILT_PRODUCTS_DIR; };
 		B216B1A21B87E57100CE0DE9 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
@@ -168,7 +168,7 @@
 		B275D6811BFDB6730061D372 /* RunSslClient */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = RunSslClient; sourceTree = BUILT_PRODUCTS_DIR; };
 		B275D6831BFDB6730061D372 /* main.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = main.cpp; sourceTree = "<group>"; };
 		B275D68C1BFDBA8B0061D372 /* libsasl2.2.0.25.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libsasl2.2.0.25.dylib; path = ../../../../../../opt/local/lib/libsasl2.2.0.25.dylib; sourceTree = "<group>"; };
-		B2A192031CC32F3400A93DF4 /* libboost_program_options.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_program_options.dylib; path = ../../../../../../opt/local/lib/libboost_program_options.dylib; sourceTree = "<group>"; };
+		B2A192031CC32F3400A93DF4 /* libboost_program_options.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_program_options.dylib; path = /opt/local/lib/libboost_program_options.dylib; sourceTree = "<absolute>"; };
 		B2A9E43B1B917DA0003B6FB3 /* StreamConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = StreamConnection.cpp; sourceTree = "<group>"; };
 		B2A9E43C1B917DA0003B6FB3 /* StreamConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = StreamConnection.h; sourceTree = "<group>"; };
 		B2AA92F11B64AB5600855ACA /* libboost_thread.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libboost_thread.dylib; path = ../../../../../../opt/local/lib/libboost_thread.dylib; sourceTree = "<group>"; };
@@ -215,7 +215,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B275D68B1BFDBA5C0061D372 /* libcrypto.1.0.0.dylib in Frameworks */,
+				B2EDBB541D17769B007C920F /* libcrypto.tbd in Frameworks */,
 				B275D68E1BFDBAC50061D372 /* libssl.1.0.0.dylib in Frameworks */,
 				B275D6891BFDBA1D0061D372 /* libboost_system.dylib in Frameworks */,
 				B275D68A1BFDBA3B0061D372 /* libboost_thread.dylib in Frameworks */,
