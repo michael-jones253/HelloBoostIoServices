@@ -8,6 +8,21 @@
 
 /* Begin PBXBuildFile section */
 		B202B4AC1C018B2F006F6F9B /* main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B275D6831BFDB6730061D372 /* main.cpp */; };
+		B209647F1FDC843900C1E1E8 /* IoEndPoint.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B20964701FDC843800C1E1E8 /* IoEndPoint.cpp */; };
+		B20964801FDC843900C1E1E8 /* IoEndPoint.h in Headers */ = {isa = PBXBuildFile; fileRef = B20964711FDC843800C1E1E8 /* IoEndPoint.h */; };
+		B20964811FDC843900C1E1E8 /* IoLog.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B20964721FDC843800C1E1E8 /* IoLog.cpp */; };
+		B20964821FDC843900C1E1E8 /* UnixStreamConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B20964731FDC843800C1E1E8 /* UnixStreamConnection.cpp */; };
+		B20964831FDC843900C1E1E8 /* stdafx.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B20964741FDC843800C1E1E8 /* stdafx.cpp */; };
+		B20964841FDC843900C1E1E8 /* UdpBufferWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B20964751FDC843800C1E1E8 /* UdpBufferWrapper.cpp */; };
+		B20964851FDC843900C1E1E8 /* TcpDomainConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = B20964761FDC843900C1E1E8 /* TcpDomainConnection.h */; };
+		B20964861FDC843900C1E1E8 /* UnixServer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B20964771FDC843900C1E1E8 /* UnixServer.cpp */; };
+		B20964871FDC843900C1E1E8 /* UnixServer.h in Headers */ = {isa = PBXBuildFile; fileRef = B20964781FDC843900C1E1E8 /* UnixServer.h */; };
+		B20964881FDC843900C1E1E8 /* IoLogConsumer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B20964791FDC843900C1E1E8 /* IoLogConsumer.cpp */; };
+		B20964891FDC843900C1E1E8 /* IoLog.h in Headers */ = {isa = PBXBuildFile; fileRef = B209647A1FDC843900C1E1E8 /* IoLog.h */; };
+		B209648A1FDC843900C1E1E8 /* UdpBufferWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = B209647B1FDC843900C1E1E8 /* UdpBufferWrapper.h */; };
+		B209648B1FDC843900C1E1E8 /* TcpDomainConnection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B209647C1FDC843900C1E1E8 /* TcpDomainConnection.cpp */; };
+		B209648C1FDC843900C1E1E8 /* UnixStreamConnection.h in Headers */ = {isa = PBXBuildFile; fileRef = B209647D1FDC843900C1E1E8 /* UnixStreamConnection.h */; };
+		B209648D1FDC843900C1E1E8 /* IoLogConsumer.h in Headers */ = {isa = PBXBuildFile; fileRef = B209647E1FDC843900C1E1E8 /* IoLogConsumer.h */; };
 		B21153BD1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */; };
 		B21153BF1BF9C109006C0723 /* libssl.1.0.0.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */; };
 		B21153C01BF9C1CA006C0723 /* libboost_system.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = B26B48121B64583E009262A4 /* libboost_system.dylib */; };
@@ -138,6 +153,21 @@
 /* Begin PBXFileReference section */
 		B2036AFC1B6759880037C5B2 /* Timer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Timer.h; sourceTree = "<group>"; };
 		B2036AFD1B67599E0037C5B2 /* PeriodicTimer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PeriodicTimer.h; sourceTree = "<group>"; };
+		B20964701FDC843800C1E1E8 /* IoEndPoint.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoEndPoint.cpp; sourceTree = "<group>"; };
+		B20964711FDC843800C1E1E8 /* IoEndPoint.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IoEndPoint.h; sourceTree = "<group>"; };
+		B20964721FDC843800C1E1E8 /* IoLog.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoLog.cpp; sourceTree = "<group>"; };
+		B20964731FDC843800C1E1E8 /* UnixStreamConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UnixStreamConnection.cpp; sourceTree = "<group>"; };
+		B20964741FDC843800C1E1E8 /* stdafx.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stdafx.cpp; sourceTree = "<group>"; };
+		B20964751FDC843800C1E1E8 /* UdpBufferWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UdpBufferWrapper.cpp; sourceTree = "<group>"; };
+		B20964761FDC843900C1E1E8 /* TcpDomainConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TcpDomainConnection.h; sourceTree = "<group>"; };
+		B20964771FDC843900C1E1E8 /* UnixServer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = UnixServer.cpp; sourceTree = "<group>"; };
+		B20964781FDC843900C1E1E8 /* UnixServer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnixServer.h; sourceTree = "<group>"; };
+		B20964791FDC843900C1E1E8 /* IoLogConsumer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = IoLogConsumer.cpp; sourceTree = "<group>"; };
+		B209647A1FDC843900C1E1E8 /* IoLog.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IoLog.h; sourceTree = "<group>"; };
+		B209647B1FDC843900C1E1E8 /* UdpBufferWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UdpBufferWrapper.h; sourceTree = "<group>"; };
+		B209647C1FDC843900C1E1E8 /* TcpDomainConnection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = TcpDomainConnection.cpp; sourceTree = "<group>"; };
+		B209647D1FDC843900C1E1E8 /* UnixStreamConnection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = UnixStreamConnection.h; sourceTree = "<group>"; };
+		B209647E1FDC843900C1E1E8 /* IoLogConsumer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = IoLogConsumer.h; sourceTree = "<group>"; };
 		B20BF4EA1CB88D630008B372 /* SecurityOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SecurityOptions.h; sourceTree = "<group>"; };
 		B21153BC1BF9C0EE006C0723 /* libcrypto.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libcrypto.1.0.0.dylib; path = /Users/michaeljones/Documents/xcodestuff/CommandLineStuff/HelloAsio/../../../../../../opt/local/lib/libcrypto.1.0.0.dylib; sourceTree = "<absolute>"; };
 		B21153BE1BF9C109006C0723 /* libssl.1.0.0.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libssl.1.0.0.dylib; path = ../../../../../../opt/local/lib/libssl.1.0.0.dylib; sourceTree = "<group>"; };
@@ -324,6 +354,21 @@
 		B2AADA991B64460400688FC5 /* IoServices */ = {
 			isa = PBXGroup;
 			children = (
+				B20964701FDC843800C1E1E8 /* IoEndPoint.cpp */,
+				B20964711FDC843800C1E1E8 /* IoEndPoint.h */,
+				B20964721FDC843800C1E1E8 /* IoLog.cpp */,
+				B209647A1FDC843900C1E1E8 /* IoLog.h */,
+				B20964791FDC843900C1E1E8 /* IoLogConsumer.cpp */,
+				B209647E1FDC843900C1E1E8 /* IoLogConsumer.h */,
+				B20964741FDC843800C1E1E8 /* stdafx.cpp */,
+				B209647C1FDC843900C1E1E8 /* TcpDomainConnection.cpp */,
+				B20964761FDC843900C1E1E8 /* TcpDomainConnection.h */,
+				B20964751FDC843800C1E1E8 /* UdpBufferWrapper.cpp */,
+				B209647B1FDC843900C1E1E8 /* UdpBufferWrapper.h */,
+				B20964771FDC843900C1E1E8 /* UnixServer.cpp */,
+				B20964781FDC843900C1E1E8 /* UnixServer.h */,
+				B20964731FDC843800C1E1E8 /* UnixStreamConnection.cpp */,
+				B209647D1FDC843900C1E1E8 /* UnixStreamConnection.h */,
 				B22AA07A1BA3B158006E58F5 /* IoServices.cpp */,
 				B20BF4EA1CB88D630008B372 /* SecurityOptions.h */,
 				B226FB7B1BA7B5DF00CFF893 /* DgramListener.cpp */,
@@ -378,14 +423,21 @@
 				B2AADA9B1B64460400688FC5 /* IoServices.h in Headers */,
 				B2F813C41B6AF66A00018DE7 /* IoBufferWrapper.h in Headers */,
 				B2AADA9D1B64460400688FC5 /* IoServicesPriv.h in Headers */,
+				B209648C1FDC843900C1E1E8 /* UnixStreamConnection.h in Headers */,
 				B22AA07F1BA3B19D006E58F5 /* targetver.h in Headers */,
 				B2F65EA21B677B5F00035D30 /* PeriodicTimer.h in Headers */,
 				B2F6E8761CB36F53006719FA /* TcpConnection.hpp in Headers */,
+				B209648A1FDC843900C1E1E8 /* UdpBufferWrapper.h in Headers */,
 				B21F0B3C1B68875E00D1FE09 /* TcpServer.h in Headers */,
+				B20964891FDC843900C1E1E8 /* IoLog.h in Headers */,
+				B20964871FDC843900C1E1E8 /* UnixServer.h in Headers */,
+				B20964801FDC843900C1E1E8 /* IoEndPoint.h in Headers */,
+				B20964851FDC843900C1E1E8 /* TcpDomainConnection.h in Headers */,
 				B23325561BF6FE5700D63355 /* TcpSslConnection.hpp in Headers */,
 				B226FB821BA7B5DF00CFF893 /* UdpListener.h in Headers */,
 				B21E69351BF819EA00532135 /* EgSslServer.hpp in Headers */,
 				B226FB801BA7B5DF00CFF893 /* DgramListener.h in Headers */,
+				B209648D1FDC843900C1E1E8 /* IoLogConsumer.h in Headers */,
 				B2F9DED81B6D858C00FC02B2 /* IoCircularBuffer.h in Headers */,
 				B22AA07E1BA3B19D006E58F5 /* stdafx.h in Headers */,
 				B2F65EA11B677B5200035D30 /* Timer.h in Headers */,
@@ -610,17 +662,25 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B20964811FDC843900C1E1E8 /* IoLog.cpp in Sources */,
+				B20964841FDC843900C1E1E8 /* UdpBufferWrapper.cpp in Sources */,
+				B20964881FDC843900C1E1E8 /* IoLogConsumer.cpp in Sources */,
 				B248C74C1B69E63F00B1A1DF /* TcpPeerConnection.cpp in Sources */,
 				B2AADAA61B6448B100688FC5 /* IoServicesImpl.cpp in Sources */,
 				B21F0B3B1B68875E00D1FE09 /* TcpServer.cpp in Sources */,
 				B21E69341BF819EA00532135 /* EgSslServer.cpp in Sources */,
+				B20964831FDC843900C1E1E8 /* stdafx.cpp in Sources */,
 				B226FB7F1BA7B5DF00CFF893 /* DgramListener.cpp in Sources */,
 				B2F6E8751CB36F53006719FA /* TcpConnection.cpp in Sources */,
 				B226FB811BA7B5DF00CFF893 /* UdpListener.cpp in Sources */,
+				B209648B1FDC843900C1E1E8 /* TcpDomainConnection.cpp in Sources */,
 				B2F9DED71B6D858C00FC02B2 /* IoCircularBuffer.cpp in Sources */,
 				B22AA07B1BA3B158006E58F5 /* IoServices.cpp in Sources */,
+				B20964861FDC843900C1E1E8 /* UnixServer.cpp in Sources */,
+				B20964821FDC843900C1E1E8 /* UnixStreamConnection.cpp in Sources */,
 				B2F813C31B6AF66A00018DE7 /* IoBufferWrapper.cpp in Sources */,
 				B23325551BF6FE5700D63355 /* TcpSslConnection.cpp in Sources */,
+				B209647F1FDC843900C1E1E8 /* IoEndPoint.cpp in Sources */,
 				B2A9E43D1B917DA0003B6FB3 /* StreamConnection.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
