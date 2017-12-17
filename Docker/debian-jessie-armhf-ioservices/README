@@ -1,0 +1,5 @@
+# cross compiles the IoServices library inside a docker image.
+# We do not need to retrieve the IoServices libary because it is statically linked by the beagle executable.
+# Therefore only the following needs to be run.
+
+build_image.sh

@@ -1,0 +1,10 @@
+# Build a Docker image for boost cross compiled libraries and be able to retrieve them for deploying to a beagle
+# This docker build also cross compiles openssl, however we do not need to retrieve them because they are statically
+# linked for the beagle executable.
+
+# First of all run the following to build the image
+./build_image.sh
+
+# Then to retrieve the boost libraries from a host mount run the following with a host mount point argument.
+# NB docker container is sandboxed and only allowed to mount a directory under /c/Users on windows.
+./run_container_mount.sh /c/Users/<host mount point>
