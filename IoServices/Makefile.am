@@ -9,7 +9,9 @@ include_HEADERS = DgramListener.h IoBufferWrapper.h IoCircularBuffer.h IoLogCons
 #AM_CPPFLAGS = -I/opt/openssl_arm/include -I/home/mikej/boost_1_61_0
 AM_CPPFLAGS = -I /opt/openssl_arm/include -I/opt/openssl_1_0_2/include -I/opt/boost_1_62_0/include
 AM_CXXFLAGS = -std=gnu++14
-libioservices_la_LDFLAGS = -static
+
+# use LT_INIT to produce both static and dynamic libraries
+#libioservices_la_LDFLAGS = -static
 
 EXTRA_DIST = RunCrossConfigure.sh
 

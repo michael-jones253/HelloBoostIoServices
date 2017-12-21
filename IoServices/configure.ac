@@ -21,6 +21,8 @@ AM_INIT_AUTOMAKE()
 # Checks for libraries.
 # ranlib obsoleted by libtool
 # AC_PROG_RANLIB
+# instruct libtool to create both dynamic and static libraries
+LT_INIT
 AC_PROG_LIBTOOL
 
 # Checks for header files.
