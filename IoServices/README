@@ -1,0 +1,153 @@
+# contents of git-push.sh are:
+git push origin master
+  787  mkdir GitHub
+  788  cd GitHub/
+  789  cp /media/sf_Downloads/ioservices-clone.txt .
+  791  mv ioservices-clone.txt ioservices-clone.sh
+  792  chmod +x ioservices-clone.sh 
+  793  ./ioservices-clone.sh 
+  795  cd HelloBoostIoServices/
+  796  git status
+  818  git add AUTHORS 
+  819  git add COPYING 
+  820  git add ChangeLog 
+  821  git add INSTALL 
+  822  git add Makefile.am 
+  823  git add NEWS 
+  824  git add README 
+  825  git add RunCrossConfigure.sh 
+  826  git add configure.ac 
+  827  cd IoServices/
+  828  git add Makefile.am 
+  831  ls
+  832  libtoolize
+  833  aclocal
+  834  automake
+  835  automake --add-missing
+  836  autoconf
+  837  aclocal
+  838  automake --add-missing
+  839  autoreconf
+  840  ls config.h.in 
+  841  automake --add-missing
+  842  autoreconf
+  851  ./RunCrossConfigure.sh 
+  852  make
+
+ 1067  git status
+ 1069  git add TcpUnixConnectionImpl.h
+ 1070  git add TcpUnixConnectionImpl.cpp 
+ 1073  cat github-push.sh 
+ 1074  git commit -m "unix domain connection in progress"
+ 1075  ./github-push.sh 
+ 1110  git add StreamUnixConnection.h
+ 1111  git add StreamUnixConnection.cpp 
+ 1112  git add TcpDomainConnection.h 
+ 1113  git add TcpDomainConnection.cpp 
+ 1126  git status
+ 1129  git commit -m "tcp unix connection compiling"
+ 1165  git status
+ 1167  git commit -m "some more unix domain socket work"
+ 1169  ./github-push.sh 
+ 1198  git commit -m "unix domain socket work in progress"
+ 1199  git status
+ 1201  git status
+ 1202  h|grep git
+ 1203  git commit
+ 1210  git status
+ 1213  git status
+ 1215  git status
+ 1217  ls -l .gitignore 
+ 1218  cat  .gitignore 
+ 1219  git add IoServices/UnixStreamConnection.cpp 
+ 1220  git add IoServices/UnixStreamConnection.h
+ 1221  vi .gitignore 
+ 1223  git commit -m "unix domain socket work in progress"
+ 1225  ./github-push.sh 
+ 1228  git status
+ 1230  git status
+ 1231  git add -u -n
+ 1232  man git
+ 1233  git add -u
+ 1234  git status
+ 1236  git commit -m "unix domain socket work in progress"
+ 1238  ./github-push.sh 
+ 1298  git status
+ 1299  git add UnixDomainClient/
+ 1300  git status
+ 1303  git add Makefile.am 
+ 1304  git add main.cpp 
+ 1306  git status
+ 1307  git commit -m "domain client example"
+ 1308  git add -u -n
+ 1309  git add -uu
+ 1310  git add -u
+ 1311  git status
+ 1312  git commit -m "domain client example"
+ 1313  ./github-push.sh 
+ 1314  git status
+ 1315  git add IoServices/UnixServer.cpp 
+ 1316  git add IoServices/UnixServer.h 
+ 1317  ./github-push.sh 
+ 1324  git status
+ 1325  git commit -m "Unix domain server"
+ 1326  git add -u -n
+ 1327  git add -u
+ 1328  git commit -m "Unix domain server"
+ 1329  ./github-push.sh 
+ 1341  h|grep git
+ 1414  git status
+ 1416  git add -u -n
+ 1417  git commit -m "unix domain server start methods"
+ 1418  git status
+ 1419  git add -u
+ 1420  git commit -m "unix domain server start methods"
+ 1421  ./github-push.sh 
+ 1442  vi .gitignore 
+ 1550  git status
+ 1551  git add -u
+ 1552  git status
+ 1554  git status
+ 1555  git add .gitignore 
+ 1556  git status
+ 1558  git status
+ 1559  git add .gitignore 
+ 1560  git checkout UnixDomainClient/.deps/main.Po
+ 1561  git status
+ 1562  git unstage HEAD UnixDomainClient/.deps/main.Po
+ 1563  git reset HEAD UnixDomainClient/.deps/main.Po
+ 1564  git status
+ 1565  git commit -m "unix domain client connecting"
+ 1566  ./github-push.sh 
+ 1581  vi .gitignore
+ 1582  vi .gitignore 
+ 1624  git add ClientUnixConnection.cpp 
+ 1625  git add ClientUnixConnection.h 
+ 1626  git add UnixConnectionManager.h 
+ 1627  git add UnixConnectionManager.cpp 
+ 1629  git add -u -n
+ 1630  git add -u
+ 1631  git commit -m "breaking up unix client into classes"
+ 1632  ./github-push.sh 
+ 1643  git status
+ 1645  git status
+ 1743  git status
+ 1744  git add -u -n
+ 1745  git add -u
+ 1746  git commit -m "Handle callbacks for expired clients"
+ 1747  ./github-push.sh 
+ 1812  git status
+ 1813  git add -u -n
+ 1814  git add -u
+ 1815  git commit -m "move periodic timer handler and impl for unix server"
+ 1816  ./github-push.sh 
+ 1898  git status
+ 1899  vi .gitignore 
+ 1900  git add -u -n
+ 1901  git rm --cached UnixDomainClient/.deps/main.Po 
+ 1902  git add -u -n
+ 1903  git add -u
+ 1904  git commit -m "ini parsing and magic close option"
+ 1905  ./github-push.sh 
+ 2006  h|grep git
+ 2007  h|grep git > README_GIT.txt

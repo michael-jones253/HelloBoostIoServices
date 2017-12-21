@@ -6,10 +6,11 @@ RUN apt-get update -y && apt-get install -y \
     automake \
     libtool
 
-COPY build_context/io-services-2.0.tar.gz /root/Crossbuilds
+COPY build_context/IoServices.tar.gz /root/Crossbuilds
+COPY build_context/config.h /root/Crossbuilds
 
 WORKDIR /root/Crossbuilds
-RUN tar xfz io-services-2.0.tar.gz
+RUN tar xfz IoServices.tar.gz && mv IoServices io-services-2.0
 WORKDIR /root/Crossbuilds/io-services-2.0
 COPY Configure.sh /root/Crossbuilds/io-services-2.0
 
