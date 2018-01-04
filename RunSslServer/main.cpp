@@ -10,9 +10,8 @@
 #include "stdafx.h"
 #endif
 
-#include "StreamConnection.h"
-#include "IoServices.h"
-#include "IoLogConsumer.h"
+#include <IoServices.h>
+#include <IoLogConsumer.h>
 #include <openssl/err.h>
 #include <boost/asio.hpp>
 #include <boost/program_options/parsers.hpp>
